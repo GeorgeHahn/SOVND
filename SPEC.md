@@ -36,6 +36,7 @@ MQTT Communication spec
 
 
 TODO:
+
 	- Charlotte: Support dynamically (un/)subscribing to topics
 	- Server: Clear votes for songs once they play
 	- Server: Set song vote time when songs are first voted for and after they've played
