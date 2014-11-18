@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using libspotifydotnet;
 
 namespace SOVND.Client
 {
@@ -53,10 +54,24 @@ namespace SOVND.Client
             {
                 Log("Playing: :\{_.Message}");
             };
+        }
 
+        public new void Run()
+        {
             Connect();
 
+            RegisterChannel("Ambient", "Ambient music", "");
+
             Publish("/user/georgehahn/ambient/songs/spotify:track:4OeTOlMKA693c7YOh5z9x1", "vote");
+        }
+
+        public bool RegisterChannel(string name, string description, string image)
+        {
+            Publish("/user/georgehahn/registerchannel/name", name);
+            Publish("/user/georgehahn/registerchannel/description", description);
+            Publish("/user/georgehahn/registerchannel/image", image);
+
+            return true;
         }
     }
 }
