@@ -165,8 +165,16 @@ namespace SOVND.Server
         }
 
         // TODO Kick this off for first song in channel
-        private void ScheduleNextSong(string channel)
+        private void ScheduleNextSong(string channel, string prevSongID = null)
         {
+            // Set prev song to 0 votes, 0 vote time
+            if (prevSongID != null)
+            {
+                Publish("\{channel}/playlist/\{prevSongID}/votes", "0");
+                Publish("\{channel}/playlist/\{prevSongID}/votetime", Timestamp().ToString());
+                Publish("\{channel}/playlist/\{prevSongID}/voters", "");
+            }
+
             var song = channels[channel].GetTopSong().SongID;
             Publish("\{channel}/nowplaying/songid", song);
             Publish("\{channel}/nowplaying/starttime", Timestamp().ToString());
@@ -174,7 +182,7 @@ namespace SOVND.Server
             var task = new Task(() =>
             {
                 Thread.Sleep(100); // TODO Song duration or ~500ms if no song
-                ScheduleNextSong(channel);
+                ScheduleNextSong(channel, song);
             });
             task.Start();
         }
