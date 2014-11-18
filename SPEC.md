@@ -42,6 +42,7 @@ MQTT Communication spec
 		/moderators
 
 TODO:
-
 	- Charlotte: Support dynamically (un/)subscribing to topics
-	- Client: All UI
+	- Client: Playlist UI
+	- Client: Login
+	- Server: [Moderation] Support muting users
