@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOVND.Client", "SOVND.Clien
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charlotte", "..\..\..\github\Charlotte\Charlotte\Charlotte.csproj", "{4D601F15-2FA6-4501-A95A-5E44832C35E7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpotifyClient", "SpotifyClient\SpotifyClient.csproj", "{0C4C71AB-4181-40C2-BA24-807F34EC1545}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C4C71AB-4181-40C2-BA24-807F34EC1545}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C4C71AB-4181-40C2-BA24-807F34EC1545}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C4C71AB-4181-40C2-BA24-807F34EC1545}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C4C71AB-4181-40C2-BA24-807F34EC1545}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

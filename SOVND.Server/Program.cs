@@ -15,6 +15,18 @@ namespace SOVND.Server
         }
     }
 
+    public class PlaylistTracker : MqttModule
+    {
+        public Action<string> Log = _ => Console.WriteLine(_);
+
+        public PlaylistTracker()
+            : base("127.0.0.1", 1883, "server", "serverpass")
+        {
+            
+        }
+        
+    }
+
     public class Server : MqttModule
     {
         public Action<string> Log = _ => Console.WriteLine(_);

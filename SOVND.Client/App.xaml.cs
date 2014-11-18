@@ -81,4 +81,9 @@ namespace SOVND.Client
             return true;
         }
     }
+
+    public class SpotifySong
+    {
+        
+    }
 }
