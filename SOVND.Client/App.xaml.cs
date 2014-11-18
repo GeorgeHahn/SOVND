@@ -25,6 +25,13 @@ namespace SOVND.Client
         public SovndClient(string brokerHostName, int brokerPort, string username, string password)
             : base(brokerHostName, brokerPort, username, password)
         {
+            // TODO Track channel list
+            // TODO Track playlist for channel
+
+            // On /channel/info -> track channel list
+            // On /selectedchannel/ nowplaying,playlist,stats,chat -> track playlist, subscribed channel details
+
+
             On["/{channel}/playlist/{songid}"] = _ =>
             {
                 Log("Votes for :\{_.songid} set to :\{_.Message}");
