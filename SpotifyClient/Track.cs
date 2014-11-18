@@ -52,6 +52,11 @@ namespace SpotifyClient
             get { return _artists.ToArray(); }
         }
 
+        public string AllArtists
+        {
+            get { return string.Join(", ", Artists); }
+        }
+
         public Track(string link)
         {
             IntPtr linkPtr = Functions.StringToLinkPtr(link);

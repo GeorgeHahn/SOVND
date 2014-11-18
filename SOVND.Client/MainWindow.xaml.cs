@@ -31,9 +31,9 @@ namespace SOVND.Client
                 throw new Exception("Login failure");
         }
 
-        private void tbAssembly_Populating(object sender, System.Windows.Controls.PopulatingEventArgs e)
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string text = tbAssembly.Text;
+            string text = tbSearch.Text;
 
             var candidates = new List<Track>();
             var search = Spotify.GetSearch(text);
@@ -47,8 +47,7 @@ namespace SOVND.Client
             // If artist, show artist songs ordered by popularity
             // If album, show album songs ordered by popularity
 
-            tbAssembly.ItemsSource = candidates;
-            tbAssembly.PopulateComplete();
+            lbPlaylist.ItemsSource = candidates;
         }
     }
 }

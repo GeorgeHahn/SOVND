@@ -8,20 +8,37 @@
         xmlns:spotify="clr-namespace:SpotifyClient;assembly=SpotifyClient"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
-    <Grid>
-        <toolkit:AutoCompleteBox
-       ToolTip="Enter the path of an assembly."
-       x:Name="tbAssembly" Height="27" Width="102"
-       Populating="tbAssembly_Populating">
-            <toolkit:AutoCompleteBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type spotify:Track}">
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type spotify:Track}" x:Key="TrackTemplate">
+            <Border Name="border" BorderBrush="Aqua" BorderThickness="1" Padding="5" Margin="5">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock>IMG</TextBlock>
                     <StackPanel>
-                        <TextBlock Text="{Binding Name}" />
-                        <TextBlock Text="{Binding Album.Name}" />
-                        <TextBlock Text="{Binding Artists}" />
+                        <TextBlock Text="{Binding Path=Name}" />
+                        <TextBlock Text="{Binding Path=Album.Name}" />
+                        <TextBlock Text="{Binding Path=AllArtists}" />
                     </StackPanel>
-                </DataTemplate>
-            </toolkit:AutoCompleteBox.ItemTemplate>
-        </toolkit:AutoCompleteBox>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        
+        <TextBox 
+            Grid.Row="0"
+            x:Name="tbSearch"
+            ToolTip="Search for a track"
+            TextChanged="TextBox_TextChanged"/>
+        
+        <ListBox
+            Grid.Row="1"
+            x:Name="lbPlaylist"
+            HorizontalContentAlignment="Stretch"
+            ItemTemplate="{StaticResource TrackTemplate}" />
     </Grid>
 </Window>
