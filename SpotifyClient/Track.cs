@@ -28,9 +28,11 @@ using System;
 using System.Collections.Generic;
 
 using libspotifydotnet;
+using System.Diagnostics;
 
 namespace SpotifyClient
 {
+    [DebuggerDisplay("{Name}")]
     public class Track
     {
         private List<string> _artists = new List<string>();
