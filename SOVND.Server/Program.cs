@@ -228,6 +228,11 @@ namespace SOVND.Server
 
         public Dictionary<string, Song> SongsByID { get; set; } = new Dictionary<string, Song>();
 
+        /// <summary>
+        /// Gets the song at the top of the list
+        /// TODO Return an enum that counts down from the top of the list (write a sorting function and use C#'s sorting)
+        /// </summary>
+        /// <returns></returns>
         public Song GetTopSong()
         {
             Song max = SongsByID.Values.FirstOrDefault();
@@ -246,14 +251,5 @@ namespace SOVND.Server
             }
             return max;
         }
-    }
-
-    public class Song
-    {
-        public string SongID { get; set; }
-        public long Votetime { get; set; }
-        public int Votes { get; set; }
-        public string Voters { get; set; } // ?
-        public bool Removed { get; set; }
     }
 }
