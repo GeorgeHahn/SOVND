@@ -35,10 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="libspotifydotnet, Version=4.0.0.0, Culture=neutral, PublicKeyToken=ae9f20a153337be6, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>libs\libspotifydotnet.dll</HintPath>
-    </Reference>
     <Reference Include="M2Mqtt">
       <HintPath>..\packages\M2Mqtt.3.6\lib\net45\M2Mqtt.dll</HintPath>
     </Reference>
@@ -116,17 +112,13 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="libs\libspotify.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="libs\libspotifydotnet.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\..\..\github\Charlotte\Charlotte\Charlotte.csproj">
       <Project>{4d601f15-2fa6-4501-a95a-5e44832c35e7}</Project>
       <Name>Charlotte</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SpotifyClient\SpotifyClient.csproj">
+      <Project>{0c4c71ab-4181-40c2-ba24-807f34ec1545}</Project>
+      <Name>SpotifyClient</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

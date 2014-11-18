@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using SpotifyClient;
+using System.IO;
 
 namespace SOVND.Client
 {
@@ -23,30 +25,29 @@ namespace SOVND.Client
         public MainWindow()
         {
             InitializeComponent();
+            Session.Login(File.ReadAllBytes("spotify_appkey.key"), "Username", "Password", true);
         }
 
         private void tbAssembly_Populating(object sender, System.Windows.Controls.PopulatingEventArgs e)
         {
             string text = tbAssembly.Text;
-            IntPtr session
-            libspotifydotnet.libspotify.sp_search_create()
 
-            if (Directory.Exists(Path.GetDirectoryName(dirname)))
-            {
-                string[] files = Directory.GetFiles(dirname, "*.*", SearchOption.TopDirectoryOnly);
-                string[] dirs = Directory.GetDirectories(dirname, "*.*", SearchOption.TopDirectoryOnly);
-                var candidates = new List<string>();
+            //if (Directory.Exists(Path.GetDirectoryName(dirname)))
+            //{
+            //    string[] files = Directory.GetFiles(dirname, "*.*", SearchOption.TopDirectoryOnly);
+            //    string[] dirs = Directory.GetDirectories(dirname, "*.*", SearchOption.TopDirectoryOnly);
+            //    var candidates = new List<string>();
 
-                Array.ForEach(new String[][] { files, dirs }, (x) =>
-                    Array.ForEach(x, (y) =>
-                    {
-                        if (y.StartsWith(dirname, StringComparison.CurrentCultureIgnoreCase))
-                            candidates.Add(y);
-                    }));
+            //    Array.ForEach(new String[][] { files, dirs }, (x) =>
+            //        Array.ForEach(x, (y) =>
+            //        {
+            //            if (y.StartsWith(dirname, StringComparison.CurrentCultureIgnoreCase))
+            //                candidates.Add(y);
+            //        }));
 
-                tbAssembly.ItemsSource = candidates;
-                tbAssembly.PopulateComplete();
-            }
+            //    tbAssembly.ItemsSource = candidates;
+            //    tbAssembly.PopulateComplete();
+            //}
         }
     }
 }
