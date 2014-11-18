@@ -25,7 +25,7 @@ namespace SOVND.Client
         public MainWindow()
         {
             InitializeComponent();
-            Session.Login(File.ReadAllBytes("spotify_appkey.key"), "Username", "Password", true);
+            Session.Login(File.ReadAllBytes("spotify_appkey.key"), File.ReadAllText("username.key"), File.ReadAllText("password.key"), true);
         }
 
         private void tbAssembly_Populating(object sender, System.Windows.Controls.PopulatingEventArgs e)
