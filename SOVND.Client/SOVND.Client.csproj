@@ -16,7 +16,7 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x86</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -35,9 +35,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Charlotte">
-      <HintPath>..\packages\Charlotte.0.0.1\lib\Charlotte.dll</HintPath>
-    </Reference>
     <Reference Include="libspotifydotnet, Version=4.0.0.0, Culture=neutral, PublicKeyToken=ae9f20a153337be6, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>libs\libspotifydotnet.dll</HintPath>
@@ -115,6 +112,12 @@
     <Content Include="libs\libspotifydotnet.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\github\Charlotte\Charlotte\Charlotte.csproj">
+      <Project>{4d601f15-2fa6-4501-a95a-5e44832c35e7}</Project>
+      <Name>Charlotte</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

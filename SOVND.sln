@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.22129.1
+VisualStudioVersion = 14.0.22310.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOVND.Server", "SOVND.Server\SOVND.Server.csproj", "{D0946921-7212-4890-90E6-24F6C9BD8EDA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOVND.Client", "SOVND.Client\SOVND.Client.csproj", "{E75E0A60-FC4D-4C06-8B47-83F3C9154344}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charlotte", "..\..\..\github\Charlotte\Charlotte\Charlotte.csproj", "{4D601F15-2FA6-4501-A95A-5E44832C35E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{E75E0A60-FC4D-4C06-8B47-83F3C9154344}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E75E0A60-FC4D-4C06-8B47-83F3C9154344}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E75E0A60-FC4D-4C06-8B47-83F3C9154344}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
