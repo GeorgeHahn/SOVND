@@ -35,6 +35,11 @@ MQTT Communication spec
 		block  # Moderator block
 	/user/{username}/{channel}/chat
 
+	/user/{username}/register/{channel}
+		/name
+		/description
+		/image
+		/moderators
 
 TODO:
 

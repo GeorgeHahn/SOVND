@@ -114,6 +114,27 @@ namespace SOVND.Server
                 // TODO [LOW] Pass chats from this topic to a channel chat topic
             };
 
+            // Channel creation
+
+            On["/user/{username}/register/{channel}/{param}"] = _ =>
+            {
+                Log("\{_.username} created channel \{_.channel}, setting \{_.param} to \{_.Message}");
+
+                if (!channels.ContainsKey(_.channel))
+                {
+                    channels[_.channel] = new Channel();
+                    // channel[].moderator = _.username
+                }
+                // else
+                // TODO Check permissions
+
+                List<string> AllowedParams = new List<string> {"name", "description", "image", "moderators"};
+
+                if(AllowedParams.Contains(_.param))
+                    Publish("/\{_.channel}/info/\{_.param}", _.Message);
+                else
+                    Log("Bad param: \{_.param}");
+            };
 
             // Channel registration
 
@@ -124,6 +145,7 @@ namespace SOVND.Server
 
                 channels[_.channel].Name = _.Message;
 
+                // Kick off channel's queue
                 ScheduleNextSong(_.channel);
             };
 
@@ -164,7 +186,6 @@ namespace SOVND.Server
             };
         }
 
-        // TODO Kick this off for first song in channel
         private void ScheduleNextSong(string channel, string prevSongID = null)
         {
             // Set prev song to 0 votes, 0 vote time
@@ -181,7 +202,7 @@ namespace SOVND.Server
 
             var task = new Task(() =>
             {
-                Thread.Sleep(100); // TODO Song duration or ~500ms if no song
+                Thread.Sleep(500); // TODO Song duration or ~500ms if no song
                 ScheduleNextSong(channel, song);
             });
             task.Start();
