@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SOVND.Server
@@ -38,11 +39,16 @@ namespace SOVND.Server
                         Log("Vote was valid");
 
                         if (!votes.ContainsKey(_.songid))
+                        {
                             votes[_.songid] = 0;
+                        }
                         votes[_.songid]++;
                         uservotes[_.username + _.songid] = true;
 
-                        // TODO: Publish vote to channel topic
+                        Publish("/\{_.channel}/playlist/\{_.songid}/votes", votes[_.songid].ToString());
+                        Publish("/\{_.channel}/playlist/\{_.songid}/votetime", Timestamp().ToString());
+
+                        // TODO publish voters
                     }
                     else
                     {
@@ -52,16 +58,24 @@ namespace SOVND.Server
                 }
                 else if (_.Message == "unvote")
                 {
-                    Log(":\{_.username} unvoted for song :\{_.songid}");
+                    Log("Unvoting currently disabled");
+                    return;
 
-                    // TODO if songid is valid
-                    if (uservotes[_.username + _.songid])
-                    {
-                        votes[_.songid]--;
-                        uservotes[_.username + _.songid] = false;
-                    }
-                    else
-                        return;
+                    //Log("\{_.username} unvoted for song \{_.songid}");
+
+                    //// TODO if songid is valid
+                    //if (uservotes[_.username + _.songid])
+                    //{
+                    //    votes[_.songid]--;
+                    //    uservotes[_.username + _.songid] = false;
+
+                    //    Publish("/\{_.channel}/playlist/\{_.songid}/votes", votes[_.songid].ToString());
+                    //}
+                    //else
+                    //{
+                    //    Log("Unvote was invalid");
+                    //    return;
+                    //}
                 }
                 else if (_.Message == "report")
                 {
@@ -90,10 +104,6 @@ namespace SOVND.Server
                     Log("Invalid command: \{_.Topic}: \{_.Message}");
                     return;
                 }
-
-                Publish("/\{_.channel}/playlist/\{_.songid}/votes", votes[_.songid].ToString());
-                // TODO votetime
-                // TODO voters
             };
 
             On["/user/{username}/{channel}/chat"] = _ =>
@@ -103,8 +113,118 @@ namespace SOVND.Server
                 // TODO [LOW] Log chats
                 // TODO [LOW] Pass chats from this topic to a channel chat topic
             };
-;
-            Log("Running");
+
+
+            // Channel registration
+
+            On["/{channel}/info/name"] = _ =>
+            {
+                if (!channels.ContainsKey(_.channel))
+                    channels[_.channel] = new Channel();
+
+                channels[_.channel].Name = _.Message;
+
+                ScheduleNextSong(_.channel);
+            };
+
+            On["/{channel}/info/description"] = _ =>
+            {
+                if (!channels.ContainsKey(_.channel))
+                    channels[_.channel] = new Channel();
+
+                channels[_.channel].Description = _.Message;
+            };
+
+            // TODO Image
+            // TODO Moderators
+
+            // Channel playlists
+            On["/{channel}/playlist/{songid}/votes"] = _ =>
+            {
+                Channel chan = channels[_.channel];
+                Song song = chan.SongsByID[_.songid];
+                if (song == null)
+                {
+                    song = new Song();
+                    chan.SongsByID[_.songid] = song;
+                }
+                song.Votes = int.Parse(_.Message);
+            };
+
+            On["/{channel}/playlist/{songid}/votetime"] = _ =>
+            {
+                Channel chan = channels[_.channel];
+                Song song = chan.SongsByID[_.songid];
+                if (song == null)
+                {
+                    song = new Song();
+                    chan.SongsByID[_.songid] = song;
+                }
+                song.Votetime = long.Parse(_.Message);
+            };
         }
+
+        // TODO Kick this off for first song in channel
+        private void ScheduleNextSong(string channel)
+        {
+            var song = channels[channel].GetTopSong().SongID;
+            Publish("\{channel}/nowplaying/songid", song);
+            Publish("\{channel}/nowplaying/starttime", Timestamp().ToString());
+
+            var task = new Task(() =>
+            {
+                Thread.Sleep(100); // TODO Song duration or ~500ms if no song
+                ScheduleNextSong(channel);
+            });
+            task.Start();
+        }
+
+        private static long Timestamp()
+        {
+            return DateTime.Now.ToUniversalTime().Ticks;
+        }
+
+        private Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
+    }
+
+    public class Channel
+    {
+        public string Name { get; set; }
+
+        public string Description { get; set; }
+
+        public string Image { get; set; }
+
+        // TODO Moderators
+
+        public Dictionary<string, Song> SongsByID { get; set; } = new Dictionary<string, Song>();
+
+        public Song GetTopSong()
+        {
+            Song max = SongsByID.Values.FirstOrDefault();
+            foreach (var song in SongsByID.Values)
+            {
+                if (song == max)
+                    continue;
+
+                if (song.Votes > max.Votes)
+                {
+                    max = song;
+                } else if (song.Votes == max.Votes && song.Votetime < max.Votetime)
+                {
+                    max = song;
+                }
+            }
+            return max;
+        }
+    }
+
+    public class Song
+    {
+        public string SongID { get; set; }
+        public long Votetime { get; set; }
+        public int Votes { get; set; }
+        public string Voters { get; set; } // ?
+        public bool Removed { get; set; }
     }
 }
