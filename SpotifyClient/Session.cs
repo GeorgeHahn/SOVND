@@ -112,9 +112,9 @@ namespace SpotifyClient
             get { return _isLoggedIn; }
         }
 
-        public static void Login(byte[] appkey, string username, string password, bool rememberme)
+        public static void Login(object[] args)
         {
-            Session.appkey = appkey;
+            Session.appkey = (byte[])args[0];
 
             if (_sessionPtr == IntPtr.Zero)
                 _loginError = initSession();
@@ -125,7 +125,7 @@ namespace SpotifyClient
             if (_sessionPtr == IntPtr.Zero)
                 throw new InvalidOperationException("Session initialization failed, session pointer is null.");
 
-            libspotify.sp_session_login(_sessionPtr, username, password, rememberme, null);
+            libspotify.sp_session_login(_sessionPtr, args[1].ToString(), args[2].ToString(), false, null);
         }
 
         public static void Logout()

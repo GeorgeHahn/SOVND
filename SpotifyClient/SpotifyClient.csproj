@@ -54,6 +54,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Search.cs" />
     <Compile Include="Session.cs" />
+    <Compile Include="Spotify.cs" />
+    <Compile Include="SpotifyTrackDataPipe.cs" />
     <Compile Include="TopList.cs" />
     <Compile Include="Track.cs" />
     <Compile Include="User.cs" />
