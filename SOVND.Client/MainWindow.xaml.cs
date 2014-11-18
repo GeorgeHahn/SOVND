@@ -26,30 +26,29 @@ namespace SOVND.Client
         {
             InitializeComponent();
 
-            Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), File.ReadAllText("username.key"), File.ReadAllText("password.key"));
-
+            Spotify.Initialize();
+            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), File.ReadAllText("username.key"), File.ReadAllText("password.key")))
+                throw new Exception("Login failure");
         }
 
         private void tbAssembly_Populating(object sender, System.Windows.Controls.PopulatingEventArgs e)
         {
             string text = tbAssembly.Text;
 
-            //if (Directory.Exists(Path.GetDirectoryName(dirname)))
-            //{
-            //    string[] files = Directory.GetFiles(dirname, "*.*", SearchOption.TopDirectoryOnly);
-            //    string[] dirs = Directory.GetDirectories(dirname, "*.*", SearchOption.TopDirectoryOnly);
-            //    var candidates = new List<string>();
+            var candidates = new List<Track>();
+            var search = Spotify.GetSearch(text);
+            foreach (var trackPtr in search.TrackPtrs)
+            {
+                var trackLink = Spotify.GetTrackLink(trackPtr);
+                var track = new Track(trackLink);
+                candidates.Add(track);
+            }
 
-            //    Array.ForEach(new String[][] { files, dirs }, (x) =>
-            //        Array.ForEach(x, (y) =>
-            //        {
-            //            if (y.StartsWith(dirname, StringComparison.CurrentCultureIgnoreCase))
-            //                candidates.Add(y);
-            //        }));
+            // If artist, show artist songs ordered by popularity
+            // If album, show album songs ordered by popularity
 
-            //    tbAssembly.ItemsSource = candidates;
-            //    tbAssembly.PopulateComplete();
-            //}
+            tbAssembly.ItemsSource = candidates;
+            tbAssembly.PopulateComplete();
         }
     }
 }

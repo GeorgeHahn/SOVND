@@ -61,10 +61,10 @@
     <Compile Include="User.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="libs\libspotify.dll">
+    <Content Include="libspotify.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="libs\libspotifydotnet.dll">
+    <Content Include="libspotifydotnet.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
