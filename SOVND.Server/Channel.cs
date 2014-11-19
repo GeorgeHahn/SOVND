@@ -17,7 +17,7 @@ namespace SOVND.Server
 
         /// <summary>
         /// Gets the song at the top of the list
-        /// TODO Return an enum that counts down from the top of the list (write a sorting function and use C#'s sorting)
+        /// TODO Return enumeration that counts down from the top of the list (write a sorting function and use C#'s sorting)
         /// </summary>
         /// <returns></returns>
         public Song GetTopSong()
