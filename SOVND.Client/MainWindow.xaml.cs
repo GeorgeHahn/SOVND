@@ -49,6 +49,7 @@ namespace SOVND.Client
                 lbPlaylist.ItemsSource = candidates;
             }
             else
+            //lbPlaylist.ItemsSource = App.client.channels.FirstOrDefault().Value.SongsByID.Values; // Dirty hack
                 lbPlaylist.ItemsSource = App.client.Playlist;
         }
 

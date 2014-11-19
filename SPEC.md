@@ -43,6 +43,9 @@ MQTT Communication spec
 
 TODO:
 	- Charlotte: Support dynamically (un/)subscribing to topics
-	- Client: Playlist UI
+	- Server: Fix song persistence (server should publish with retain flag set)
+	- Client: Sort all songs in channel by votes & votetime
+	- Client: Set channel
+	- Client: Channel browser
 	- Client: Login
 	- Server: [Moderation] Support muting users

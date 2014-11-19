@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using SpotifyClient;
 using SOVND.Server;
+using System.Collections;
 
 namespace SOVND.Client
 {
@@ -28,13 +29,16 @@ namespace SOVND.Client
     {
         private Action<string> Log = _ => Console.WriteLine(_);
 
-        public List<Track> Playlist { get; } = new List<Track>();
-
         public string Username { get; private set; } = "georgehahn";
+
+        public IEnumerable<Track> Playlist
+        {
+            get { yield return channels["ambient"].GetTopSong()?.track; } // TODO Give all songs in channel
+        }
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
-        private Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
+        public Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
 
         public SovndClient(string brokerHostName, int brokerPort, string username, string password)
             : base(brokerHostName, brokerPort, username, password)
@@ -105,7 +109,11 @@ namespace SOVND.Client
 
                 Channel chan = channels[_.channel];
                 if (!chan.SongsByID.ContainsKey(_.songid))
-                    chan.SongsByID[_.songid] = new Song() { SongID = _.songid };
+                    chan.SongsByID[_.songid] = new Song()
+                    {
+                        SongID = _.songid,
+                        track = new Track(_.songid)
+                    };
                 var song = chan.SongsByID[_.songid];
                 song.Votes = int.Parse(_.Message);
             };
@@ -130,7 +138,7 @@ namespace SOVND.Client
         {
             Connect();
 
-            RegisterChannel("ambient", "Ambient music", "");
+            //RegisterChannel("ambient", "Ambient music", "");
         }
 
         public bool RegisterChannel(string name, string description, string image)

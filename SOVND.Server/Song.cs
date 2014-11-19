@@ -7,5 +7,6 @@ namespace SOVND.Server
         public int Votes { get; set; }
         public string Voters { get; set; } // ?
         public bool Removed { get; set; }
+        //public Track track { get; set; }
     }
 }
