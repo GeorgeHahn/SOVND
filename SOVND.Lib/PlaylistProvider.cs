@@ -10,7 +10,35 @@ namespace SOVND.Lib
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
-        
+
+
+        public bool AddVote(string songID, string username)
+        {
+            if (!uservotes.ContainsKey(username + songID) || !uservotes[username + songID])
+            {
+                Log("Vote was valid");
+
+                if (!votes.ContainsKey(songID))
+                {
+                    votes[songID] = 0;
+                }
+                votes[songID]++;
+                uservotes[username + songID] = true;
+
+                // TODO publish voters
+                return true;
+            }
+            else
+            {
+                Log("Vote was invalid");
+                return false;
+            }
+        }
+
+        public int GetVotes(string songID)
+        {
+            return votes[songID];
+        }
 
         public PlaylistProvider(Channel channel)
             : base("127.0.0.1", 1883, "", "")

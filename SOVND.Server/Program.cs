@@ -43,27 +43,12 @@ namespace SOVND.Server
                 if (_.Message == "vote")
                 {
                     Log("\{_.username} voted for song \{_.songid}");
+                    var playlist = channels[_.channel].Playlist;
 
-                    if (!uservotes.ContainsKey(_.username + _.songid) || !uservotes[_.username + _.songid])
+                    if (playlist.AddVote(_.songid, _.username))
                     {
-                        Log("Vote was valid");
-
-                        if (!votes.ContainsKey(_.songid))
-                        {
-                            votes[_.songid] = 0;
-                        }
-                        votes[_.songid]++;
-                        uservotes[_.username + _.songid] = true;
-
-                        Publish("/\{_.channel}/playlist/\{_.songid}/votes", votes[_.songid].ToString(), true);
+                        Publish("/\{_.channel}/playlist/\{_.songid}/votes", playlist.GetVotes(_.songid).ToString(), true);
                         Publish("/\{_.channel}/playlist/\{_.songid}/votetime", Timestamp().ToString());
-
-                        // TODO publish voters
-                    }
-                    else
-                    {
-                        Log("Vote was invalid");
-                        return;
                     }
                 }
                 else if (_.Message == "unvote")
@@ -162,7 +147,9 @@ namespace SOVND.Server
                 channels[_.channel].MQTTName = _.channel;
 
                 // Start watching channel's playlist
-                channels[_.channel].Playlist = new PlaylistProvider(_.channel);
+                var playlist = new PlaylistProvider(channels[_.channel]);
+                channels[_.channel].Playlist = playlist;
+                playlist.Run();
 
                 // Kick off channel's queue
                 ScheduleNextSong(_.channel);

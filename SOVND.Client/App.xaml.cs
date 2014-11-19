@@ -7,8 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using SpotifyClient;
-using SOVND.Server;
 using System.Collections;
+using SOVND.Lib;
 
 namespace SOVND.Client
 {
