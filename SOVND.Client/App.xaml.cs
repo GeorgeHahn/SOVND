@@ -18,11 +18,6 @@ namespace SOVND.Client
     public partial class App : Application
     {
         public static SovndClient client = new SovndClient("127.0.0.1", 1883, "", "");
-
-        public App()
-        {
-            client.Run();
-        }
     }
 
     public class SovndClient : MqttModule
@@ -31,10 +26,12 @@ namespace SOVND.Client
 
         public string Username { get; private set; } = "georgehahn";
 
-        public IEnumerable<Track> Playlist
-        {
-            get { yield return channels["ambient"].GetTopSong()?.track; } // TODO Give all songs in channel
-        }
+        public List<Track> Playlist { get; } = new List<Track>();
+
+        //public IEnumerable<Track> Playlist
+        //{
+        //    get { yield return channels["ambient"].GetTopSong()?.track; } // TODO Give all songs in channel
+        //}
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
@@ -107,13 +104,29 @@ namespace SOVND.Client
                     return;
                 }
 
+                Track track = null;
+
+                while (track != null)
+                {
+                    // TODO Max retry count
+                    try
+                    {
+                        track = new Track(_.songid);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        Log("Track not loaded");
+                    }
+                }
+
                 Channel chan = channels[_.channel];
                 if (!chan.SongsByID.ContainsKey(_.songid))
                     chan.SongsByID[_.songid] = new Song()
                     {
                         SongID = _.songid,
-                        track = new Track(_.songid)
+                        track = track
                     };
+                Playlist.Add(track);
                 var song = chan.SongsByID[_.songid];
                 song.Votes = int.Parse(_.Message);
             };
@@ -132,13 +145,6 @@ namespace SOVND.Client
                 var song = chan.SongsByID[_.songid];
                 song.Votetime = long.Parse(_.Message);
             };
-        }
-
-        public new void Run()
-        {
-            Connect();
-
-            //RegisterChannel("ambient", "Ambient music", "");
         }
 
         public bool RegisterChannel(string name, string description, string image)

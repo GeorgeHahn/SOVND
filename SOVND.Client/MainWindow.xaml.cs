@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using SpotifyClient;
 using System.IO;
+using System.Threading;
 
 namespace SOVND.Client
 {
@@ -29,6 +30,13 @@ namespace SOVND.Client
             Spotify.Initialize();
             if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), File.ReadAllText("username.key"), File.ReadAllText("password.key")))
                 throw new Exception("Login failure");
+
+            Loaded += MainWindow_Loaded;
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            App.client.Run();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)

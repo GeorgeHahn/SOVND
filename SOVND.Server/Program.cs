@@ -57,7 +57,7 @@ namespace SOVND.Server
                         votes[_.songid]++;
                         uservotes[_.username + _.songid] = true;
 
-                        Publish("/\{_.channel}/playlist/\{_.songid}/votes", votes[_.songid].ToString());
+                        Publish("/\{_.channel}/playlist/\{_.songid}/votes", votes[_.songid].ToString(), true);
                         Publish("/\{_.channel}/playlist/\{_.songid}/votetime", Timestamp().ToString());
 
                         // TODO publish voters
@@ -222,12 +222,25 @@ namespace SOVND.Server
             Log("Running");
         }
 
+        private void RemoveSong(string channel, string songID)
+        {
+            Publish("\{channel}/playlist/\{songID}/votes", "", true);
+            Publish("\{channel}/playlist/\{songID}/removed", "true", true);
+        }
+
+        private void BlockSong(string channel, string songID)
+        {
+            Publish("\{channel}/playlist/\{songID}/votes", "", true);
+            Publish("\{channel}/playlist/\{songID}/removed", "true", true);
+            Publish("\{channel}/playlist/\{songID}/blocked", "true", true);
+        }
+
         private void ScheduleNextSong(string channel, string prevSongID = null)
         {
             // Set prev song to 0 votes, 0 vote time
             if (prevSongID != null)
             {
-                Publish("\{channel}/playlist/\{prevSongID}/votes", "0");
+                Publish("\{channel}/playlist/\{prevSongID}/votes", "0", true);
                 Publish("\{channel}/playlist/\{prevSongID}/votetime", Timestamp().ToString());
                 Publish("\{channel}/playlist/\{prevSongID}/voters", "");
             }
