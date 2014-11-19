@@ -11,14 +11,26 @@
     <Window.Resources>
         <DataTemplate DataType="{x:Type spotify:Track}" x:Key="TrackTemplate">
             <Border Name="border" BorderBrush="Aqua" BorderThickness="1" Padding="5" Margin="5">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock>IMG</TextBlock>
+                <DockPanel>
+                    <TextBlock
+                        DockPanel.Dock="Left"
+                        Margin="3">
+                        IMG
+                    </TextBlock>
                     <StackPanel>
                         <TextBlock Text="{Binding Path=Name}" />
                         <TextBlock Text="{Binding Path=Album.Name}" />
                         <TextBlock Text="{Binding Path=AllArtists}" />
                     </StackPanel>
-                </StackPanel>
+                    <Button
+                        HorizontalAlignment="Right"
+                        HorizontalContentAlignment="Right"
+                        DockPanel.Dock="Right"
+                        Click="Button_Click"
+                        Margin="3">
+                        ADD
+                    </Button>
+                </DockPanel>
             </Border>
         </DataTemplate>
     </Window.Resources>

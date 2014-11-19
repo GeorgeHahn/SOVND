@@ -35,19 +35,32 @@ namespace SOVND.Client
         {
             string text = tbSearch.Text;
 
-            var candidates = new List<Track>();
-            var search = Spotify.GetSearch(text);
-            foreach (var trackPtr in search.TrackPtrs)
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                var trackLink = Spotify.GetTrackLink(trackPtr);
-                var track = new Track(trackLink);
-                candidates.Add(track);
+                var candidates = new List<Track>();
+                var search = Spotify.GetSearch(text);
+                foreach (var trackPtr in search.TrackPtrs)
+                {
+                    var trackLink = Spotify.GetTrackLink(trackPtr);
+                    var track = new Track(trackLink);
+                    candidates.Add(track);
+                }
+
+                lbPlaylist.ItemsSource = candidates;
             }
+            else
+                lbPlaylist.ItemsSource = App.client.Playlist;
+        }
 
-            // If artist, show artist songs ordered by popularity
-            // If album, show album songs ordered by popularity
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            EnqueueTrack((Track)((Button)sender).DataContext);
+            tbSearch.Clear();
+        }
 
-            lbPlaylist.ItemsSource = candidates;
+        private void EnqueueTrack(Track track)
+        {
+            App.client.AddTrack(track);
         }
     }
 }

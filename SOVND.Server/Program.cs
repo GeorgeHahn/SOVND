@@ -33,9 +33,10 @@ namespace SOVND.Server
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
+        private Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
 
         public Server()
-            : base("127.0.0.1", 1883, "server", "serverpass")
+            : base("127.0.0.1", 1883, "", "")
         {
             Log("Starting up");
 
@@ -123,6 +124,7 @@ namespace SOVND.Server
 
                 // TODO [LOW] Log chats
                 // TODO [LOW] Pass chats from this topic to a channel chat topic
+                // TODO [LOW] Allow moderators to mute users
             };
 
             // Channel creation
@@ -142,15 +144,22 @@ namespace SOVND.Server
                 List<string> AllowedParams = new List<string> {"name", "description", "image", "moderators"};
 
                 if(AllowedParams.Contains(_.param))
-                    Publish("/\{_.channel}/info/\{_.param}", _.Message);
+                    Publish("/\{_.channel}/info/\{_.param}", _.Message, true);
                 else
                     Log("Bad param: \{_.param}");
             };
+
+
+
+
+            // TODO: This should probably be torn out and modularized because it's shared between the client and the server
 
             // Channel registration
 
             On["/{channel}/info/name"] = _ =>
             {
+                Log("\{_.channel} got a name: \{_.Message}");
+
                 if (!channels.ContainsKey(_.channel))
                     channels[_.channel] = new Channel();
 
@@ -162,6 +171,8 @@ namespace SOVND.Server
 
             On["/{channel}/info/description"] = _ =>
             {
+                Log("\{_.channel} got a description: \{_.Message}");
+
                 if (!channels.ContainsKey(_.channel))
                     channels[_.channel] = new Channel();
 
@@ -174,27 +185,41 @@ namespace SOVND.Server
             // Channel playlists
             On["/{channel}/playlist/{songid}/votes"] = _ =>
             {
-                Channel chan = channels[_.channel];
-                Song song = chan.SongsByID[_.songid];
-                if (song == null)
+                if (!channels.ContainsKey(_.channel))
                 {
-                    song = new Song();
-                    chan.SongsByID[_.songid] = song;
+                    Log("Bad channnel: \{_.channel}");
+                    return;
                 }
+
+                Log("\{_.channel} got a vote for \{_.songid}");
+
+                Channel chan = channels[_.channel];
+                if (!chan.SongsByID.ContainsKey(_.songid))
+                    chan.SongsByID[_.songid] = new Song() { SongID = _.songid };
+                var song = chan.SongsByID[_.songid];
                 song.Votes = int.Parse(_.Message);
             };
 
             On["/{channel}/playlist/{songid}/votetime"] = _ =>
             {
-                Channel chan = channels[_.channel];
-                Song song = chan.SongsByID[_.songid];
-                if (song == null)
+                if (!channels.ContainsKey(_.channel))
                 {
-                    song = new Song();
-                    chan.SongsByID[_.songid] = song;
+                    Log("Bad channnel: \{_.channel}");
+                    return;
                 }
+
+                Channel chan = channels[_.channel];
+                if (!chan.SongsByID.ContainsKey(_.songid))
+                    chan.SongsByID[_.songid] = new Song() { SongID = _.songid };
+                var song = chan.SongsByID[_.songid];
                 song.Votetime = long.Parse(_.Message);
             };
+        }
+
+        public new void Run()
+        {
+            Connect();
+            Log("Running");
         }
 
         private void ScheduleNextSong(string channel, string prevSongID = null)
@@ -207,9 +232,14 @@ namespace SOVND.Server
                 Publish("\{channel}/playlist/\{prevSongID}/voters", "");
             }
 
-            var song = channels[channel].GetTopSong().SongID;
-            Publish("\{channel}/nowplaying/songid", song);
-            Publish("\{channel}/nowplaying/starttime", Timestamp().ToString());
+            var song = channels[channel].GetTopSong()?.SongID;
+            if (song != null)
+            {
+                Publish("\{channel}/nowplaying/songid", song);
+                Publish("\{channel}/nowplaying/starttime", Timestamp().ToString());
+            }
+            else
+                Log("No songs in channel \{channel}");
 
             var task = new Task(() =>
             {
@@ -223,7 +253,5 @@ namespace SOVND.Server
         {
             return DateTime.Now.ToUniversalTime().Ticks;
         }
-
-        private Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
     }
 }

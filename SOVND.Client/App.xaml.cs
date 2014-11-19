@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using SpotifyClient;
+using SOVND.Server;
 
 namespace SOVND.Client
 {
@@ -15,12 +16,25 @@ namespace SOVND.Client
     /// </summary>
     public partial class App : Application
     {
-        public SovndClient client = new SovndClient("127.0.0.1", 1883, "", "");
+        public static SovndClient client = new SovndClient("127.0.0.1", 1883, "", "");
+
+        public App()
+        {
+            client.Run();
+        }
     }
 
     public class SovndClient : MqttModule
     {
         private Action<string> Log = _ => Console.WriteLine(_);
+
+        public List<Track> Playlist { get; } = new List<Track>();
+
+        public string Username { get; private set; } = "georgehahn";
+
+        private Dictionary<string, int> votes = new Dictionary<string, int>();
+        private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
+        private Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
 
         public SovndClient(string brokerHostName, int brokerPort, string username, string password)
             : base(brokerHostName, brokerPort, username, password)
@@ -34,32 +48,81 @@ namespace SOVND.Client
 
             On["/{channel}/playlist/{songid}"] = _ =>
             {
-                Log("Votes for :\{_.songid} set to :\{_.Message}");
+                Log("Votes for \{_.songid} set to \{_.Message}");
             };
 
             On["/{channel}/playlist/{songid}/voters"] = _ =>
             {
-                Log("Voters for :\{_.songid}: :\{_.Message}");
+                Log("Voters for \{_.songid}: \{_.Message}");
             };
 
             On["/{channel}/playlist/{songid}/removed"] = _ =>
             {
-                Log("Song removed from playlist: :\{_.songid}");
+                Log("Song removed from playlist: \{_.songid}");
             };
 
             On["/user/{username}/{channel}/chat"] = _ =>
             {
-                Log(":\{_.username}: :\{_.Message}");
+                Log("\{_.username}: \{_.Message}");
             };
 
             On["/{channel}/stats/users"] = _ =>
             {
-                Log(":\{_.Message} active users");
+                Log("\{_.Message} active users");
             };
 
             On["/{channel}/nowplaying"] = _ =>
             {
-                Log("Playing: :\{_.Message}");
+                Log("Playing: \{_.Message}");
+            };
+
+
+
+            On["/{channel}/info/name"] = _ =>
+            {
+                if (!channels.ContainsKey(_.channel))
+                    channels[_.channel] = new Channel();
+
+                channels[_.channel].Name = _.Message;
+            };
+
+            On["/{channel}/info/description"] = _ =>
+            {
+                if (!channels.ContainsKey(_.channel))
+                    channels[_.channel] = new Channel();
+
+                channels[_.channel].Description = _.Message;
+            };
+
+            // Channel playlists
+            On["/{channel}/playlist/{songid}/votes"] = _ =>
+            {
+                if (!channels.ContainsKey(_.channel))
+                {
+                    Log("Bad channnel: \{_.channel}");
+                    return;
+                }
+
+                Channel chan = channels[_.channel];
+                if (!chan.SongsByID.ContainsKey(_.songid))
+                    chan.SongsByID[_.songid] = new Song() { SongID = _.songid };
+                var song = chan.SongsByID[_.songid];
+                song.Votes = int.Parse(_.Message);
+            };
+
+            On["/{channel}/playlist/{songid}/votetime"] = _ =>
+            {
+                if (!channels.ContainsKey(_.channel))
+                {
+                    Log("Bad channnel: \{_.channel}");
+                    return;
+                }
+
+                Channel chan = channels[_.channel];
+                if (!chan.SongsByID.ContainsKey(_.songid))
+                    chan.SongsByID[_.songid] = new Song() { SongID = _.songid };
+                var song = chan.SongsByID[_.songid];
+                song.Votetime = long.Parse(_.Message);
             };
         }
 
@@ -67,23 +130,21 @@ namespace SOVND.Client
         {
             Connect();
 
-            RegisterChannel("Ambient", "Ambient music", "");
-
-            Publish("/user/georgehahn/ambient/songs/spotify:track:4OeTOlMKA693c7YOh5z9x1", "vote");
+            RegisterChannel("ambient", "Ambient music", "");
         }
 
         public bool RegisterChannel(string name, string description, string image)
         {
-            Publish("/user/georgehahn/registerchannel/name", name);
-            Publish("/user/georgehahn/registerchannel/description", description);
-            Publish("/user/georgehahn/registerchannel/image", image);
+            Publish("/user/\{Username}/register/\{name}/name", name);
+            Publish("/user/\{Username}/register/\{name}/description", description);
+            Publish("/user/\{Username}/register/\{name}/image", image);
 
             return true;
         }
-    }
 
-    public class SpotifySong
-    {
-        
+        public void AddTrack(Track track)
+        {
+            Publish("/user/\{Username}/ambient/songs/\{Spotify.GetTrackLink(track.TrackPtr)}", "vote");
+        }
     }
 }
