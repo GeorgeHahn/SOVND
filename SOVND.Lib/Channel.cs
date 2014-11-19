@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SOVND.Server
+namespace SOVND.Lib
 {
     public class Channel
     {
+        public string MQTTName { get; set; }
+
         public string Name { get; set; }
 
         public string Description { get; set; }
@@ -15,9 +17,10 @@ namespace SOVND.Server
 
         public Dictionary<string, Song> SongsByID { get; set; } = new Dictionary<string, Song>();
 
+        public PlaylistProvider Playlist { get; set; }
+
         /// <summary>
         /// Gets the song at the top of the list
-        /// TODO Return enumeration that counts down from the top of the list (write a sorting function and use C#'s sorting)
         /// </summary>
         /// <returns></returns>
         public Song GetTopSong()
@@ -38,5 +41,7 @@ namespace SOVND.Server
             }
             return max;
         }
+
+        /// TODO Return an enum that counts down from the top of the list (write a sorting function and use C#'s sorting)
     }
 }

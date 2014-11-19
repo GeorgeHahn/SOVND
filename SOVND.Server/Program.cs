@@ -1,4 +1,5 @@
 ﻿using Charlotte;
+using SOVND.Lib;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -30,9 +31,6 @@ namespace SOVND.Server
     public class Server : MqttModule
     {
         public Action<string> Log = _ => Console.WriteLine(_);
-
-        private Dictionary<string, int> votes = new Dictionary<string, int>();
-        private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
         private Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
 
         public Server()
@@ -150,11 +148,8 @@ namespace SOVND.Server
             };
 
 
-
-
-            // TODO: This should probably be torn out and modularized because it's shared between the client and the server
-
             // Channel registration
+            // TODO: Channel info should probably be stored as JSON data so it comes as one message
 
             On["/{channel}/info/name"] = _ =>
             {
@@ -164,6 +159,10 @@ namespace SOVND.Server
                     channels[_.channel] = new Channel();
 
                 channels[_.channel].Name = _.Message;
+                channels[_.channel].MQTTName = _.channel;
+
+                // Start watching channel's playlist
+                channels[_.channel].Playlist = new PlaylistProvider(_.channel);
 
                 // Kick off channel's queue
                 ScheduleNextSong(_.channel);
@@ -181,39 +180,6 @@ namespace SOVND.Server
 
             // TODO Image
             // TODO Moderators
-
-            // Channel playlists
-            On["/{channel}/playlist/{songid}/votes"] = _ =>
-            {
-                if (!channels.ContainsKey(_.channel))
-                {
-                    Log("Bad channnel: \{_.channel}");
-                    return;
-                }
-
-                Log("\{_.channel} got a vote for \{_.songid}");
-
-                Channel chan = channels[_.channel];
-                if (!chan.SongsByID.ContainsKey(_.songid))
-                    chan.SongsByID[_.songid] = new Song() { SongID = _.songid };
-                var song = chan.SongsByID[_.songid];
-                song.Votes = int.Parse(_.Message);
-            };
-
-            On["/{channel}/playlist/{songid}/votetime"] = _ =>
-            {
-                if (!channels.ContainsKey(_.channel))
-                {
-                    Log("Bad channnel: \{_.channel}");
-                    return;
-                }
-
-                Channel chan = channels[_.channel];
-                if (!chan.SongsByID.ContainsKey(_.songid))
-                    chan.SongsByID[_.songid] = new Song() { SongID = _.songid };
-                var song = chan.SongsByID[_.songid];
-                song.Votetime = long.Parse(_.Message);
-            };
         }
 
         public new void Run()

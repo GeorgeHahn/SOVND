@@ -61,8 +61,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Channel.cs" />
-    <Compile Include="Song.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -108,6 +106,10 @@
     <ProjectReference Include="..\..\..\..\github\Charlotte\Charlotte\Charlotte.csproj">
       <Project>{4d601f15-2fa6-4501-a95a-5e44832c35e7}</Project>
       <Name>Charlotte</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SOVND.Lib\SOVND.Lib.csproj">
+      <Project>{b3e18678-d240-4673-adc5-59faa2abe4e1}</Project>
+      <Name>SOVND.Lib</Name>
     </ProjectReference>
     <ProjectReference Include="..\SpotifyClient\SpotifyClient.csproj">
       <Project>{0c4c71ab-4181-40c2-ba24-807f34ec1545}</Project>
