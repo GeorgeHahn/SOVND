@@ -45,7 +45,7 @@ namespace libspotifydotnet {
         }
 
         [DllImport("libspotify")]
-        public static extern IntPtr sp_link_create_from_string(string linkString);
+        public static extern IntPtr sp_link_create_from_string(IntPtr linkString);
 
         [DllImport("libspotify")]
         public static extern IntPtr sp_link_create_from_track(IntPtr trackPtr, int offset);

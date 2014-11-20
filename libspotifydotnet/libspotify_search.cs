@@ -39,7 +39,7 @@ namespace libspotifydotnet {
     public static partial class libspotify {
         
         [DllImport("libspotify")]
-        public static extern IntPtr sp_search_create(IntPtr sessionPtr, string query, int track_offset, int track_count,
+        public static extern IntPtr sp_search_create(IntPtr sessionPtr, IntPtr query, int track_offset, int track_count,
                                                        int album_offset, int album_count, int artist_offset, int artist_count,
                                                        int playlist_offset, int playlist_count, sp_search_type search_type,
                                                        IntPtr callbackPtr, IntPtr userDataPtr);
