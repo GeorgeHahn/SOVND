@@ -1,4 +1,5 @@
 ﻿using Charlotte;
+using SpotifyClient;
 using System;
 using System.Collections.Generic;
 
@@ -6,11 +7,11 @@ namespace SOVND.Lib
 {
     public class PlaylistProvider : MqttModule
     {
+        private readonly Channel _channel;
         public Action<string> Log = _ => Console.WriteLine(_);
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
-
 
         public bool AddVote(string songID, string username)
         {
@@ -22,10 +23,12 @@ namespace SOVND.Lib
                 {
                     votes[songID] = 0;
                 }
+
                 votes[songID]++;
                 uservotes[username + songID] = true;
 
-                // TODO publish voters
+
+                // TODO publish voter names
                 return true;
             }
             else
@@ -40,16 +43,26 @@ namespace SOVND.Lib
             return votes[songID];
         }
 
+        public IEnumerable<Song> InOrder()
+        {
+            _channel.Songs.Sort();
+            return _channel.Songs;
+        }
+
         public PlaylistProvider(Channel channel)
             : base("127.0.0.1", 1883, "", "")
         {
+            _channel = channel;
             // Channel playlists
             On["/\{channel.MQTTName}/playlist/{songid}/votes"] = _ =>
             {
                 Log("\{channel.Name} got a vote for \{_.songid}");
 
                 if (!channel.SongsByID.ContainsKey(_.songid))
+                {
                     channel.SongsByID[_.songid] = new Song() { SongID = _.songid };
+                    channel.Songs.Add(channel.SongsByID[_.songid]);
+                }
                 var song = channel.SongsByID[_.songid];
                 song.Votes = int.Parse(_.Message);
             };
@@ -57,10 +70,15 @@ namespace SOVND.Lib
             On["/\{channel.MQTTName}/playlist/{songid}/votetime"] = _ =>
             {
                 if (!channel.SongsByID.ContainsKey(_.songid))
+                {
                     channel.SongsByID[_.songid] = new Song() { SongID = _.songid };
+                    channel.Songs.Add(channel.SongsByID[_.songid]);
+                }
                 var song = channel.SongsByID[_.songid];
                 song.Votetime = long.Parse(_.Message);
             };
+
+            Run();
         }
     }
 }

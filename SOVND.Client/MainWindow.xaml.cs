@@ -57,8 +57,7 @@ namespace SOVND.Client
                 lbPlaylist.ItemsSource = candidates;
             }
             else
-            //lbPlaylist.ItemsSource = App.client.channels.FirstOrDefault().Value.SongsByID.Values; // Dirty hack
-                lbPlaylist.ItemsSource = App.client.Playlist;
+                lbPlaylist.ItemsSource = App.client.SubscribedChannel.Playlist.InOrder();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

@@ -26,7 +26,7 @@ namespace SOVND.Client
 
         public string Username { get; private set; } = "georgehahn";
 
-        public List<Track> Playlist { get; } = new List<Track>();
+        public Channel SubscribedChannel;
 
         //public IEnumerable<Track> Playlist
         //{
@@ -82,7 +82,7 @@ namespace SOVND.Client
             On["/{channel}/info/name"] = _ =>
             {
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = new Channel();
+                    channels[_.channel] = new Channel(_.channel);
 
                 channels[_.channel].Name = _.Message;
             };
@@ -90,61 +90,64 @@ namespace SOVND.Client
             On["/{channel}/info/description"] = _ =>
             {
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = new Channel();
+                    channels[_.channel] = new Channel(_.channel);
 
                 channels[_.channel].Description = _.Message;
             };
 
-            // Channel playlists
-            On["/{channel}/playlist/{songid}/votes"] = _ =>
-            {
-                if (!channels.ContainsKey(_.channel))
-                {
-                    Log("Bad channnel: \{_.channel}");
-                    return;
-                }
+            //// Channel playlists
+            //On["/{channel}/playlist/{songid}/votes"] = _ =>
+            //{
+            //    if (!channels.ContainsKey(_.channel))
+            //    {
+            //        Log("Bad channnel: \{_.channel}");
+            //        return;
+            //    }
 
-                Track track = null;
+            //    Track track = null;
 
-                while (track != null)
-                {
-                    // TODO Max retry count
-                    try
-                    {
-                        track = new Track(_.songid);
-                    }
-                    catch (InvalidOperationException)
-                    {
-                        Log("Track not loaded");
-                    }
-                }
+            //    while (track != null)
+            //    {
+            //        // TODO Max retry count
+            //        try
+            //        {
+            //            track = new Track(_.songid);
+            //        }
+            //        catch (InvalidOperationException)
+            //        {
+            //            Log("Track not loaded");
+            //        }
+            //    }
 
-                Channel chan = channels[_.channel];
-                if (!chan.SongsByID.ContainsKey(_.songid))
-                    chan.SongsByID[_.songid] = new Song()
-                    {
-                        SongID = _.songid,
-                        track = track
-                    };
-                Playlist.Add(track);
-                var song = chan.SongsByID[_.songid];
-                song.Votes = int.Parse(_.Message);
-            };
+            //    Channel chan = channels[_.channel];
+            //    if (!chan.SongsByID.ContainsKey(_.songid))
+            //        chan.SongsByID[_.songid] = new Song()
+            //        {
+            //            SongID = _.songid,
+            //            track = track
+            //        };
+            //    Playlist.Add(track);
+            //    var song = chan.SongsByID[_.songid];
+            //    song.Votes = int.Parse(_.Message);
+            //};
 
-            On["/{channel}/playlist/{songid}/votetime"] = _ =>
-            {
-                if (!channels.ContainsKey(_.channel))
-                {
-                    Log("Bad channnel: \{_.channel}");
-                    return;
-                }
+            //On["/{channel}/playlist/{songid}/votetime"] = _ =>
+            //{
+            //    if (!channels.ContainsKey(_.channel))
+            //    {
+            //        Log("Bad channnel: \{_.channel}");
+            //        return;
+            //    }
 
-                Channel chan = channels[_.channel];
-                if (!chan.SongsByID.ContainsKey(_.songid))
-                    chan.SongsByID[_.songid] = new Song() { SongID = _.songid };
-                var song = chan.SongsByID[_.songid];
-                song.Votetime = long.Parse(_.Message);
-            };
+            //    Channel chan = channels[_.channel];
+            //    if (!chan.SongsByID.ContainsKey(_.songid))
+            //        chan.SongsByID[_.songid] = new Song() { SongID = _.songid };
+            //    var song = chan.SongsByID[_.songid];
+            //    song.Votetime = long.Parse(_.Message);
+            //};
+
+            SubscribedChannel = new Channel("ambient");
+            SubscribedChannel.Subscribe();
         }
 
         public bool RegisterChannel(string name, string description, string image)

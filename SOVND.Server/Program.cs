@@ -48,7 +48,7 @@ namespace SOVND.Server
                     if (playlist.AddVote(_.songid, _.username))
                     {
                         Publish("/\{_.channel}/playlist/\{_.songid}/votes", playlist.GetVotes(_.songid).ToString(), true);
-                        Publish("/\{_.channel}/playlist/\{_.songid}/votetime", Timestamp().ToString());
+                        Publish("/\{_.channel}/playlist/\{_.songid}/votetime", Timestamp().ToString(), true);
                     }
                 }
                 else if (_.Message == "unvote")
@@ -116,13 +116,8 @@ namespace SOVND.Server
             {
                 Log("\{_.username} created channel \{_.channel}, setting \{_.param} to \{_.Message}");
 
-                if (!channels.ContainsKey(_.channel))
-                {
-                    channels[_.channel] = new Channel();
-                    // channel[].moderator = _.username
-                }
-                // else
                 // TODO Check permissions
+                // TODO Publish _.username as moderater
 
                 List<string> AllowedParams = new List<string> {"name", "description", "image", "moderators"};
 
@@ -136,20 +131,17 @@ namespace SOVND.Server
             // Channel registration
             // TODO: Channel info should probably be stored as JSON data so it comes as one message
 
-            On["/{channel}/info/name"] = _ =>
+            On["/{channel}/info/name"] = _ => // TODO: This should maybe be chan/info/{PARAM}
             {
                 Log("\{_.channel} got a name: \{_.Message}");
 
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = new Channel();
+                    channels[_.channel] = new Channel(_.channel);
 
                 channels[_.channel].Name = _.Message;
-                channels[_.channel].MQTTName = _.channel;
 
                 // Start watching channel's playlist
-                var playlist = new PlaylistProvider(channels[_.channel]);
-                channels[_.channel].Playlist = playlist;
-                playlist.Run();
+                channels[_.channel].Subscribe();
 
                 // Kick off channel's queue
                 ScheduleNextSong(_.channel);
@@ -160,7 +152,7 @@ namespace SOVND.Server
                 Log("\{_.channel} got a description: \{_.Message}");
 
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = new Channel();
+                    channels[_.channel] = new Channel(_.channel);
 
                 channels[_.channel].Description = _.Message;
             };
@@ -194,7 +186,7 @@ namespace SOVND.Server
             if (prevSongID != null)
             {
                 Publish("\{channel}/playlist/\{prevSongID}/votes", "0", true);
-                Publish("\{channel}/playlist/\{prevSongID}/votetime", Timestamp().ToString());
+                Publish("\{channel}/playlist/\{prevSongID}/votetime", Timestamp().ToString(), true);
                 Publish("\{channel}/playlist/\{prevSongID}/voters", "");
             }
 

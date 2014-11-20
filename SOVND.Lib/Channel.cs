@@ -5,7 +5,12 @@ namespace SOVND.Lib
 {
     public class Channel
     {
-        public string MQTTName { get; set; }
+        public Channel(string mqttname)
+        {
+            MQTTName = mqttname;
+        }
+
+        public string MQTTName { get; private set; }
 
         public string Name { get; set; }
 
@@ -16,8 +21,20 @@ namespace SOVND.Lib
         // TODO Moderators
 
         public Dictionary<string, Song> SongsByID { get; set; } = new Dictionary<string, Song>();
+        public List<Song> Songs { get; set; } = new List<Song>();
 
-        public PlaylistProvider Playlist { get; set; }
+        public PlaylistProvider Playlist { get; private set; }
+
+        public void Subscribe()
+        {
+            Playlist = new PlaylistProvider(this);
+        }
+
+        public void Unsubscribe()
+        {
+            Playlist.Disconnect();
+            Playlist = null;
+        }
 
         /// <summary>
         /// Gets the song at the top of the list
