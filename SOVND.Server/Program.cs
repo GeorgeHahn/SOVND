@@ -1,7 +1,9 @@
 ﻿using Charlotte;
 using SOVND.Lib;
+using SpotifyClient;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -163,6 +165,12 @@ namespace SOVND.Server
 
         public new void Run()
         {
+            Spotify.Initialize();
+            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), File.ReadAllText("username.key"), File.ReadAllText("password.key")))
+                throw new Exception("Login failure");
+            while (!Spotify.Ready())
+                Thread.Sleep(100);
+
             Connect();
             Log("Running");
         }

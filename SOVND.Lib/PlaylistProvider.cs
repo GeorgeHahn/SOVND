@@ -2,6 +2,8 @@
 using SpotifyClient;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SOVND.Lib
 {
@@ -49,6 +51,29 @@ namespace SOVND.Lib
             return _channel.Songs;
         }
 
+        private void AddNewSong(string ID)
+        {
+            var song = new Song(ID);
+            _channel.SongsByID[ID] = song;
+            _channel.Songs.Add(song);
+
+            SchedSong(song);
+        }
+
+        private void SchedSong(Song song)
+        {
+            (new Task(() =>
+            {
+                if (song.track == null)
+                {
+                    Thread.Sleep(100);
+                    SchedSong(song);
+                }
+                else
+                    Log("Song is \{song.track.Name}");
+            })).Start();
+        }
+
         public PlaylistProvider(Channel channel)
             : base("127.0.0.1", 1883, "", "")
         {
@@ -59,10 +84,7 @@ namespace SOVND.Lib
                 Log("\{channel.Name} got a vote for \{_.songid}");
 
                 if (!channel.SongsByID.ContainsKey(_.songid))
-                {
-                    channel.SongsByID[_.songid] = new Song() { SongID = _.songid };
-                    channel.Songs.Add(channel.SongsByID[_.songid]);
-                }
+                    AddNewSong(_.songid);
                 var song = channel.SongsByID[_.songid];
                 song.Votes = int.Parse(_.Message);
             };
@@ -70,10 +92,7 @@ namespace SOVND.Lib
             On["/\{channel.MQTTName}/playlist/{songid}/votetime"] = _ =>
             {
                 if (!channel.SongsByID.ContainsKey(_.songid))
-                {
-                    channel.SongsByID[_.songid] = new Song() { SongID = _.songid };
-                    channel.Songs.Add(channel.SongsByID[_.songid]);
-                }
+                    AddNewSong(_.songid);
                 var song = channel.SongsByID[_.songid];
                 song.Votetime = long.Parse(_.Message);
             };

@@ -640,6 +640,22 @@ namespace SpotifyClient
                 _mainSignal.Set();
         }
 
+        public static bool Ready()
+        {
+            return _mainSignal != null;
+        }
+
+        public static void InvokeOnSpotifyThread(Action a)
+        {
+            postMessage(InvokeSoon, new object[] {a});
+        }
+
+        private static void InvokeSoon(object[] bits)
+        {
+            Action a = (Action) bits[0];
+            a();
+        }
+
         private static void postMessage(MainThreadMessageDelegate d, object[] payload)
         {
             if (_mq == null)

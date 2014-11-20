@@ -31,6 +31,9 @@ namespace SOVND.Client
             if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), File.ReadAllText("username.key"), File.ReadAllText("password.key")))
                 throw new Exception("Login failure");
 
+            while (!Spotify.Ready())
+                Thread.Sleep(100);
+
             Loaded += MainWindow_Loaded;
         }
 

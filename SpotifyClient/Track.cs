@@ -29,6 +29,7 @@ using System.Collections.Generic;
 
 using libspotifydotnet;
 using System.Diagnostics;
+using System.Threading;
 
 namespace SpotifyClient
 {
@@ -77,10 +78,10 @@ namespace SpotifyClient
             init(trackPtr);
         }
 
-        private void init(IntPtr trackPtr)
+        private bool init(IntPtr trackPtr)
         {
             if (!libspotify.sp_track_is_loaded(trackPtr))
-                throw new InvalidOperationException("Track is not loaded.");
+                return false;
 
             this.TrackPtr = trackPtr;
             this.Name = Functions.PtrToString(libspotify.sp_track_name(trackPtr));
@@ -96,6 +97,8 @@ namespace SpotifyClient
                 if (artistPtr != IntPtr.Zero)
                     _artists.Add(Functions.PtrToString(libspotify.sp_artist_name(artistPtr)));
             }
+
+            return true;
         }
     }
 }

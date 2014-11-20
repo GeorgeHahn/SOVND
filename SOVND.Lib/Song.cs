@@ -1,11 +1,26 @@
 using SpotifyClient;
 using System;
+using System.Threading.Tasks;
 
 namespace SOVND.Lib
 {
     public class Song : IComparable
     {
-        public string SongID { get; }
+        public Song(string songID)
+        {
+            SongID = songID;
+
+            (new Task(() =>
+            {
+                while(track == null)
+                    Spotify.InvokeOnSpotifyThread(() =>
+                    {
+                        track = new Track(songID);
+                    });
+            })).Start();
+        }
+
+        public string SongID { get; private set; }
         public long Votetime { get; set; }
         public int Votes { get; set; }
         public string Voters { get; set; }
