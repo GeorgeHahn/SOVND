@@ -13,24 +13,10 @@ namespace SOVND.Lib
         {
             SongID = songID;
 
-            (new Task(() =>
+            Spotify.InvokeOnSpotifyThread(() =>
             {
-                while (track == null)
-                {
-                    try
-                    {
-                        Spotify.InvokeOnSpotifyThread(() =>
-                        {
-                            track = new Track(songID);
-                        });
-                        Thread.Sleep(10);
-                    }
-                    catch (Exception e)
-                    {
-                        Log("Blargh: \{e.Message}");
-                    }
-                }
-            })).Start();
+                track = new Track(songID);
+            });
         }
 
         public string SongID { get; private set; }

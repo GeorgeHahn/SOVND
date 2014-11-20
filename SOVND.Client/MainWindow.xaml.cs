@@ -40,6 +40,7 @@ namespace SOVND.Client
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             App.client.Run();
+            App.client.SubscribedChannel.Subscribe();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)

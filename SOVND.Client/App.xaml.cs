@@ -147,7 +147,6 @@ namespace SOVND.Client
             //};
 
             SubscribedChannel = new Channel("ambient");
-            SubscribedChannel.Subscribe();
         }
 
         public bool RegisterChannel(string name, string description, string image)
