@@ -1,22 +1,35 @@
 using SpotifyClient;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace SOVND.Lib
 {
     public class Song : IComparable
     {
+        public Action<string> Log = _ => Console.WriteLine(_);
+
         public Song(string songID)
         {
             SongID = songID;
 
             (new Task(() =>
             {
-                while(track == null)
-                    Spotify.InvokeOnSpotifyThread(() =>
+                while (track == null)
+                {
+                    try
                     {
-                        track = new Track(songID);
-                    });
+                        Spotify.InvokeOnSpotifyThread(() =>
+                        {
+                            track = new Track(songID);
+                        });
+                        Thread.Sleep(10);
+                    }
+                    catch (Exception e)
+                    {
+                        Log("Blargh: \{e.Message}");
+                    }
+                }
             })).Start();
         }
 
