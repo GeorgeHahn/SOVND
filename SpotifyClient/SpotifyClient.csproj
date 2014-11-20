@@ -31,10 +31,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="libspotifydotnet, Version=4.0.0.0, Culture=neutral, PublicKeyToken=ae9f20a153337be6, processorArchitecture=x86">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>libs\libspotifydotnet.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -64,9 +60,6 @@
     <Content Include="libspotify.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="libspotifydotnet.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="password.key">
@@ -78,6 +71,12 @@
     <None Include="username.key">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\libspotifydotnet\libspotifydotnet.csproj">
+      <Project>{1de51e4d-4e01-4662-8c22-026974faded9}</Project>
+      <Name>libspotifydotnet</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
