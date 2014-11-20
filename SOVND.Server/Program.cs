@@ -1,12 +1,12 @@
 ﻿using Charlotte;
 using SOVND.Lib;
-using SpotifyClient;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using SpotifyClient;
 
 namespace SOVND.Server
 {
@@ -16,18 +16,6 @@ namespace SOVND.Server
         {
             (new Server()).Run();
         }
-    }
-
-    public class PlaylistTracker : MqttModule
-    {
-        public Action<string> Log = _ => Console.WriteLine(_);
-
-        public PlaylistTracker()
-            : base("127.0.0.1", 1883, "server", "serverpass")
-        {
-            
-        }
-        
     }
 
     public class Server : MqttModule
