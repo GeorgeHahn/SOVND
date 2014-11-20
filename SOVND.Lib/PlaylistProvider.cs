@@ -57,17 +57,17 @@ namespace SOVND.Lib
             _channel.SongsByID[ID] = song;
             _channel.Songs.Add(song);
 
-            SchedSong(song);
+            WaitForTrack(song);
         }
 
-        private void SchedSong(Song song)
+        private void WaitForTrack(Song song)
         {
             (new Task(() =>
             {
                 if (song.track == null)
                 {
                     Thread.Sleep(100);
-                    SchedSong(song);
+                    WaitForTrack(song);
                 }
                 else
                     Log("Song is \{song.track.Name}");
