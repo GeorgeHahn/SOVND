@@ -27,7 +27,9 @@ namespace SOVND.Lib
 
         public void Subscribe()
         {
-            Playlist = new PlaylistProvider(this);
+            // Don't double subscribe
+            if (Playlist == null)
+                Playlist = new PlaylistProvider(this);
         }
 
         public void Unsubscribe()
