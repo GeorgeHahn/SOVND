@@ -166,15 +166,15 @@ namespace SOVND.Server
 
         private void RemoveSong(string channel, string songID)
         {
-            Publish("\{channel}/playlist/\{songID}/votes", "", true);
-            Publish("\{channel}/playlist/\{songID}/removed", "true", true);
+            Publish("/\{channel}/playlist/\{songID}/votes", "", true);
+            Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
         }
 
         private void BlockSong(string channel, string songID)
         {
-            Publish("\{channel}/playlist/\{songID}/votes", "", true);
-            Publish("\{channel}/playlist/\{songID}/removed", "true", true);
-            Publish("\{channel}/playlist/\{songID}/blocked", "true", true);
+            Publish("/\{channel}/playlist/\{songID}/votes", "", true);
+            Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
+            Publish("/\{channel}/playlist/\{songID}/blocked", "true", true);
         }
 
         private void ScheduleNextSong(string channel, Song prevSong = null)
@@ -185,9 +185,9 @@ namespace SOVND.Server
                 if(prevSong.track?.Name != null)
                     Log("Finished playing \{prevSong.track.Name}");
 
-                Publish("\{channel}/playlist/\{prevSong.SongID}/votes", "0", true);
-                Publish("\{channel}/playlist/\{prevSong.SongID}/votetime", Timestamp().ToString(), true);
-                Publish("\{channel}/playlist/\{prevSong.SongID}/voters", "");
+                Publish("/\{channel}/playlist/\{prevSong.SongID}/votes", "0", true);
+                Publish("/\{channel}/playlist/\{prevSong.SongID}/votetime", Timestamp().ToString(), true);
+                Publish("/\{channel}/playlist/\{prevSong.SongID}/voters", "");
             }
 
             var song = channels[channel].GetTopSong();
@@ -195,8 +195,8 @@ namespace SOVND.Server
             {
                 if(song.track?.Name != null)
                     Log("Playing \{song.track.Name}");
-                Publish("\{channel}/nowplaying/songid", song.SongID);
-                Publish("\{channel}/nowplaying/starttime", Timestamp().ToString());
+                Publish("/\{channel}/nowplaying/songid", song.SongID);
+                Publish("/\{channel}/nowplaying/starttime", Timestamp().ToString());
             }
             else
                 Log("No songs in channel \{channel}");
