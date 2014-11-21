@@ -21,22 +21,6 @@ namespace SOVND.Client
         public static SovndClient client = new SovndClient("127.0.0.1", 1883, "", "");
     }
 
-    public class SpotifyPlayer : IWaveProvider
-    {
-        public WaveFormat WaveFormat
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public int Read(byte[] buffer, int offset, int count)
-        {
-            throw new NotImplementedException();
-        }
-    }
-
     public class SovndClient : MqttModule
     {
         private Action<string> Log = _ => Console.WriteLine(_);
