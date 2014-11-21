@@ -193,7 +193,7 @@ namespace SOVND.Server
             var song = channels[channel].GetTopSong();
             if (song != null)
             {
-                if(song.track.Name != null)
+                if(song.track?.Name != null)
                     Log("Playing \{song.track.Name}");
                 Publish("\{channel}/nowplaying/songid", song.SongID);
                 Publish("\{channel}/nowplaying/starttime", Timestamp().ToString());

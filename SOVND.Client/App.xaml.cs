@@ -184,6 +184,7 @@ namespace SOVND.Client
 
         public void AddTrack(Track track)
         {
+            // TODO ambient -> subscribed channel
             Publish("/user/\{Username}/ambient/songs/\{Spotify.GetTrackLink(track.TrackPtr)}", "vote");
         }
     }

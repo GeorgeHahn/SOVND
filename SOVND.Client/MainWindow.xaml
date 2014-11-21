@@ -10,30 +10,6 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Window.Resources>
-        <DataTemplate DataType="{x:Type lib:Song}" x:Key="TrackTemplate">
-            <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
-                <DockPanel>
-                    <TextBlock
-                        DockPanel.Dock="Left"
-                        Margin="3">
-                        IMG
-                    </TextBlock>
-                    <StackPanel DataContext="{Binding Path=Track}">
-                        <TextBlock Text="{Binding Path=Name}" />
-                        <TextBlock Text="{Binding Path=Album.Name}" />
-                        <TextBlock Text="{Binding Path=AllArtists}" />
-                    </StackPanel>
-                    <Button
-                        HorizontalAlignment="Right"
-                        HorizontalContentAlignment="Right"
-                        DockPanel.Dock="Right"
-                        Click="Button_Click"
-                        Margin="3">
-                        ADD
-                    </Button>
-                </DockPanel>
-            </Border>
-        </DataTemplate>
     </Window.Resources>
     
     <Grid>
@@ -51,7 +27,58 @@
         <ListBox
             Grid.Row="1"
             x:Name="lbPlaylist"
-            HorizontalContentAlignment="Stretch"
-            ItemTemplate="{StaticResource TrackTemplate}" />
+            HorizontalContentAlignment="Stretch">
+            <ListBox.Resources>
+                <DataTemplate DataType="{x:Type lib:Song}">
+                    <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
+                        <DockPanel>
+                            <TextBlock
+                                DockPanel.Dock="Left"
+                                Margin="3">
+                                IMG
+                            </TextBlock>
+                            <StackPanel DataContext="{Binding Path=track}">
+                                <TextBlock Text="{Binding Path=Name}" />
+                                <TextBlock Text="{Binding Path=Album.Name}" />
+                                <TextBlock Text="{Binding Path=AllArtists}" />
+                            </StackPanel>
+                            <Button
+                                HorizontalAlignment="Right"
+                                HorizontalContentAlignment="Right"
+                                DockPanel.Dock="Right"
+                                Click="AddSong_Click"
+                                Margin="3">
+                                UP
+                            </Button>
+                        </DockPanel>
+                    </Border>
+                </DataTemplate>
+        
+                <DataTemplate DataType="{x:Type spotify:Track}">
+                    <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
+                        <DockPanel>
+                            <TextBlock
+                                DockPanel.Dock="Left"
+                                Margin="3">
+                                IMG
+                            </TextBlock>
+                            <StackPanel>
+                                <TextBlock Text="{Binding Path=Name}" />
+                                <TextBlock Text="{Binding Path=Album.Name}" />
+                                <TextBlock Text="{Binding Path=AllArtists}" />
+                            </StackPanel>
+                            <Button
+                                HorizontalAlignment="Right"
+                                HorizontalContentAlignment="Right"
+                                DockPanel.Dock="Right"
+                                Click="AddSong_Click"
+                                Margin="3">
+                                ADD
+                            </Button>
+                        </DockPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.Resources>
+        </ListBox>
     </Grid>
 </Window>

@@ -62,12 +62,18 @@ namespace SOVND.Client
                 lbPlaylist.ItemsSource = candidates;
             }
             else
+            {
                 lbPlaylist.ItemsSource = App.client.SubscribedChannel.Playlist.InOrder();
+            }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void AddSong_Click(object sender, RoutedEventArgs e)
         {
-            EnqueueTrack((Track)((Button)sender).DataContext);
+            var item = ((Button) sender).DataContext as Track;
+            if (item == null)
+                return;
+
+            EnqueueTrack(item);
             tbSearch.Clear();
         }
 
