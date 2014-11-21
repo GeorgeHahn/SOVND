@@ -108,6 +108,7 @@ namespace SOVND.Server
 
                 // TODO Check permissions
                 // TODO Publish _.username as moderater
+                // TODO If channel hasn't already been created
 
                 List<string> AllowedParams = new List<string> {"name", "description", "image", "moderators"};
 
@@ -176,20 +177,25 @@ namespace SOVND.Server
             Publish("\{channel}/playlist/\{songID}/blocked", "true", true);
         }
 
-        private void ScheduleNextSong(string channel, string prevSongID = null)
+        private void ScheduleNextSong(string channel, Song prevSong = null)
         {
             // Set prev song to 0 votes, 0 vote time
-            if (prevSongID != null)
+            if (prevSong != null)
             {
-                Publish("\{channel}/playlist/\{prevSongID}/votes", "0", true);
-                Publish("\{channel}/playlist/\{prevSongID}/votetime", Timestamp().ToString(), true);
-                Publish("\{channel}/playlist/\{prevSongID}/voters", "");
+                if(prevSong.track?.Name != null)
+                    Log("Finished playing \{prevSong.track.Name}");
+
+                Publish("\{channel}/playlist/\{prevSong.SongID}/votes", "0", true);
+                Publish("\{channel}/playlist/\{prevSong.SongID}/votetime", Timestamp().ToString(), true);
+                Publish("\{channel}/playlist/\{prevSong.SongID}/voters", "");
             }
 
-            var song = channels[channel].GetTopSong()?.SongID;
+            var song = channels[channel].GetTopSong();
             if (song != null)
             {
-                Publish("\{channel}/nowplaying/songid", song);
+                if(song.track.Name != null)
+                    Log("Playing \{song.track.Name}");
+                Publish("\{channel}/nowplaying/songid", song.SongID);
                 Publish("\{channel}/nowplaying/starttime", Timestamp().ToString());
             }
             else
@@ -197,7 +203,11 @@ namespace SOVND.Server
 
             var task = new Task(() =>
             {
-                Thread.Sleep(500); // TODO Song duration or ~500ms if no song
+                if (song == null || song.track == null || song.track.Seconds == 0)
+                    Thread.Sleep(500);
+                else
+                    Thread.Sleep((int)Math.Ceiling(song.track.Seconds*1000));
+
                 ScheduleNextSong(channel, song);
             });
             task.Start();
