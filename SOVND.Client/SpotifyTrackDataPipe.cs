@@ -31,10 +31,11 @@ using System.Threading;
 using SpotifyClient;
 
 using libspotifydotnet;
+using NAudio.Wave;
 
 namespace SpotifyClient
 {
-    public class SpotifyTrackDataPipe
+    public class SpotifyTrackDataPipe : IWaveProvider
     {
         private IntPtr _trackPtr;
         private Action<byte[]> d_OnAudioDataArrived = null;
@@ -42,8 +43,15 @@ namespace SpotifyClient
         private Queue<byte[]> _q = new Queue<byte[]>();
         private bool _complete;
 
+        private int buffoffset = 0;
+
         private static bool _interrupt;
         private static object _syncObj = new object();
+
+        public WaveFormat WaveFormat
+        {
+            get { return new WaveFormat(); }
+        }
 
         public SpotifyTrackDataPipe(IntPtr trackPtr)
         {
@@ -53,7 +61,9 @@ namespace SpotifyClient
             d_OnAudioStreamComplete = new Action<object>(Session_OnAudioStreamComplete);
         }
 
-        protected void FetchData()
+        public bool Complete { get { return _complete; } }
+
+        public void StartStreaming()
         {
             _interrupt = true;
 
@@ -64,45 +74,25 @@ namespace SpotifyClient
                 Session.OnAudioDataArrived += d_OnAudioDataArrived;
                 Session.OnAudioStreamComplete += d_OnAudioStreamComplete;
 
-                libspotify.sp_error error = Session.LoadPlayer(_trackPtr);
+                var error = Session.LoadPlayer(_trackPtr);
 
                 if (error != libspotify.sp_error.OK)
                 {
-                    throw new Exception(
-                        String.Format("[Spotify] {0}", libspotify.sp_error_message(error)));
+                    throw new Exception("[Spotify] \{libspotify.sp_error_message(error)}");
                 }
 
                 libspotify.sp_availability avail = libspotify.sp_track_get_availability(Session.SessionPtr, _trackPtr);
 
                 if (avail != libspotify.sp_availability.SP_TRACK_AVAILABILITY_AVAILABLE)
-                    throw new Exception(
-                        String.Format("Track is unavailable ({0}).", avail));
+                    throw new Exception("Track is unavailable (\{avail}).");
 
                 Session.Play();
 
                 byte[] buffer = null;
 
-                while (!_interrupt && !_complete)
+                while (!_interrupt && !_complete || _q.Count > 0)
                 {
-                    if (_q.Count > 0)
-                    {
-                        buffer = _q.Dequeue();
-                        //this.Write(buffer, 0, buffer.Length);
-
-                        Thread.Sleep(10);
-                    }
-                    else
-                    {
-                        Thread.Sleep(50);
-                    }
-                }
-
-                while (!_interrupt && _q.Count > 0)
-                {
-                    buffer = _q.Dequeue();
-                    //this.Write(buffer, 0, buffer.Length);
-
-                    Thread.Sleep(10);
+                    Thread.Sleep(50);
                 }
 
                 Session.OnAudioDataArrived -= d_OnAudioDataArrived;
@@ -124,6 +114,22 @@ namespace SpotifyClient
             {
                 _q.Enqueue(buffer);
             }
+        }
+
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            if (_q.Count == 0)
+                return 0;
+
+            var buf = _q.Peek();
+            Array.Copy(buf, buffoffset, buffer, offset, count);
+            buffoffset += count;
+            if (buffoffset >= buf.Length)
+            {
+                buffoffset = 0;
+                _q.Dequeue();
+            }
+            return count;
         }
     }
 }

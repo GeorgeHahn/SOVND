@@ -9,6 +9,7 @@ using System.Windows;
 using SpotifyClient;
 using System.Collections;
 using SOVND.Lib;
+using NAudio.Wave;
 
 namespace SOVND.Client
 {
@@ -18,6 +19,22 @@ namespace SOVND.Client
     public partial class App : Application
     {
         public static SovndClient client = new SovndClient("127.0.0.1", 1883, "", "");
+    }
+
+    public class SpotifyPlayer : IWaveProvider
+    {
+        public WaveFormat WaveFormat
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public int Read(byte[] buffer, int offset, int count)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class SovndClient : MqttModule
@@ -46,7 +63,7 @@ namespace SOVND.Client
             // On /channel/info -> track channel list
             // On /selectedchannel/ nowplaying,playlist,stats,chat -> track playlist, subscribed channel details
 
-
+            // TODO: Need to move all of this to somewhere channel specific
             On["/{channel}/playlist/{songid}"] = _ =>
             {
                 Log("Votes for \{_.songid} set to \{_.Message}");
@@ -72,9 +89,16 @@ namespace SOVND.Client
                 Log("\{_.Message} active users");
             };
 
-            On["/{channel}/nowplaying"] = _ =>
+            // TODO Use channel/nowplaying/starttime to seek to correct position
+            On["/{channel}/nowplaying/songid"] = _ =>
             {
                 Log("Playing: \{_.Message}");
+
+                var track = new Track(_.Message);
+                var audio = new SpotifyTrackDataPipe(track.TrackPtr);
+                var waveout = new WaveOut();
+                waveout.Init(audio);
+                waveout.Play();
             };
 
 

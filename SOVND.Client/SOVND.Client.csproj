@@ -39,6 +39,9 @@
     <Reference Include="M2Mqtt">
       <HintPath>..\packages\M2Mqtt.3.6\lib\net45\M2Mqtt.dll</HintPath>
     </Reference>
+    <Reference Include="NAudio">
+      <HintPath>..\packages\NAudio.1.7.1\lib\net35\NAudio.dll</HintPath>
+    </Reference>
     <Reference Include="NLog">
       <HintPath>..\packages\NLog.3.1.0.0\lib\net45\NLog.dll</HintPath>
     </Reference>
@@ -61,6 +64,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="SpotifyTrackDataPipe.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -106,6 +110,10 @@
     <ProjectReference Include="..\..\..\..\github\Charlotte\Charlotte\Charlotte.csproj">
       <Project>{4d601f15-2fa6-4501-a95a-5e44832c35e7}</Project>
       <Name>Charlotte</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\libspotifydotnet\libspotifydotnet.csproj">
+      <Project>{1de51e4d-4e01-4662-8c22-026974faded9}</Project>
+      <Name>libspotifydotnet</Name>
     </ProjectReference>
     <ProjectReference Include="..\SOVND.Lib\SOVND.Lib.csproj">
       <Project>{b3e18678-d240-4673-adc5-59faa2abe4e1}</Project>
