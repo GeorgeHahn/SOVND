@@ -117,7 +117,7 @@ namespace SpotifyClient
             Session.appkey = (byte[])args[0];
 
             if (_sessionPtr == IntPtr.Zero)
-                _loginError = initSession();
+                _loginError = initSession((string)args[3]);
 
             if (_loginError != libspotify.sp_error.OK)
                 throw new ApplicationException(Functions.PtrToString(libspotify.sp_error_message(_loginError)));
@@ -165,7 +165,7 @@ namespace SpotifyClient
             libspotify.sp_session_player_unload(_sessionPtr);
         }
 
-        private static libspotify.sp_error initSession()
+        private static libspotify.sp_error initSession(string appname)
         {
             libspotify.sp_session_callbacks callbacks = new libspotify.sp_session_callbacks();
             callbacks.connection_error = Marshal.GetFunctionPointerForDelegate(fn_connection_error_delegate);
@@ -190,11 +190,11 @@ namespace SpotifyClient
 
             libspotify.sp_session_config config = new libspotify.sp_session_config();
             config.api_version = libspotify.SPOTIFY_API_VERSION;
-            config.user_agent = "Jamcast";
+            config.user_agent = appname;
             config.application_key_size = appkey.Length;
             config.application_key = Marshal.AllocHGlobal(appkey.Length);
-            config.cache_location = Path.Combine(Path.GetTempPath(), "spotify_api_temp");
-            config.settings_location = Path.Combine(Path.GetTempPath(), "spotify_api_temp");
+            config.cache_location = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appname, "spotifycache");
+            config.settings_location = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appname, "spotifysettings");
             config.callbacks = callbacksPtr;
             config.compress_playlists = true;
             config.dont_save_metadata_for_playlists = false;

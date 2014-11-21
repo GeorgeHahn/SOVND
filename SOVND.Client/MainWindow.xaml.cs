@@ -28,7 +28,7 @@ namespace SOVND.Client
             InitializeComponent();
 
             Spotify.Initialize();
-            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), File.ReadAllText("username.key"), File.ReadAllText("password.key")))
+            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_client", File.ReadAllText("username.key"), File.ReadAllText("password.key")))
                 throw new Exception("Login failure");
 
             while (!Spotify.Ready())
@@ -41,6 +41,7 @@ namespace SOVND.Client
         {
             App.client.Run();
             App.client.SubscribedChannel.Subscribe();
+            App.client.RegisterChannel("ambient", "Ambient music :)", "");
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)

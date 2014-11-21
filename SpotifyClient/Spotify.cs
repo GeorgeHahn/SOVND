@@ -77,7 +77,7 @@ namespace SpotifyClient
             get { return _isLoggedIn; }
         }
 
-        public static bool Login(byte[] appkey, string username, string password)
+        public static bool Login(byte[] appkey, string appname, string username, string password)
         {
             lock (_initSync)
             {
@@ -90,7 +90,7 @@ namespace SpotifyClient
                 if (_isLoggedIn)
                     return true;
 
-                postMessage(Session.Login, new object[] { appkey, username, password });
+                postMessage(Session.Login, new object[] { appkey, username, password, appname });
 
                 _programSignal.WaitOne();
 

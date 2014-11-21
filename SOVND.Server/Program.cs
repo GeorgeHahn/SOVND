@@ -154,7 +154,7 @@ namespace SOVND.Server
         public new void Run()
         {
             Spotify.Initialize();
-            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), File.ReadAllText("username.key"), File.ReadAllText("password.key")))
+            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_server", File.ReadAllText("username.key"), File.ReadAllText("password.key")))
                 throw new Exception("Login failure");
             while (!Spotify.Ready())
                 Thread.Sleep(100);
