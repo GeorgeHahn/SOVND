@@ -81,6 +81,7 @@ namespace SOVND.Client
                 var track = new Track(_.Message);
                 var audio = new SpotifyTrackDataPipe(track.TrackPtr);
                 var waveout = new WaveOut();
+                waveout.DeviceNumber = 0;
                 waveout.Init(audio);
                 waveout.Play();
             };
