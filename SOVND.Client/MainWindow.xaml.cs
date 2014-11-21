@@ -42,6 +42,12 @@ namespace SOVND.Client
             App.client.Run();
             App.client.SubscribedChannel.Subscribe();
             App.client.RegisterChannel("ambient", "Ambient music :)", "");
+            BindToPlaylist();
+        }
+
+        private void BindToPlaylist()
+        {
+            lbPlaylist.ItemsSource = App.client.SubscribedChannel.Playlist.InOrder();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -63,7 +69,7 @@ namespace SOVND.Client
             }
             else
             {
-                lbPlaylist.ItemsSource = App.client.SubscribedChannel.Playlist.InOrder();
+                BindToPlaylist();
             }
         }
 
