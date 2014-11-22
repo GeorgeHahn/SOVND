@@ -18,20 +18,43 @@ using System.Threading;
 using System.Windows.Interop;
 using SOVND.Lib;
 using System.Diagnostics;
+using SOVND.Lib.Settings;
+using SOVND.Client.ViewModels;
 
 namespace SOVND.Client
 {
+    public class AppName : IAppName
+    {
+        public string Name { get { return "SOVND_client"; } }
+    }
+
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        public MainWindow()
+        private readonly ISettingsProvider _settings;
+        private readonly IAppName _appname;
+        private readonly SettingsModel auth;
+
+        public MainWindow(ISettingsProvider settings, IAppName appname)
         {
+            _settings = settings;
+            _appname = appname;
             InitializeComponent();
             
             App.uithread = SynchronizationContext.Current;
             SyncHolder.sync = SynchronizationContext.Current;
+
+            if (!_settings.AuthSettingsSet())
+            {
+                SettingsWindow w = new SettingsWindow();
+                var settingsViewModel = new SettingsViewModel(settings.GetAuthSettings());
+                w.DataContext = settingsViewModel;
+                w.ShowDialog();
+            }
+
+            auth = _settings.GetAuthSettings();
 
             Loaded += MainWindow_Loaded;
             Closed += (a, b) =>
@@ -47,7 +70,7 @@ namespace SOVND.Client
             App.client.WindowHandle = new WindowInteropHelper(this).Handle;
 
             Spotify.Initialize();
-            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_client", File.ReadAllText("username.key"), File.ReadAllText("password.key")))
+            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), _appname.Name, auth.SpotifyUsername, auth.SpotifyPassword))
                 throw new Exception("Login failure");
 
             while (!Spotify.Ready())

@@ -24,16 +24,16 @@ namespace SOVND.Lib.Settings
         string GetTempPath();
     }
 
-    public class AppName
+    public interface IAppName
     {
-        public string Name { get { return "SOVND_client"; } }
+        string Name { get; }
     }
 
     public class AppDataLocationProvider : IFileLocationProvider
     {
         private readonly string _appname;
 
-        public AppDataLocationProvider(AppName appname)
+        public AppDataLocationProvider(IAppName appname)
         {
             _appname = appname.Name;
         }

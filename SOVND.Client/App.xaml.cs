@@ -36,16 +36,11 @@ namespace SOVND.Client
             kernel.Bind<ISettingsProvider>().To<FilesystemSettingsProvider>();
             kernel.Bind<IFileLocationProvider>().To<AppDataLocationProvider>();
 
-            var settings = kernel.Get<ISettingsProvider>();
-            if (!settings.AuthSettingsSet())
-            {
-                SettingsWindow w = new SettingsWindow();
-                var settingsViewModel = new SettingsViewModel(settings.GetAuthSettings());
-                w.DataContext = settingsViewModel;
-                w.ShowDialog();
-            }
+            kernel.Bind<IAppName>().To<AppName>();
 
             client = kernel.Get<SovndClient>();
+            var window = kernel.Get<MainWindow>();
+            window.Show();
         }
     }
 
