@@ -19,8 +19,9 @@ MQTT Communication spec
 		/votes    # number of votes
 		/voters   # users who have voted for this song (TODO: comma delimited?)
 		/removed
-	/{channel}/stats/users # number of active users
-	/{channel}/stats/usernames # names of nonanonymous users in channel
+	/{channel}/stats
+		/users     # number of active users
+		/usernames # names of nonanonymous users in channel
 	/{channel}/chat # ATM Username: Message; future: JSON message object
 
 	Future
