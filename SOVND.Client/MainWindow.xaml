@@ -29,7 +29,7 @@
             x:Name="lbPlaylist"
             HorizontalContentAlignment="Stretch">
             <ListBox.Resources>
-                <DataTemplate DataType="{x:Type lib:Song}">
+                <DataTemplate DataType="{x:Type lib:Song}"> <!-- This is a song in the playlist -->
                     <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
                         <DockPanel>
                             <TextBlock
@@ -46,7 +46,7 @@
                                 HorizontalAlignment="Right"
                                 HorizontalContentAlignment="Right"
                                 DockPanel.Dock="Right"
-                                Click="AddSong_Click"
+                                Click="VoteUp_Click"
                                 Margin="3">
                                 UP
                             </Button>
@@ -54,7 +54,7 @@
                     </Border>
                 </DataTemplate>
         
-                <DataTemplate DataType="{x:Type spotify:Track}">
+                <DataTemplate DataType="{x:Type spotify:Track}"> <!-- This is a search result -->
                     <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
                         <DockPanel>
                             <TextBlock

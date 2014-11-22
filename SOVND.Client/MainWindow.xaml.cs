@@ -43,7 +43,6 @@ namespace SOVND.Client
 
             App.client.Run();
             App.client.SubscribedChannel.Subscribe();
-            App.client.RegisterChannel("ambient", "Ambient music :)", "");
             BindToPlaylist();
         }
 
@@ -77,12 +76,22 @@ namespace SOVND.Client
 
         private void AddSong_Click(object sender, RoutedEventArgs e)
         {
-            var item = ((Button) sender).DataContext as Track;
+            var item = ((Button)sender).DataContext as Track;
             if (item == null)
                 return;
 
             EnqueueTrack(item);
             tbSearch.Clear();
+        }
+
+        private void VoteUp_Click(object sender, RoutedEventArgs e)
+        {
+            var item = ((Button)sender).DataContext as Song;
+            if (item == null)
+                return;
+
+            EnqueueTrack(item);
+            BindToPlaylist();
         }
 
         private void EnqueueTrack(Track track)

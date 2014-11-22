@@ -43,6 +43,7 @@ namespace SpotifyClient
         private bool _complete;
 
         private static bool _interrupt;
+        private static bool _loaded;
         private static object _syncObj = new object();
 
         public BufferedWaveProvider wave { get; private set; }
@@ -60,6 +61,10 @@ namespace SpotifyClient
             d_OnAudioDataArrived = new Action<byte[]>(Session_OnAudioDataArrived);
             d_OnAudioStreamComplete = new Action<object>(Session_OnAudioStreamComplete);
 
+            Session.OnAudioDataArrived += d_OnAudioDataArrived;
+            Session.OnAudioStreamComplete += d_OnAudioStreamComplete;
+            Session.AudioBufferStats += Session_AudioBufferStats;
+
             (new Task(StartStreaming)).Start();
         }
 
@@ -73,10 +78,13 @@ namespace SpotifyClient
             {
                 _interrupt = false;
 
-                Session.OnAudioDataArrived += d_OnAudioDataArrived;
-                Session.OnAudioStreamComplete += d_OnAudioStreamComplete;
-                Session.AudioBufferStats += Session_AudioBufferStats;
+                if (_loaded)
+                {
+                    Session.UnloadPlayer();
+                    _loaded = false;
+                }
 
+                _loaded = true;
                 var error = Session.LoadPlayer(_trackPtr);
 
                 if (error != libspotify.sp_error.OK)
@@ -104,18 +112,17 @@ namespace SpotifyClient
         {
             _complete = true;
 
-            Session.OnAudioDataArrived -= d_OnAudioDataArrived;
-            Session.OnAudioStreamComplete -= d_OnAudioStreamComplete;
-            Session.AudioBufferStats -= Session_AudioBufferStats;
-
-            Session.UnloadPlayer();
+            //Session.OnAudioDataArrived -= d_OnAudioDataArrived;
+            //Session.OnAudioStreamComplete -= d_OnAudioStreamComplete;
+            //Session.AudioBufferStats -= Session_AudioBufferStats;
         }
 
         private void Session_OnAudioDataArrived(byte[] buffer)
         {
             if (!_interrupt && !_complete)
             {
-                if (wave.BufferedBytes < 1000)
+                // Try to keep buffer 1 second full
+                if (wave.BufferedDuration.TotalSeconds < 1)
                     jitter++;
 
                 wave.AddSamples(buffer, 0, buffer.Length);
