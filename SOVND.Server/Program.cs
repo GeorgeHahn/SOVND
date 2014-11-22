@@ -96,8 +96,9 @@ namespace SOVND.Server
                 Log("\{_.username} said \{_.Message} on \{_.channel}");
 
                 // TODO [LOW] Log chats
-                // TODO [LOW] Pass chats from this topic to a channel chat topic
                 // TODO [LOW] Allow moderators to mute users
+
+                Publish("/\{_.channel}/chat", "\{_.username}: \{_.message}");
             };
 
             // Channel creation
