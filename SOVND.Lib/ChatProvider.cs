@@ -11,11 +11,10 @@ namespace SOVND.Lib
 
         public ObservableCollection<ChatMessage> Chats = new ObservableCollection<ChatMessage>();
 
-        public ChatProvider(Channel channel)
-            : base("127.0.0.1", 1883, "", "")
+        public void Subscribe(Channel channel)
         {
             _channel = channel;
-                
+
             // Channel chats
             On["/\{channel.MQTTName}/chat"] = _ =>
             {
@@ -29,5 +28,9 @@ namespace SOVND.Lib
 
             Run();
         }
+
+        public ChatProvider(IMQTTSettings settings)
+            : base(settings.Broker, settings.Port, settings.Username, settings.Password)
+        { }
     }
 }

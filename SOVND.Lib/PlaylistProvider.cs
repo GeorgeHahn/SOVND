@@ -74,8 +74,8 @@ namespace SOVND.Lib
             })).Start();
         }
 
-        public PlaylistProvider(Channel channel)
-            : base("127.0.0.1", 1883, "", "")
+        public PlaylistProvider(Channel channel, IMQTTSettings settings)
+            : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
             _channel = channel;
             // Channel playlists
