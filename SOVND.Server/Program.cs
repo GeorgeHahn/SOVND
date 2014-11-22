@@ -195,8 +195,8 @@ namespace SOVND.Server
             {
                 if(song.track?.Name != null)
                     Log("Playing \{song.track.Name}");
-                Publish("/\{channel}/nowplaying/songid", song.SongID);
-                Publish("/\{channel}/nowplaying/starttime", Timestamp().ToString());
+                Publish("/\{channel}/nowplaying/songid", song.SongID, true);
+                Publish("/\{channel}/nowplaying/starttime", Timestamp().ToString(), true);
             }
             else
                 Log("No songs in channel \{channel}");

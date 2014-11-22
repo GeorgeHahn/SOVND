@@ -39,6 +39,7 @@ namespace SOVND.Client
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
         public Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
 
+        private SpotifyTrackDataPipe streamingaudio = null;
         private Track playingTrack = null;
         private WaveOut player = null;
 
@@ -88,10 +89,10 @@ namespace SOVND.Client
                     return;
 
                 playingTrack = new Track(_.Message);
-                var audio = new SpotifyTrackDataPipe(playingTrack.TrackPtr);
+                streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr);
                 player = new WaveOut(WindowHandle);
                 player.DeviceNumber = 0;
-                player.Init(audio.wave);
+                player.Init(streamingaudio.wave);
                 player.Play();
             };
 
@@ -179,6 +180,11 @@ namespace SOVND.Client
         {
             // TODO ambient -> subscribed channel
             Publish("/user/\{Username}/ambient/songs/\{Spotify.GetTrackLink(track.TrackPtr)}", "vote");
+        }
+
+        protected override void Stop()
+        {
+            streamingaudio.StopStreaming();
         }
     }
 }

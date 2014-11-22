@@ -99,6 +99,15 @@ namespace SpotifyClient
             }
         }
 
+        public void StopStreaming()
+        {
+            if (_loaded)
+            {
+                Session.UnloadPlayer();
+                _loaded = false;
+            }
+        }
+
         private int jitter = 0;
 
         private void Session_AudioBufferStats(ref libspotify.sp_audio_buffer_stats obj)
@@ -111,18 +120,14 @@ namespace SpotifyClient
         private void Session_OnAudioStreamComplete(object obj)
         {
             _complete = true;
-
-            //Session.OnAudioDataArrived -= d_OnAudioDataArrived;
-            //Session.OnAudioStreamComplete -= d_OnAudioStreamComplete;
-            //Session.AudioBufferStats -= Session_AudioBufferStats;
         }
 
         private void Session_OnAudioDataArrived(byte[] buffer)
         {
             if (!_interrupt && !_complete)
             {
-                // Try to keep buffer 1 second full
-                if (wave.BufferedDuration.TotalSeconds < 1)
+                // Try to keep buffer 1/2 full
+                if (wave.BufferedDuration.TotalSeconds < wave.BufferDuration.TotalSeconds / 2)
                     jitter++;
 
                 wave.AddSamples(buffer, 0, buffer.Length);

@@ -16,6 +16,8 @@ using SpotifyClient;
 using System.IO;
 using System.Threading;
 using System.Windows.Interop;
+using SOVND.Lib;
+using System.Diagnostics;
 
 namespace SOVND.Client
 {
@@ -28,6 +30,12 @@ namespace SOVND.Client
         {
             InitializeComponent();
             Loaded += MainWindow_Loaded;
+            Closed += (a, b) =>
+            {
+                App.client.Disconnect();
+                Spotify.ShutDown();
+                Process.GetCurrentProcess().Kill(); // TODO That's really inelegant
+            };
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -90,7 +98,7 @@ namespace SOVND.Client
             if (item == null)
                 return;
 
-            EnqueueTrack(item);
+            EnqueueTrack(item.track);
             BindToPlaylist();
         }
 
