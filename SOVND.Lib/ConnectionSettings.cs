@@ -14,11 +14,11 @@ namespace SOVND.Lib
         int Port { get; set; }
     }
 
-    public class SovndImqttSettings : IMQTTSettings
+    public class SovndMqttSettings : IMQTTSettings
     {
         public string Broker
         {
-            get { return "192.168.0.1" }
+            get { return "127.0.0.1"; }
         }
 
         public string Username

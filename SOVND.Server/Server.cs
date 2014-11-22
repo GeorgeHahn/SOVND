@@ -9,13 +9,19 @@ using SpotifyClient;
 
 namespace SOVND.Server
 {
-    public class Server : MqttModule
+    public interface IServer
+    {
+        new void Run();
+        void Disconnect();
+    }
+
+    public class Server : MqttModule, IServer
     {
         public Action<string> Log = _ => Console.WriteLine(_);
-        private Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
+        private Dictionary<string, ChannelHandler> channels = new Dictionary<string, ChannelHandler>();
 
-        public Server()
-            : base("127.0.0.1", 1883, "", "")
+        public Server(IMQTTSettings settings, IChannelHandlerFactory chf)
+            : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
             Log("Starting up");
 
@@ -24,7 +30,7 @@ namespace SOVND.Server
                 if (_.Message == "vote")
                 {
                     Log("\{_.username} voted for song \{_.songid}");
-                    var playlist = channels[_.channel].Playlist;
+                    var playlist = channels[_.channel]._playlist; // TODO Nasty
 
                     if (playlist.AddVote(_.songid, _.username))
                     {
@@ -82,7 +88,7 @@ namespace SOVND.Server
                 }
             };
 
-            // Channel creation
+            // ChannelHandler creation
 
             On["/user/{username}/register/{channel}/{param}"] = _ =>
             {
@@ -110,15 +116,15 @@ namespace SOVND.Server
                 Publish("/\{_.channel}/chat", "\{_.username}: \{_.Message}");
             };
 
-            // Channel registration
-            // TODO: Channel info should probably be stored as JSON data so it comes as one message
+            // ChannelHandler registration
+            // TODO: ChannelHandler info should probably be stored as JSON data so it comes as one message
 
             On["/{channel}/info/name"] = _ => // TODO: This should maybe be chan/info/{PARAM}
             {
                 Log("\{_.channel} got a name: \{_.Message}");
 
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = new Channel(_.channel);
+                    channels[_.channel] = chf.CreateChannelHandler(_.channel);
 
                 channels[_.channel].Name = _.Message;
 
@@ -134,7 +140,7 @@ namespace SOVND.Server
                 Log("\{_.channel} got a description: \{_.Message}");
 
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = new Channel(_.channel);
+                    channels[_.channel] = chf.CreateChannelHandler(_.channel);
 
                 channels[_.channel].Description = _.Message;
             };

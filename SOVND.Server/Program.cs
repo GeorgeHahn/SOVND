@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using Ninject;
+using Ninject.Extensions.Factory;
+using SOVND.Lib;
+using System.Text;
 
 namespace SOVND.Server
 {
@@ -6,7 +9,14 @@ namespace SOVND.Server
     {
         static void Main(string[] args)
         {
-            (new Server()).Run();
+            IKernel kernel = new StandardKernel();
+            kernel.Bind<IMQTTSettings>().To<SovndMqttSettings>();
+            kernel.Bind<IChannelHandlerFactory>().ToFactory();
+            kernel.Bind<IServer>().To<Server>();
+            kernel.Bind<IPlaylistProvider>().To<PlaylistProvider>();
+            kernel.Bind<IChatProvider>().To<ChatProvider>();
+            var server = kernel.Get<IServer>();
+            server.Run();
         }
     }
 }

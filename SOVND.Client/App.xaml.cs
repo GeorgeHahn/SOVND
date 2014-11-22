@@ -11,6 +11,8 @@ using System.Collections;
 using SOVND.Lib;
 using NAudio.Wave;
 using System.Threading;
+using Ninject;
+using Ninject.Extensions.Factory;
 
 namespace SOVND.Client
 {
@@ -19,17 +21,28 @@ namespace SOVND.Client
     /// </summary>
     public partial class App : Application
     {
-        public static SovndClient client = new SovndClient("127.0.0.1", 1883, "", "");
+        public static SovndClient client;
         public static SynchronizationContext uithread;
+
+        public App()
+        {
+            IKernel kernel = new StandardKernel();
+            kernel.Bind<IMQTTSettings>().To<SovndMqttSettings>();
+            kernel.Bind<IChannelHandlerFactory>().ToFactory();
+            kernel.Bind<IPlaylistProvider>().To<PlaylistProvider>();
+            kernel.Bind<IChatProvider>().To<ChatProvider>();
+
+            client = kernel.Get<SovndClient>();
+        }
     }
 
     public class SovndClient : MqttModule
     {
         private Action<string> Log = _ => Console.WriteLine(_);
 
-        public string Username { get; private set; } = "georgehahn";
+        private readonly string Username;
 
-        public Channel SubscribedChannel;
+        public ChannelHandler SubscribedChannelHandler;
         public IntPtr WindowHandle = IntPtr.Zero;
 
         //public IEnumerable<Track> Playlist
@@ -39,15 +52,17 @@ namespace SOVND.Client
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
-        public Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
+        public Dictionary<string, ChannelHandler> channels = new Dictionary<string, ChannelHandler>();
 
         private SpotifyTrackDataPipe streamingaudio = null;
         private Track playingTrack = null;
         private WaveOut player = null;
 
-        public SovndClient(string brokerHostName, int brokerPort, string username, string password)
-            : base(brokerHostName, brokerPort, username, password)
+        public SovndClient(IMQTTSettings settings, IChannelHandlerFactory chf)
+            : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
+            Username = settings.Username;
+
             // TODO Track channel list
             // TODO Track playlist for channel
 
@@ -78,7 +93,7 @@ namespace SOVND.Client
             On["/{channel}/info/name"] = _ =>
             {
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = new Channel(_.channel);
+                    channels[_.channel] = chf.CreateChannelHandler(_.channel);
 
                 channels[_.channel].Name = _.Message;
             };
@@ -86,7 +101,7 @@ namespace SOVND.Client
             On["/{channel}/info/description"] = _ =>
             {
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = new Channel(_.channel);
+                    channels[_.channel] = chf.CreateChannelHandler(_.channel);
 
                 channels[_.channel].Description = _.Message;
             };
@@ -142,7 +157,7 @@ namespace SOVND.Client
             //    song.Votetime = long.Parse(_.Message);
             //};
 
-            SubscribedChannel = new Channel("ambient");
+            SubscribedChannelHandler = chf.CreateChannelHandler("ambient");
         }
 
         internal void SendChat(string text)

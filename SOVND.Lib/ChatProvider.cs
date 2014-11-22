@@ -4,18 +4,25 @@ using Charlotte;
 
 namespace SOVND.Lib
 {
-    public class ChatProvider : MqttModule
+    public interface IChatProvider
     {
-        private Channel _channel;
+        ObservableCollection<ChatMessage> Chats { get; }
+
+        void Subscribe(ChannelHandler channel);
+    }
+
+    public class ChatProvider : MqttModule, IChatProvider
+    {
+        private ChannelHandler _channel;
         public Action<string> Log = _ => Console.WriteLine(_);
 
-        public ObservableCollection<ChatMessage> Chats = new ObservableCollection<ChatMessage>();
+        public ObservableCollection<ChatMessage> Chats { get; } = new ObservableCollection<ChatMessage>();
 
-        public void Subscribe(Channel channel)
+        public void Subscribe(ChannelHandler channel)
         {
             _channel = channel;
 
-            // Channel chats
+            // ChannelHandler chats
             On["/\{channel.MQTTName}/chat"] = _ =>
             {
                 Log("\{channel.Name} chat - \{_.Message}");

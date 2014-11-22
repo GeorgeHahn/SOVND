@@ -54,13 +54,13 @@ namespace SOVND.Client
                 Thread.Sleep(100);
 
             App.client.Run();
-            App.client.SubscribedChannel.Subscribe();
+            App.client.SubscribedChannelHandler.Subscribe();
             BindToPlaylist();
         }
 
         private void BindToPlaylist()
         {
-            lbPlaylist.ItemsSource = App.client.SubscribedChannel._playlist.InOrder();
+            lbPlaylist.ItemsSource = App.client.SubscribedChannelHandler._playlist.InOrder();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -113,7 +113,7 @@ namespace SOVND.Client
 
         private void SendChat(object sender, RoutedEventArgs e)
         {
-            chatbox.ItemsSource = App.client.SubscribedChannel.Chats;
+            chatbox.ItemsSource = App.client.SubscribedChannelHandler.Chats;
 
             App.client.SendChat(chatinput.Text);
             chatinput.Clear();

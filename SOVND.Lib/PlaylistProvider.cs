@@ -7,9 +7,20 @@ using System.Threading.Tasks;
 
 namespace SOVND.Lib
 {
-    public class PlaylistProvider : MqttModule
+    public interface IPlaylistProvider
     {
-        private readonly Channel _channel;
+        bool AddVote(string songID, string username);
+        int GetVotes(string songID);
+
+        IEnumerable<Song> InOrder();
+
+        void Subscribe(ChannelHandler channel);
+        void Unsubscribe();
+    }
+
+    public class PlaylistProvider : MqttModule, IPlaylistProvider
+    {
+        private ChannelHandler _channel;
         public Action<string> Log = _ => Console.WriteLine(_);
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
@@ -47,8 +58,8 @@ namespace SOVND.Lib
 
         public IEnumerable<Song> InOrder() // TODO need to give WPF something IObservable to bind to
         {
-            _channel.Songs.Sort();
-            return _channel.Songs;
+            _channel?.Songs.Sort();
+            return _channel?.Songs;
         }
 
         private void AddNewSong(string ID)
@@ -74,14 +85,14 @@ namespace SOVND.Lib
             })).Start();
         }
 
-        public PlaylistProvider(Channel channel, IMQTTSettings settings)
-            : base(settings.Broker, settings.Port, settings.Username, settings.Password)
+        public void Subscribe(ChannelHandler channel)
         {
             _channel = channel;
-            // Channel playlists
-            On["/\{channel.MQTTName}/playlist/{songid}/votes"] = _ =>
+
+            // ChannelHandler playlists
+            On["/\{_channel.MQTTName}/playlist/{songid}/votes"] = _ =>
             {
-                Log("\{channel.Name} got a vote for \{_.songid}");
+                Log("\{_channel.Name} got a vote for \{_.songid}");
 
                 if (!channel.SongsByID.ContainsKey(_.songid))
                     AddNewSong(_.songid);
@@ -89,7 +100,7 @@ namespace SOVND.Lib
                 song.Votes = int.Parse(_.Message);
             };
 
-            On["/\{channel.MQTTName}/playlist/{songid}/votetime"] = _ =>
+            On["/\{_channel.MQTTName}/playlist/{songid}/votetime"] = _ =>
             {
                 if (!channel.SongsByID.ContainsKey(_.songid))
                     AddNewSong(_.songid);
@@ -98,6 +109,16 @@ namespace SOVND.Lib
             };
 
             Run();
+        }
+
+        public void Unsubscribe()
+        {
+            Stop();
+        }
+
+        public PlaylistProvider(IMQTTSettings settings)
+            : base(settings.Broker, settings.Port, settings.Username, settings.Password)
+        {
         }
     }
 }

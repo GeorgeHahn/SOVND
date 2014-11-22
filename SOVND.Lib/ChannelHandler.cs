@@ -4,14 +4,15 @@ using System.Linq;
 
 namespace SOVND.Lib
 {
-    public class Channel
+    public class ChannelHandler
     {
-        public Channel(string mqttname)
+        public ChannelHandler(IPlaylistProvider playlistProvider, IChatProvider chatProvider)
         {
-            MQTTName = mqttname;
+            _playlist = playlistProvider;
+            _chat = chatProvider;
         }
 
-        public string MQTTName { get; private set; }
+        public string MQTTName { get; set; }
 
         public string Name { get; set; }
 
@@ -25,9 +26,9 @@ namespace SOVND.Lib
 
         public List<Song> Songs { get; set; } = new List<Song>();
 
-        public PlaylistProvider _playlist { get; private set; } // TODO this should be private with important parts exposed via properties
+        public IPlaylistProvider _playlist { get; private set; } // TODO this should be private with important parts exposed via properties
 
-        private ChatProvider _chat;
+        private IChatProvider _chat;
 
         public ObservableCollection<ChatMessage> Chats
         {
@@ -38,14 +39,14 @@ namespace SOVND.Lib
         {
             // Don't double subscribe
             if (_playlist == null)
-                _playlist = new PlaylistProvider(this);
+                _playlist.Subscribe(this);
             if (_chat == null)
-                _chat = new ChatProvider(this);
+                _chat.Subscribe(this);
         }
 
         public void Unsubscribe()
         {
-            _playlist.Disconnect();
+            _playlist.Unsubscribe();
             _playlist = null;
         }
 
@@ -73,5 +74,10 @@ namespace SOVND.Lib
         }
 
         /// TODO Return an enum that counts down from the top of the list (write a sorting function and use C#'s sorting)
+    }
+
+    public interface IChannelHandlerFactory
+    {
+        ChannelHandler CreateChannelHandler(string MQTTName);
     }
 }
