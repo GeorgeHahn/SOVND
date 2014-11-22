@@ -27,15 +27,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
-
-using SpotifyClient;
-
 using libspotifydotnet;
 using NAudio.Wave;
+using System.Threading.Tasks;
+using NAudio.Utils;
 
 namespace SpotifyClient
 {
-    public class SpotifyTrackDataPipe : IWaveProvider
+    public class SpotifyTrackDataPipe
     {
         private IntPtr _trackPtr;
         private Action<byte[]> d_OnAudioDataArrived = null;
@@ -43,22 +42,25 @@ namespace SpotifyClient
         private Queue<byte[]> _q = new Queue<byte[]>();
         private bool _complete;
 
-        private int buffoffset = 0;
-
         private static bool _interrupt;
         private static object _syncObj = new object();
 
-        public WaveFormat WaveFormat
-        {
-            get { return new WaveFormat(); }
-        }
+        public BufferedWaveProvider wave { get; private set; }
+
+        public WaveFormat WaveFormat { get; private set; }
 
         public SpotifyTrackDataPipe(IntPtr trackPtr)
         {
             _trackPtr = trackPtr;
 
+            WaveFormat = new WaveFormat(44100, 16, 2);
+            wave = new BufferedWaveProvider(WaveFormat);
+            wave.BufferDuration = TimeSpan.FromSeconds(10);
+
             d_OnAudioDataArrived = new Action<byte[]>(Session_OnAudioDataArrived);
             d_OnAudioStreamComplete = new Action<object>(Session_OnAudioStreamComplete);
+
+            (new Task(StartStreaming)).Start();
         }
 
         public bool Complete { get { return _complete; } }
@@ -73,63 +75,51 @@ namespace SpotifyClient
 
                 Session.OnAudioDataArrived += d_OnAudioDataArrived;
                 Session.OnAudioStreamComplete += d_OnAudioStreamComplete;
+                Session.AudioBufferStats += Session_AudioBufferStats;
 
                 var error = Session.LoadPlayer(_trackPtr);
 
                 if (error != libspotify.sp_error.OK)
-                {
                     throw new Exception("[Spotify] \{libspotify.sp_error_message(error)}");
-                }
 
                 libspotify.sp_availability avail = libspotify.sp_track_get_availability(Session.SessionPtr, _trackPtr);
-
+            
                 if (avail != libspotify.sp_availability.SP_TRACK_AVAILABILITY_AVAILABLE)
                     throw new Exception("Track is unavailable (\{avail}).");
 
                 Session.Play();
-
-                byte[] buffer = null;
-
-                while (!_interrupt && !_complete || _q.Count > 0)
-                {
-                    Thread.Sleep(50);
-                }
-
-                Session.OnAudioDataArrived -= d_OnAudioDataArrived;
-                Session.OnAudioStreamComplete -= d_OnAudioStreamComplete;
-
-                Session.UnloadPlayer();
             }
+        }
+
+        private int jitter = 0;
+
+        private void Session_AudioBufferStats(ref libspotify.sp_audio_buffer_stats obj)
+        {
+            obj.samples = wave.BufferedBytes;
+            obj.stutter = jitter;
+            jitter = 0;
         }
 
         private void Session_OnAudioStreamComplete(object obj)
         {
             _complete = true;
+
+            Session.OnAudioDataArrived -= d_OnAudioDataArrived;
+            Session.OnAudioStreamComplete -= d_OnAudioStreamComplete;
+            Session.AudioBufferStats -= Session_AudioBufferStats;
+
+            Session.UnloadPlayer();
         }
 
         private void Session_OnAudioDataArrived(byte[] buffer)
         {
-            if (!_interrupt
-                && !_complete)
+            if (!_interrupt && !_complete)
             {
-                _q.Enqueue(buffer);
-            }
-        }
+                if (wave.BufferedBytes < 1000)
+                    jitter++;
 
-        public int Read(byte[] buffer, int offset, int count)
-        {
-            if (_q.Count == 0)
-                return 0;
-
-            var buf = _q.Peek();
-            Array.Copy(buf, buffoffset, buffer, offset, count);
-            buffoffset += count;
-            if (buffoffset >= buf.Length)
-            {
-                buffoffset = 0;
-                _q.Dequeue();
+                wave.AddSamples(buffer, 0, buffer.Length);
             }
-            return count;
         }
     }
 }

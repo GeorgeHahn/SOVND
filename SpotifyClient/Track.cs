@@ -48,6 +48,8 @@ namespace SpotifyClient
 
         public decimal Seconds { get; private set; }
 
+        public string SongID { get; private set; }
+
         public string[] Artists
         {
             get { return _artists.ToArray(); }
@@ -60,6 +62,7 @@ namespace SpotifyClient
 
         public Track(string link)
         {
+            SongID = link;
             IntPtr linkPtr = Functions.StringToLinkPtr(link);
             try
             {

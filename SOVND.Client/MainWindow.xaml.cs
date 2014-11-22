@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using SpotifyClient;
 using System.IO;
 using System.Threading;
+using System.Windows.Interop;
 
 namespace SOVND.Client
 {
@@ -26,6 +27,12 @@ namespace SOVND.Client
         public MainWindow()
         {
             InitializeComponent();
+            Loaded += MainWindow_Loaded;
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            App.client.WindowHandle = new WindowInteropHelper(this).Handle;
 
             Spotify.Initialize();
             if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_client", File.ReadAllText("username.key"), File.ReadAllText("password.key")))
@@ -34,11 +41,6 @@ namespace SOVND.Client
             while (!Spotify.Ready())
                 Thread.Sleep(100);
 
-            Loaded += MainWindow_Loaded;
-        }
-
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
             App.client.Run();
             App.client.SubscribedChannel.Subscribe();
             App.client.RegisterChannel("ambient", "Ambient music :)", "");

@@ -28,6 +28,7 @@ namespace SOVND.Client
         public string Username { get; private set; } = "georgehahn";
 
         public Channel SubscribedChannel;
+        public IntPtr WindowHandle = IntPtr.Zero;
 
         //public IEnumerable<Track> Playlist
         //{
@@ -37,6 +38,9 @@ namespace SOVND.Client
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
         public Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
+
+        private Track playingTrack = null;
+        private WaveOut player = null;
 
         public SovndClient(string brokerHostName, int brokerPort, string username, string password)
             : base(brokerHostName, brokerPort, username, password)
@@ -74,18 +78,22 @@ namespace SOVND.Client
             };
 
             // TODO Use channel/nowplaying/starttime to seek to correct position
+            // TODO Convert nowplaying to a JSON object so songid and playtime come in at the same time?
             On["/{channel}/nowplaying/songid"] = _ =>
             {
                 Log("Playing: \{_.Message}");
 
-                var track = new Track(_.Message);
-                var audio = new SpotifyTrackDataPipe(track.TrackPtr);
-                var waveout = new WaveOut();
-                waveout.DeviceNumber = 0;
-                waveout.Init(audio);
-                waveout.Play();
-            };
+                // TODO This is plain wrong. Need to hold a ref to the waveout and properly destroy and recreate it when new songs play
+                if (playingTrack?.SongID == _.Message)
+                    return;
 
+                playingTrack = new Track(_.Message);
+                var audio = new SpotifyTrackDataPipe(playingTrack.TrackPtr);
+                player = new WaveOut(WindowHandle);
+                player.DeviceNumber = 0;
+                player.Init(audio.wave);
+                player.Play();
+            };
 
 
             On["/{channel}/info/name"] = _ =>

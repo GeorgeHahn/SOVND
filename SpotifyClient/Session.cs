@@ -29,6 +29,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 
 using libspotifydotnet;
+using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -40,7 +41,8 @@ namespace SpotifyClient
 
         private delegate void end_of_track_delegate(IntPtr sessionPtr);
 
-        private delegate void get_audio_buffer_stats_delegate(IntPtr sessionPtr, IntPtr statsPtr);
+        private delegate void get_audio_buffer_stats_delegate(IntPtr sessionPtr, ref sp_audio_buffer_stats statsPtr);
+        public delegate void get_audiobufferstats(ref sp_audio_buffer_stats statsPtr);
 
         private delegate void log_message_delegate(IntPtr sessionPtr, string message);
 
@@ -96,6 +98,8 @@ namespace SpotifyClient
         public static event Action<byte[]> OnAudioDataArrived;
 
         public static event Action<object> OnAudioStreamComplete;
+
+        public static event get_audiobufferstats AudioBufferStats;
 
         public static IntPtr SessionPtr
         {
@@ -236,8 +240,10 @@ namespace SpotifyClient
                 Session.OnAudioStreamComplete(null);
         }
 
-        private static void get_audio_buffer_stats(IntPtr sessionPtr, IntPtr statsPtr)
+        private static void get_audio_buffer_stats(IntPtr sessionPtr, ref sp_audio_buffer_stats statsPtr)
         {
+            if (AudioBufferStats != null)
+                AudioBufferStats(ref statsPtr);
         }
 
         private static void log_message(IntPtr sessionPtr, string message)
