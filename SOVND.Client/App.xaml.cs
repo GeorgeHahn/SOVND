@@ -55,31 +55,7 @@ namespace SOVND.Client
             // On /selectedchannel/ nowplaying,playlist,stats,chat -> track playlist, subscribed channel details
 
             // TODO: Need to move all of this to somewhere channel specific
-            On["/{channel}/playlist/{songid}"] = _ =>
-            {
-                Log("Votes for \{_.songid} set to \{_.Message}");
-            };
-
-            On["/{channel}/playlist/{songid}/voters"] = _ =>
-            {
-                Log("Voters for \{_.songid}: \{_.Message}");
-            };
-
-            On["/{channel}/playlist/{songid}/removed"] = _ =>
-            {
-                Log("Song removed from playlist: \{_.songid}");
-            };
-
-            On["/user/{username}/{channel}/chat"] = _ =>
-            {
-                Log("\{_.username}: \{_.Message}");
-            };
-
-            On["/{channel}/stats/users"] = _ =>
-            {
-                Log("\{_.Message} active users");
-            };
-
+            
             // TODO Use channel/nowplaying/starttime to seek to correct position
             // TODO Convert nowplaying to a JSON object so songid and playtime come in at the same time?
             On["/{channel}/nowplaying/songid"] = _ =>
