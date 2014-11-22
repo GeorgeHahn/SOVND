@@ -124,15 +124,14 @@ namespace SOVND.Server
                 Log("\{_.channel} got a name: \{_.Message}");
 
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = chf.CreateChannelHandler(_.channel);
+                {
+                    ChannelHandler channel = chf.CreateChannelHandler(_.channel);
+                    channel.Subscribe();
+                    channels[_.channel] = channel;
+                    ScheduleNextSong(_.channel);
+                }
 
                 channels[_.channel].Name = _.Message;
-
-                // Start watching channel's playlist
-                channels[_.channel].Subscribe();
-
-                // Kick off channel's queue
-                ScheduleNextSong(_.channel);
             };
 
             On["/{channel}/info/description"] = _ =>
@@ -140,7 +139,11 @@ namespace SOVND.Server
                 Log("\{_.channel} got a description: \{_.Message}");
 
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = chf.CreateChannelHandler(_.channel);
+                {
+                    ChannelHandler channel = chf.CreateChannelHandler(_.channel);
+                    channel.Subscribe();
+                    channels[_.channel] = channel;
+                }
 
                 channels[_.channel].Description = _.Message;
             };

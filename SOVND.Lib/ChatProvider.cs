@@ -9,6 +9,8 @@ namespace SOVND.Lib
         ObservableCollection<ChatMessage> Chats { get; }
 
         void Subscribe(ChannelHandler channel);
+
+        //void Unsubscribe();
     }
 
     public class ChatProvider : MqttModule, IChatProvider

@@ -6,10 +6,11 @@ namespace SOVND.Lib
 {
     public class ChannelHandler
     {
-        public ChannelHandler(IPlaylistProvider playlistProvider, IChatProvider chatProvider)
+        public ChannelHandler(IPlaylistProvider playlistProvider, IChatProvider chatProvider, string MQTTName)
         {
             _playlist = playlistProvider;
             _chat = chatProvider;
+            this.MQTTName = MQTTName;
         }
 
         public string MQTTName { get; set; }
@@ -37,11 +38,8 @@ namespace SOVND.Lib
 
         public void Subscribe()
         {
-            // Don't double subscribe
-            if (_playlist == null)
-                _playlist.Subscribe(this);
-            if (_chat == null)
-                _chat.Subscribe(this);
+            _playlist.Subscribe(this);
+            _chat.Subscribe(this);
         }
 
         public void Unsubscribe()
