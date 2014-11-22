@@ -108,7 +108,15 @@ namespace SOVND.Server
                 else
                     Log("Bad param: \{_.param}");
             };
-
+            On["/user/{username}/{channel}/chat"] = _ =>
+            {
+                Log("\{_.channel}-> \{_.username}: \{_.Message}");
+                
+                // TODO [LOW] Log chats
+                // TODO [LOW] Allow moderators to mute users
+                
+                Publish("/\{_.channel}/chat", "\{_.username}: \{_.Message}");
+            };
 
             // Channel registration
             // TODO: Channel info should probably be stored as JSON data so it comes as one message
