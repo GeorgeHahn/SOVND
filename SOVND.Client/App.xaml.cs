@@ -13,6 +13,8 @@ using NAudio.Wave;
 using System.Threading;
 using Ninject;
 using Ninject.Extensions.Factory;
+using SOVND.Client.ViewModels;
+using SOVND.Lib.Settings;
 
 namespace SOVND.Client
 {
@@ -31,6 +33,17 @@ namespace SOVND.Client
             kernel.Bind<IChannelHandlerFactory>().ToFactory();
             kernel.Bind<IPlaylistProvider>().To<PlaylistProvider>();
             kernel.Bind<IChatProvider>().To<ChatProvider>();
+            kernel.Bind<ISettingsProvider>().To<FilesystemSettingsProvider>();
+            kernel.Bind<IFileLocationProvider>().To<AppDataLocationProvider>();
+
+            var settings = kernel.Get<ISettingsProvider>();
+            if (!settings.AuthSettingsSet())
+            {
+                SettingsWindow w = new SettingsWindow();
+                var settingsViewModel = new SettingsViewModel(settings.GetAuthSettings());
+                w.DataContext = settingsViewModel;
+                w.ShowDialog();
+            }
 
             client = kernel.Get<SovndClient>();
         }
@@ -45,11 +58,6 @@ namespace SOVND.Client
         public ChannelHandler SubscribedChannelHandler;
         public IntPtr WindowHandle = IntPtr.Zero;
 
-        //public IEnumerable<Track> Playlist
-        //{
-        //    get { yield return channels["ambient"].GetTopSong()?.track; } // TODO Give all songs in channel
-        //}
-
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
         public Dictionary<string, ChannelHandler> channels = new Dictionary<string, ChannelHandler>();
@@ -58,10 +66,14 @@ namespace SOVND.Client
         private Track playingTrack = null;
         private WaveOut player = null;
 
-        public SovndClient(IMQTTSettings settings, IChannelHandlerFactory chf)
-            : base(settings.Broker, settings.Port, settings.Username, settings.Password)
+        private SettingsModel _authSettings;
+
+        public SovndClient(IMQTTSettings connectionSettings, IChannelHandlerFactory chf, ISettingsProvider settings)
+            : base(connectionSettings.Broker, connectionSettings.Port, settings.GetAuthSettings().SOVNDUsername, settings.GetAuthSettings().SOVNDPassword)
         {
-            Username = settings.Username;
+            _authSettings = settings.GetAuthSettings();
+
+            Username = _authSettings.SOVNDUsername;
 
             // TODO Track channel list
             // TODO Track playlist for channel

@@ -9,9 +9,9 @@ namespace SOVND.Lib
     public interface IMQTTSettings
     {
         string Broker { get; }
+        int Port { get; set; }
         string Username { get; set; }
         string Password { get; set; }
-        int Port { get; set; }
     }
 
     public class SovndMqttSettings : IMQTTSettings
