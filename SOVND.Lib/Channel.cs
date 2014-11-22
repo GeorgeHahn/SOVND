@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace SOVND.Lib
@@ -21,21 +22,31 @@ namespace SOVND.Lib
         // TODO Moderators
 
         public Dictionary<string, Song> SongsByID { get; set; } = new Dictionary<string, Song>();
+
         public List<Song> Songs { get; set; } = new List<Song>();
 
-        public PlaylistProvider Playlist { get; private set; }
+        public PlaylistProvider _playlist { get; private set; } // TODO this should be private with important parts exposed via properties
+
+        private ChatProvider _chat;
+
+        public ObservableCollection<ChatMessage> Chats
+        {
+            get { return _chat?.Chats; }
+        }
 
         public void Subscribe()
         {
             // Don't double subscribe
-            if (Playlist == null)
-                Playlist = new PlaylistProvider(this);
+            if (_playlist == null)
+                _playlist = new PlaylistProvider(this);
+            if (_chat == null)
+                _chat = new ChatProvider(this);
         }
 
         public void Unsubscribe()
         {
-            Playlist.Disconnect();
-            Playlist = null;
+            _playlist.Disconnect();
+            _playlist = null;
         }
 
         /// <summary>

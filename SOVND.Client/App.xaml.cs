@@ -10,6 +10,7 @@ using SpotifyClient;
 using System.Collections;
 using SOVND.Lib;
 using NAudio.Wave;
+using System.Threading;
 
 namespace SOVND.Client
 {
@@ -19,6 +20,7 @@ namespace SOVND.Client
     public partial class App : Application
     {
         public static SovndClient client = new SovndClient("127.0.0.1", 1883, "", "");
+        public static SynchronizationContext uithread;
     }
 
     public class SovndClient : MqttModule
@@ -165,6 +167,11 @@ namespace SOVND.Client
             //};
 
             SubscribedChannel = new Channel("ambient");
+        }
+
+        internal void SendChat(string text)
+        {
+            Publish("/user/\{Username}/ambient/chat", text);
         }
 
         public bool RegisterChannel(string name, string description, string image)

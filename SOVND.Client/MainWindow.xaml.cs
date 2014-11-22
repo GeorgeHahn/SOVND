@@ -29,6 +29,10 @@ namespace SOVND.Client
         public MainWindow()
         {
             InitializeComponent();
+            
+            App.uithread = SynchronizationContext.Current;
+            SyncHolder.sync = SynchronizationContext.Current;
+
             Loaded += MainWindow_Loaded;
             Closed += (a, b) =>
             {
@@ -56,7 +60,7 @@ namespace SOVND.Client
 
         private void BindToPlaylist()
         {
-            lbPlaylist.ItemsSource = App.client.SubscribedChannel.Playlist.InOrder();
+            lbPlaylist.ItemsSource = App.client.SubscribedChannel._playlist.InOrder();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -105,6 +109,14 @@ namespace SOVND.Client
         private void EnqueueTrack(Track track)
         {
             App.client.AddTrack(track);
+        }
+
+        private void SendChat(object sender, RoutedEventArgs e)
+        {
+            chatbox.ItemsSource = App.client.SubscribedChannel.Chats;
+
+            App.client.SendChat(chatinput.Text);
+            chatinput.Clear();
         }
     }
 }

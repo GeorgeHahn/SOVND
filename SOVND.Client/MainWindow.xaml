@@ -11,74 +11,110 @@
         Title="MainWindow" Height="350" Width="525">
     <Window.Resources>
     </Window.Resources>
-    
+
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
         
-        <TextBox 
-            Grid.Row="0"
-            x:Name="tbSearch"
-            ToolTip="Search for a track"
-            TextChanged="TextBox_TextChanged"/>
-        
-        <ListBox
-            Grid.Row="1"
-            x:Name="lbPlaylist"
-            HorizontalContentAlignment="Stretch">
-            <ListBox.Resources>
-                <DataTemplate DataType="{x:Type lib:Song}"> <!-- This is a song in the playlist -->
-                    <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
-                        <DockPanel>
-                            <TextBlock
-                                DockPanel.Dock="Left"
-                                Margin="3">
-                                IMG
-                            </TextBlock>
-                            <StackPanel DataContext="{Binding Path=track}">
-                                <TextBlock Text="{Binding Path=Name}" />
-                                <TextBlock Text="{Binding Path=Album.Name}" />
-                                <TextBlock Text="{Binding Path=AllArtists}" />
-                            </StackPanel>
-                            <Button
-                                HorizontalAlignment="Right"
-                                HorizontalContentAlignment="Right"
-                                DockPanel.Dock="Right"
-                                Click="VoteUp_Click"
-                                Margin="3">
-                                UP
-                            </Button>
-                        </DockPanel>
-                    </Border>
-                </DataTemplate>
-        
-                <DataTemplate DataType="{x:Type spotify:Track}"> <!-- This is a search result -->
-                    <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
-                        <DockPanel>
-                            <TextBlock
-                                DockPanel.Dock="Left"
-                                Margin="3">
-                                IMG
-                            </TextBlock>
-                            <StackPanel>
-                                <TextBlock Text="{Binding Path=Name}" />
-                                <TextBlock Text="{Binding Path=Album.Name}" />
-                                <TextBlock Text="{Binding Path=AllArtists}" />
-                            </StackPanel>
-                            <Button
-                                HorizontalAlignment="Right"
-                                HorizontalContentAlignment="Right"
-                                DockPanel.Dock="Right"
-                                Click="AddSong_Click"
-                                Margin="3">
-                                ADD
-                            </Button>
-                        </DockPanel>
-                    </Border>
-                </DataTemplate>
-            </ListBox.Resources>
-        </ListBox>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <TextBox 
+                Grid.Row="0"
+                x:Name="tbSearch"
+                ToolTip="Search for a track"
+                TextChanged="TextBox_TextChanged"/>
+
+            <ListBox
+                Grid.Row="1"
+                x:Name="lbPlaylist"
+                HorizontalContentAlignment="Stretch">
+                <ListBox.Resources>
+                    <DataTemplate DataType="{x:Type lib:Song}">
+                        <!-- This is a song in the playlist -->
+                        <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
+                            <DockPanel>
+                                <TextBlock
+                                    DockPanel.Dock="Left"
+                                    Margin="3">
+                                    IMG
+                                </TextBlock>
+                                <StackPanel DataContext="{Binding Path=track}">
+                                    <TextBlock Text="{Binding Path=Name}" />
+                                    <TextBlock Text="{Binding Path=Album.Name}" />
+                                    <TextBlock Text="{Binding Path=AllArtists}" />
+                                </StackPanel>
+                                <Button
+                                    HorizontalAlignment="Right"
+                                    HorizontalContentAlignment="Right"
+                                    DockPanel.Dock="Right"
+                                    Click="VoteUp_Click"
+                                    Margin="3">
+                                    UP
+                                </Button>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type spotify:Track}">
+                        <!-- This is a search result -->
+                        <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
+                            <DockPanel>
+                                <TextBlock
+                                    DockPanel.Dock="Left"
+                                    Margin="3">
+                                    IMG
+                                </TextBlock>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Path=Name}" />
+                                    <TextBlock Text="{Binding Path=Album.Name}" />
+                                    <TextBlock Text="{Binding Path=AllArtists}" />
+                                </StackPanel>
+                                <Button
+                                    HorizontalAlignment="Right"
+                                    HorizontalContentAlignment="Right"
+                                    DockPanel.Dock="Right"
+                                    Click="AddSong_Click"
+                                    Margin="3">
+                                    ADD
+                                </Button>
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ListBox.Resources>
+            </ListBox>
+        </Grid>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <ListBox x:Name="chatbox">
+                <ListBox.Resources>
+                    <DataTemplate DataType="{x:Type lib:ChatMessage}">
+                        <TextBlock Text="{Binding Path=Message}" />
+                    </DataTemplate>
+                </ListBox.Resources>
+            </ListBox>
+
+            <DockPanel
+                Grid.Row="1"
+                LastChildFill="True">
+                
+                <Button 
+                    HorizontalAlignment="Right" 
+                    DockPanel.Dock="Right"
+                    Click="SendChat">Send</Button>
+                
+                <TextBox x:Name="chatinput" />
+            </DockPanel>
+        </Grid>
     </Grid>
 </Window>

@@ -98,7 +98,7 @@ namespace SOVND.Server
                 // TODO [LOW] Log chats
                 // TODO [LOW] Allow moderators to mute users
 
-                Publish("/\{_.channel}/chat", "\{_.username}: \{_.message}");
+                Publish("/\{_.channel}/chat", "\{_.username}: \{_.Message}");
             };
 
             // Channel creation
