@@ -99,6 +99,7 @@ namespace SOVND.Server
                 else
                     Log("Bad param: \{_.param}");
             };
+
             On["/user/{username}/{channel}/chat"] = _ =>
             {
                 Log("\{_.channel}-> \{_.username}: \{_.Message}");
