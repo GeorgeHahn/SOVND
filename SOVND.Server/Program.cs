@@ -91,16 +91,6 @@ namespace SOVND.Server
                 }
             };
 
-            On["/user/{username}/{channel}/chat"] = _ =>
-            {
-                Log("\{_.username} said \{_.Message} on \{_.channel}");
-
-                // TODO [LOW] Log chats
-                // TODO [LOW] Allow moderators to mute users
-
-                Publish("/\{_.channel}/chat", "\{_.username}: \{_.Message}");
-            };
-
             // Channel creation
 
             On["/user/{username}/register/{channel}/{param}"] = _ =>
