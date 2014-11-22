@@ -11,7 +11,7 @@ namespace SOVND.Server
 {
     public interface IServer
     {
-        new void Run();
+        void Run();
         void Disconnect();
     }
 
