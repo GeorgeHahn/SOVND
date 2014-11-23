@@ -113,63 +113,15 @@ namespace SOVND.Client
                 channels[_.channel].Description = _.Message;
             };
 
-            //// Channel playlists
-            //On["/{channel}/playlist/{songid}/votes"] = _ =>
-            //{
-            //    if (!channels.ContainsKey(_.channel))
-            //    {
-            //        Log("Bad channnel: \{_.channel}");
-            //        return;
-            //    }
-
-            //    Track track = null;
-
-            //    while (track != null)
-            //    {
-            //        // TODO Max retry count
-            //        try
-            //        {
-            //            track = new Track(_.songid);
-            //        }
-            //        catch (InvalidOperationException)
-            //        {
-            //            Log("Track not loaded");
-            //        }
-            //    }
-
-            //    Channel chan = channels[_.channel];
-            //    if (!chan.SongsByID.ContainsKey(_.songid))
-            //        chan.SongsByID[_.songid] = new Song()
-            //        {
-            //            SongID = _.songid,
-            //            track = track
-            //        };
-            //    Playlist.Add(track);
-            //    var song = chan.SongsByID[_.songid];
-            //    song.Votes = int.Parse(_.Message);
-            //};
-
-            //On["/{channel}/playlist/{songid}/votetime"] = _ =>
-            //{
-            //    if (!channels.ContainsKey(_.channel))
-            //    {
-            //        Log("Bad channnel: \{_.channel}");
-            //        return;
-            //    }
-
-            //    Channel chan = channels[_.channel];
-            //    if (!chan.SongsByID.ContainsKey(_.songid))
-            //        chan.SongsByID[_.songid] = new Song() { SongID = _.songid };
-            //    var song = chan.SongsByID[_.songid];
-            //    song.Votetime = long.Parse(_.Message);
-            //};
-
             SubscribedChannelHandler = chf.CreateChannelHandler("ambient");
         }
 
         internal void SendChat(string text)
         {
-            Publish("/user/\{Username}/ambient/chat", text);
+            if (SubscribedChannelHandler != null)
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/ chat", text);
+            else
+                Log("Not subscribed to any channel");
         }
 
         public bool RegisterChannel(string name, string description, string image)
