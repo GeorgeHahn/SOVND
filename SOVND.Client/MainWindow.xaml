@@ -8,7 +8,7 @@
         xmlns:spotify="clr-namespace:SpotifyClient;assembly=SpotifyClient"
         xmlns:lib="clr-namespace:SOVND.Lib;assembly=SOVND.Lib"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="SOVND" Height="350" Width="525">
     <Window.Resources>
     </Window.Resources>
 
