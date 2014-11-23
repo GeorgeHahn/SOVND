@@ -15,14 +15,29 @@ namespace SOVND.Server
         void Disconnect();
     }
 
+    public class ServerSpotifyAuth
+    {
+        public string Username
+        {
+            get { return File.ReadAllText("spot.username.key"); }
+        }
+
+        public string Password
+        {
+            get { return File.ReadAllText("spot.password.key"); }
+        }
+    }
+
     public class Server : MqttModule, IServer
     {
+        private readonly ServerSpotifyAuth _spot;
         public Action<string> Log = _ => Console.WriteLine(_);
         private Dictionary<string, ChannelHandler> channels = new Dictionary<string, ChannelHandler>();
 
-        public Server(IMQTTSettings settings, IChannelHandlerFactory chf)
+        public Server(IMQTTSettings settings, IChannelHandlerFactory chf, ServerSpotifyAuth spot)
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
+            _spot = spot;
             Log("Starting up");
 
             On["/user/{username}/{channel}/songs/{songid}"] = _ =>
@@ -155,7 +170,7 @@ namespace SOVND.Server
         public new void Run()
         {
             Spotify.Initialize();
-            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_server", File.ReadAllText("username.key"), File.ReadAllText("password.key")))
+            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_server", _spot.Username, _spot.Password))
                 throw new Exception("Login failure");
             while (!Spotify.Ready())
                 Thread.Sleep(100);
