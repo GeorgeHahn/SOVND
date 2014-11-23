@@ -29,7 +29,6 @@ using System.Collections.Generic;
 
 using libspotifydotnet;
 using System.Diagnostics;
-using System.Threading;
 
 namespace SpotifyClient
 {
@@ -67,7 +66,8 @@ namespace SpotifyClient
             try
             {
                 IntPtr trackPtr = libspotify.sp_link_as_track(linkPtr);
-                init(trackPtr);
+                if (!init(trackPtr))
+                    throw new Exception("Track not loaded");
             }
             finally
             {

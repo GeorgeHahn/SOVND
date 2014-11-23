@@ -52,6 +52,9 @@ namespace SpotifyClient
 
         public SpotifyTrackDataPipe(IntPtr trackPtr)
         {
+            if (trackPtr == IntPtr.Zero)
+                throw new ArgumentNullException("trackPtr");
+
             _trackPtr = trackPtr;
 
             WaveFormat = new WaveFormat(44100, 16, 2);
@@ -73,7 +76,7 @@ namespace SpotifyClient
         public void StartStreaming()
         {
             _interrupt = true;
-
+                
             lock (_syncObj)
             {
                 _interrupt = false;
