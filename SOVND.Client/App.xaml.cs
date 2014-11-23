@@ -13,6 +13,7 @@ using NAudio.Wave;
 using System.Threading;
 using Ninject;
 using Ninject.Extensions.Factory;
+using SOVND.Client.Settings;
 using SOVND.Client.ViewModels;
 using SOVND.Lib.Settings;
 

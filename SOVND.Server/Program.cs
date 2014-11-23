@@ -10,11 +10,13 @@ namespace SOVND.Server
         static void Main(string[] args)
         {
             IKernel kernel = new StandardKernel();
-            kernel.Bind<IMQTTSettings>().To<SovndMqttSettings>();
             kernel.Bind<IChannelHandlerFactory>().ToFactory();
             kernel.Bind<IServer>().To<Server>();
             kernel.Bind<IPlaylistProvider>().To<PlaylistProvider>();
             kernel.Bind<IChatProvider>().To<ChatProvider>();
+
+            kernel.Bind<IMQTTSettings>().To<ServerMqttSettings>();
+
             var server = kernel.Get<IServer>();
             server.Run();
         }

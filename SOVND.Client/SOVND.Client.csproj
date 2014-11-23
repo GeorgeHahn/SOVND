@@ -80,27 +80,30 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ChannelPicker.xaml.cs">
+    <Compile Include="Views\ChannelPicker.xaml.cs">
       <DependentUpon>ChannelPicker.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ChannelWindow.xaml.cs">
+    <Compile Include="Views\ChannelWindow.xaml.cs">
       <DependentUpon>ChannelWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="SettingsWindow.xaml.cs">
+    <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Settings\AppDataLocationProvider.cs" />
+    <Compile Include="Settings\IListeningSettings.cs" />
+    <Compile Include="Settings\SovndListeningSettings.cs" />
+    <Compile Include="Settings\SovndMqttSettings.cs" />
     <Compile Include="SpotifyTrackDataPipe.cs" />
-    <Compile Include="Models\SettingsModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
-    <Page Include="ChannelPicker.xaml">
+    <Page Include="Views\ChannelPicker.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="ChannelWindow.xaml">
+    <Page Include="Views\ChannelWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -108,11 +111,11 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="SettingsWindow.xaml">
+    <Page Include="Views\SettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -162,6 +165,9 @@
       <Project>{0c4c71ab-4181-40c2-ba24-807f34ec1545}</Project>
       <Name>SpotifyClient</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
