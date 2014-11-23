@@ -52,6 +52,7 @@ namespace SOVND.Client
                 var settingsViewModel = new SettingsViewModel(settings.GetAuthSettings());
                 w.DataContext = settingsViewModel;
                 w.ShowDialog();
+                Process.GetCurrentProcess().Kill(); // TODO clean this up
             }
 
             auth = _settings.GetAuthSettings();
@@ -94,7 +95,7 @@ namespace SOVND.Client
             {
                 var candidates = new List<Track>();
                 var search = Spotify.GetSearch(text);
-                foreach (var trackPtr in search.TrackPtrs)
+                foreach (var trackPtr in search?.TrackPtrs)
                 {
                     var trackLink = Spotify.GetTrackLink(trackPtr);
                     var track = new Track(trackLink);
