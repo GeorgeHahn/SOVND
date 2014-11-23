@@ -80,6 +80,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Util\PasswordHelper.cs" />
     <Compile Include="Views\ChannelPicker.xaml.cs">
       <DependentUpon>ChannelPicker.xaml</DependentUpon>
     </Compile>

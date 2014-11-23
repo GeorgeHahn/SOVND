@@ -120,7 +120,7 @@ namespace SOVND.Client
         internal void SendChat(string text)
         {
             if (SubscribedChannelHandler != null)
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/ chat", text);
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/chat", text);
             else
                 Log("Not subscribed to any channel");
         }
@@ -142,7 +142,8 @@ namespace SOVND.Client
 
         protected override void Stop()
         {
-            streamingaudio.StopStreaming();
+            if(streamingaudio != null)
+                streamingaudio.StopStreaming();
         }
     }
 }

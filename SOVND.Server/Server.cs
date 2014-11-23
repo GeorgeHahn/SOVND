@@ -40,6 +40,11 @@ namespace SOVND.Server
             _spot = spot;
             Log("Starting up");
 
+            On["#"] = _ =>
+            {
+                Log("\{_.Topic}: \{_.Message}");
+            };
+
             On["/user/{username}/{channel}/songs/{songid}"] = _ =>
             {
                 if (_.Message == "vote")
