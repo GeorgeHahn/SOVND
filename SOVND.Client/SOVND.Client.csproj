@@ -83,6 +83,9 @@
     <Compile Include="ChannelPicker.xaml.cs">
       <DependentUpon>ChannelPicker.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ChannelWindow.xaml.cs">
+      <DependentUpon>ChannelWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
@@ -90,6 +93,10 @@
     <Compile Include="Models\SettingsModel.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Page Include="ChannelPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ChannelWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
