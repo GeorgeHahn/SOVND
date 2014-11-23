@@ -9,34 +9,44 @@ namespace SOVND.Lib
     public interface IMQTTSettings
     {
         string Broker { get; }
-        int Port { get; set; }
-        string Username { get; set; }
-        string Password { get; set; }
+        int Port { get; }
+
+        string Username { get; }
+        string Password { get; }
     }
 
     public class SovndMqttSettings : IMQTTSettings
     {
-        public string Broker
-        {
-            get { return "127.0.0.1"; }
-        }
+        public string Broker { get { return "104.131.87.42"; } }
+
+        public int Port { get { return 8883; } }
+
 
         public string Username
         {
             get { return "georgehahn"; }
-            set { throw new NotImplementedException(); }
         }
 
         public string Password
         {
             get { return ""; }
-            set { throw new NotImplementedException(); }
+        }
+    }
+
+    public class ServerMqttSettings : IMQTTSettings
+    {
+        public string Broker { get { return "104.131.87.42"; } }
+
+        public int Port { get { return 8883; } }
+
+        public string Username
+        {
+            get { return ""; }
         }
 
-        public int Port
+        public string Password
         {
-            get { return 1883; }
-            set { throw new NotImplementedException(); }
+            get { return ""; }
         }
     }
 
