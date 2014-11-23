@@ -81,11 +81,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Util\PasswordHelper.cs" />
-    <Compile Include="Views\ChannelPicker.xaml.cs">
-      <DependentUpon>ChannelPicker.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Views\ChannelWindow.xaml.cs">
       <DependentUpon>ChannelWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\NewChannel.xaml.cs">
+      <DependentUpon>NewChannel.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
@@ -96,10 +96,6 @@
     <Compile Include="Settings\SovndMqttSettings.cs" />
     <Compile Include="SpotifyTrackDataPipe.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
-    <Page Include="Views\ChannelPicker.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="Views\ChannelWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -116,6 +112,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\NewChannel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\SettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

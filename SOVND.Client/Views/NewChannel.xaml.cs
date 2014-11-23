@@ -12,14 +12,14 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace SOVND.Client
+namespace SOVND.Client.Views
 {
     /// <summary>
-    /// Interaction logic for ChannelPicker.xaml
+    /// Interaction logic for NewChannel.xaml
     /// </summary>
-    public partial class ChannelPicker : Window
+    public partial class NewChannel : Window
     {
-        public ChannelPicker()
+        public NewChannel()
         {
             InitializeComponent();
         }
