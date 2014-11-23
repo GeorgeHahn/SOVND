@@ -26,8 +26,13 @@ MQTT Communication spec
 
 	Future
 	/{channel}/toptracks/{1-50} # top tracks, from 1 to 50
+	/user/{username}/reauthflag # Client needs to resend login info
+
 
 	User published messages
+	/user/{username}/login
+		IP
+		Client name + version
 	/user/{username}/{channel}/songs/{songid}
 		vote	# vote for song
 		unvote	# revoke vote for song
