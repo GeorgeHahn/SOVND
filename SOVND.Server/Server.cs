@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Charlotte;
 using SOVND.Lib;
 using SpotifyClient;
+using System.Diagnostics;
 
 namespace SOVND.Server
 {
@@ -215,54 +216,60 @@ namespace SOVND.Server
             Publish("/\{channel}/playlist/\{songID}/blocked", "true");
         }
 
-        private void ScheduleNextSong(ChannelHandler channelHandler, Song prevSong = null)
+        private Dictionary<ChannelHandler, bool> runningScheduler = new Dictionary<ChannelHandler, bool>();
+
+        private void ScheduleNextSong(ChannelHandler channelHandler)
         {
-            // TODO Badly in need of refactoring
-
-            var channel = channelHandler.MQTTName;
-
-            // Set prev song to 0 votes, 0 vote time
-            if (prevSong != null)
+            lock (runningScheduler)
             {
-                if(prevSong.track?.Name != null)
-                    Log("Finished playing \{prevSong.track.Name}");
-
-                channelHandler._playlist.ClearVotes(prevSong.SongID);
-
-                Publish("/\{channel}/playlist/\{prevSong.SongID}/votes", "0");
-                Publish("/\{channel}/playlist/\{prevSong.SongID}/votetime", Timestamp().ToString());
-                Publish("/\{channel}/playlist/\{prevSong.SongID}/voters", "");
-            }
-
-            var song = channels[channel].GetTopSong();
-            if (song != null && song.track != null)
-            {
-                if(song.track?.Name != null)
-                    Log("Playing \{song.track.Name}");
-                Publish("/\{channel}/nowplaying/songid", song.SongID);
-                Publish("/\{channel}/nowplaying/starttime", Timestamp().ToString());
-            }
-            else
-                Log("No songs in channel \{channel}");
-
-            var task = new Task(() =>
-            {
-                if (song == null || song.track == null || song.track.Seconds == 0)
+                if (runningScheduler.ContainsKey(channelHandler) && runningScheduler[channelHandler])
                 {
-                    Log("No song, track, or track time; sleeping 1s");
-                    Thread.Sleep(1000);
-                    ScheduleNextSong(channelHandler, null);
+                    Log("Already running scheduler for \{channelHandler.MQTTName}");
+                    return;
                 }
                 else
+                    runningScheduler[channelHandler] = true;
+            }
+
+            var task = Task.Factory.StartNew(() =>
+            {
+                var channel = channelHandler.MQTTName;
+                Log("Starting track scheduler for \{channel}");
+                
+                while (true)
                 {
-                    var songtime = song.track.Seconds;
-                    Log("Sleeping \{songtime} seconds until playing next track");
-                    Thread.Sleep((int)Math.Ceiling(songtime * 1000));
-                    Log("Playing next track");
-                    ScheduleNextSong(channelHandler, song);
+                    var song = channels[channel].GetTopSong();
+                    
+                    if (song == null || song.track == null || song.track.Seconds == 0)
+                    {
+                        Log("Either no song, no track, or no track time; sleeping 1s");
+                        Thread.Sleep(1000);
+                        continue;
+                    }
+                    else
+                    {
+                        if (song.track?.Name != null)
+                            Log("Playing \{song.track.Name}");
+
+                        Publish("/\{channel}/nowplaying/songid", song.SongID);
+                        Publish("/\{channel}/nowplaying/starttime", Timestamp().ToString());
+
+                        var songtime = song.track.Seconds;
+                        Thread.Sleep((int) Math.Ceiling(songtime*1000));
+
+                        if (song.track?.Name != null)
+                            Log("Finished playing \{song.track.Name}");
+
+                        // Set prev song to 0 votes, 0 vote time
+                        channelHandler._playlist.ClearVotes(song.SongID);
+
+                        Publish("/\{channel}/playlist/\{song.SongID}/votes", "0");
+                        Publish("/\{channel}/playlist/\{song.SongID}/votetime", Timestamp().ToString());
+                        Publish("/\{channel}/playlist/\{song.SongID}/voters", "");
+                        continue;
+                    }
                 }
             });
-            task.Start();
         }
 
         private static long Timestamp()
