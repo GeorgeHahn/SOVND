@@ -227,7 +227,7 @@ namespace SOVND.Server
             }
 
             var song = channels[channel].GetTopSong();
-            if (song != null)
+            if (song != null && song.track != null)
             {
                 if(song.track?.Name != null)
                     Log("Playing \{song.track.Name}");
@@ -240,11 +240,19 @@ namespace SOVND.Server
             var task = new Task(() =>
             {
                 if (song == null || song.track == null || song.track.Seconds == 0)
-                    Thread.Sleep(500);
+                {
+                    Log("No song, track, or track time; sleeping 1s");
+                    Thread.Sleep(1000);
+                    ScheduleNextSong(channel, null);
+                }
                 else
-                    Thread.Sleep((int)Math.Ceiling(song.track.Seconds*1000));
-
-                ScheduleNextSong(channel, song);
+                {
+                    var songtime = song.track.Seconds;
+                    Log("Sleeping \{songtime} seconds until playing next track");
+                    Thread.Sleep((int)Math.Ceiling(songtime * 1000));
+                    ScheduleNextSong(channel, song);
+                    Log("Playing next track");
+                }
             });
             task.Start();
         }
