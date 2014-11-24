@@ -127,6 +127,8 @@ namespace SOVND.Client
 
         public bool RegisterChannel(string name, string description, string image)
         {
+            // TODO: Detect success
+
             Publish("/user/\{Username}/register/\{name}/name", name);
             Publish("/user/\{Username}/register/\{name}/description", description);
             Publish("/user/\{Username}/register/\{name}/image", image);
@@ -136,8 +138,10 @@ namespace SOVND.Client
 
         public void AddTrack(Track track)
         {
-            // TODO ambient -> subscribed channel
-            Publish("/user/\{Username}/ambient/songs/\{Spotify.GetTrackLink(track.TrackPtr)}", "vote");
+            if (SubscribedChannelHandler != null && SubscribedChannelHandler.MQTTName != null)
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/songs/\{Spotify.GetTrackLink(track.TrackPtr)}", "vote");
+            else
+                Log("Not subscribed to a channel or channel subscription is malformed (null or MQTTName null)");
         }
 
         protected override void Stop()
