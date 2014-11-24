@@ -2,17 +2,18 @@
 using SpotifyClient;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SOVND.Lib
 {
-    public interface IPlaylistProvider
+    public interface IPlaylistProvider : INotifyPropertyChanged
     {
         bool AddVote(string songID, string username);
         int GetVotes(string songID);
 
-        IEnumerable<Song> InOrder();
+        IEnumerable<Song> InOrder { get; }
 
         void Subscribe(ChannelHandler channel);
         void Unsubscribe();
@@ -26,7 +27,7 @@ namespace SOVND.Lib
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
 
-        public bool AddVote(string songID, string username)
+        public bool AddVote(string songID, string username) // TODO: THIS DOES NOT BELONG IN THIS CLASS
         {
             if (!uservotes.ContainsKey(username + songID) || !uservotes[username + songID])
             {
@@ -56,14 +57,18 @@ namespace SOVND.Lib
             return votes[songID];
         }
 
-        public IEnumerable<Song> InOrder() // TODO need to give WPF something IObservable to bind to
+        public IEnumerable<Song> InOrder // TODO need to give WPF something IObservable to bind to
         {
-            _channel?.Songs.Sort();
-            return _channel?.Songs;
+            get
+            {
+                _channel?.Songs.Sort();
+                return _channel?.Songs;
+            }
         }
 
         private void AddNewSong(string ID)
         {
+            Log("Added song \{ID}");
             var song = new Song(ID);
             _channel.SongsByID[ID] = song;
             _channel.Songs.Add(song);
@@ -98,6 +103,8 @@ namespace SOVND.Lib
                     AddNewSong(_.songid);
                 var song = channel.SongsByID[_.songid];
                 song.Votes = int.Parse(_.Message);
+
+                RaisePropertyChanged("InOrder");
             };
 
             On["/\{_channel.MQTTName}/playlist/{songid}/votetime"] = _ =>
@@ -119,6 +126,18 @@ namespace SOVND.Lib
         public PlaylistProvider(IMQTTSettings settings)
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void RaisePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+            else
+                Log("INPC null :(");
         }
     }
 }

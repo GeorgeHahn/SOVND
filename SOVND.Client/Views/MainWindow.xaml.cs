@@ -84,7 +84,15 @@ namespace SOVND.Client
 
         private void BindToPlaylist()
         {
-            lbPlaylist.ItemsSource = App.client.SubscribedChannelHandler._playlist.InOrder();
+            Binding myBinding = new Binding();
+
+            lbPlaylist.DataContext = App.client.SubscribedChannelHandler._playlist;
+
+            myBinding.Source = App.client.SubscribedChannelHandler._playlist;
+            myBinding.Path = new PropertyPath("InOrder");
+            myBinding.Mode = BindingMode.OneWay;
+            myBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
+            BindingOperations.SetBinding(lbPlaylist, ListBox.ItemsSourceProperty, myBinding);
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -116,6 +124,8 @@ namespace SOVND.Client
             if (item == null)
                 return;
 
+            BindToPlaylist();
+
             EnqueueTrack(item);
             tbSearch.Clear();
         }
@@ -127,7 +137,6 @@ namespace SOVND.Client
                 return;
 
             EnqueueTrack(item.track);
-            BindToPlaylist();
         }
 
         private void EnqueueTrack(Track track)
