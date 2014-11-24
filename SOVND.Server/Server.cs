@@ -60,8 +60,8 @@ namespace SOVND.Server
 
                     if (playlist.AddVote(_.songid, _.username))
                     {
-                        Publish("/\{_.channel}/playlist/\{_.songid}/votes", playlist.GetVotes(_.songid).ToString(), true);
-                        Publish("/\{_.channel}/playlist/\{_.songid}/votetime", Timestamp().ToString(), true);
+                        Publish("/\{_.channel}/playlist/\{_.songid}/votes", playlist.GetVotes(_.songid).ToString());
+                        Publish("/\{_.channel}/playlist/\{_.songid}/votetime", Timestamp().ToString());
                     }
                 }
                 else if (_.Message == "unvote")
@@ -127,17 +127,16 @@ namespace SOVND.Server
                 if (string.IsNullOrWhiteSpace(_.Message))
                 {
                     Log("\{_.param} was null or whitespace, rejected");
+                    return;
                 }
-                else
-                {
-                    Log("\{_.username} created channel \{_.channel}, setting \{_.param} to \{_.Message}");
 
-                    List<string> AllowedParams = new List<string> { "name", "description", "image", "moderators" };
-                    if (AllowedParams.Contains(_.param))
-                        Publish("/\{_.channel}/info/\{_.param}", _.Message, true);
-                    else
-                        Log("Bad param: \{_.param}");
-                }
+                Log("\{_.username} created channel \{_.channel}, setting \{_.param} to \{_.Message}");
+
+                List<string> AllowedParams = new List<string> { "name", "description", "image", "moderators" };
+                if (AllowedParams.Contains(_.param))
+                    Publish("/\{_.channel}/info/\{_.param}", _.Message);
+                else
+                    Log("Bad param: \{_.param}");
             };
 
             On["/user/{username}/{channel}/chat"] = _ =>
@@ -203,15 +202,15 @@ namespace SOVND.Server
 
         private void RemoveSong(string channel, string songID)
         {
-            Publish("/\{channel}/playlist/\{songID}/votes", "", true);
-            Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
+            Publish("/\{channel}/playlist/\{songID}/votes", "");
+            Publish("/\{channel}/playlist/\{songID}/removed", "true");
         }
 
         private void BlockSong(string channel, string songID)
         {
-            Publish("/\{channel}/playlist/\{songID}/votes", "", true);
-            Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
-            Publish("/\{channel}/playlist/\{songID}/blocked", "true", true);
+            Publish("/\{channel}/playlist/\{songID}/votes", "");
+            Publish("/\{channel}/playlist/\{songID}/removed", "true");
+            Publish("/\{channel}/playlist/\{songID}/blocked", "true");
         }
 
         private void ScheduleNextSong(string channel, Song prevSong = null)
@@ -222,8 +221,8 @@ namespace SOVND.Server
                 if(prevSong.track?.Name != null)
                     Log("Finished playing \{prevSong.track.Name}");
 
-                Publish("/\{channel}/playlist/\{prevSong.SongID}/votes", "0", true);
-                Publish("/\{channel}/playlist/\{prevSong.SongID}/votetime", Timestamp().ToString(), true);
+                Publish("/\{channel}/playlist/\{prevSong.SongID}/votes", "0");
+                Publish("/\{channel}/playlist/\{prevSong.SongID}/votetime", Timestamp().ToString());
                 Publish("/\{channel}/playlist/\{prevSong.SongID}/voters", "");
             }
 
@@ -232,8 +231,8 @@ namespace SOVND.Server
             {
                 if(song.track?.Name != null)
                     Log("Playing \{song.track.Name}");
-                Publish("/\{channel}/nowplaying/songid", song.SongID, true);
-                Publish("/\{channel}/nowplaying/starttime", Timestamp().ToString(), true);
+                Publish("/\{channel}/nowplaying/songid", song.SongID);
+                Publish("/\{channel}/nowplaying/starttime", Timestamp().ToString());
             }
             else
                 Log("No songs in channel \{channel}");
