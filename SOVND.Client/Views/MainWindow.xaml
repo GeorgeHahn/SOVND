@@ -50,7 +50,7 @@
                                     <TextBlock Text="{Binding Path=AllArtists}" />
                                 </StackPanel>
 
-                                <StackPanel DockPanel.Dock="Left">
+                                <StackPanel DockPanel.Dock="Right">
                                     <TextBlock
                                         Text="Votes:"
                                         Margin="4"/>
