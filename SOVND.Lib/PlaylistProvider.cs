@@ -153,8 +153,6 @@ namespace SOVND.Lib
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
-            else
-                Log("INPC null :(");
         }
     }
 }

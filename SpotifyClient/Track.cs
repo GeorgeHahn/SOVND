@@ -66,8 +66,7 @@ namespace SpotifyClient
             try
             {
                 IntPtr trackPtr = libspotify.sp_link_as_track(linkPtr);
-                if (!init(trackPtr))
-                    throw new Exception("Track not loaded");
+                init(trackPtr);
             }
             finally
             {
@@ -78,8 +77,7 @@ namespace SpotifyClient
 
         public Track(IntPtr trackPtr)
         {
-            if (!init(trackPtr))
-                throw new Exception("Track not loaded");
+            init(trackPtr);
         }
 
         private bool init(IntPtr trackPtr)

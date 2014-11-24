@@ -146,7 +146,10 @@ namespace SOVND.Client
         public void AddTrack(Track track)
         {
             if (SubscribedChannelHandler != null && SubscribedChannelHandler.MQTTName != null)
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/songs/\{Spotify.GetTrackLink(track.TrackPtr)}", "vote");
+            {
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/songs/\{track.SongID}", "vote");
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/songssearch/", track.Name + " " + track.Artists[0]);
+            }
             else
                 Log("Not subscribed to a channel or channel subscription is malformed (null or MQTTName null)");
         }

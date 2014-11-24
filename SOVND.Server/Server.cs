@@ -46,6 +46,13 @@ namespace SOVND.Server
                 Log("\{_.Topic}: \{_.Message}");
             };
 
+
+            On["/user/{username}/{channel}/songssearch/"] = _ =>
+            {
+                Search search = Spotify.GetSearch(_.Message);
+                Log("Searched \{_.Message} and is is \{(search.IsLoaded?"is":"is not")} loaded");
+            };
+
             On["/user/{username}/{channel}/songs/{songid}"] = _ =>
             {
                 if (_.Message == "vote")
@@ -242,6 +249,8 @@ namespace SOVND.Server
                     
                     if (song == null || song.track == null || song.track.Seconds == 0)
                     {
+                        if(song != null)
+                            song.track = new Track(song.SongID);
                         Log("Either no song, no track, or no track time; sleeping 1s");
                         Thread.Sleep(1000);
                         continue;

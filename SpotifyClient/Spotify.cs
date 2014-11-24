@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using libspotifydotnet;
+using System.Diagnostics;
 
 namespace SpotifyClient
 {
@@ -120,6 +121,7 @@ namespace SpotifyClient
 
                     _programSignal.WaitOne();
 
+                    Console.WriteLine("Message thread running");
                     Log.Debug(Plugin.LOG_MODULE, "Message thread running...");
 
                     _initted = true;
@@ -538,6 +540,7 @@ namespace SpotifyClient
 
         public static void ShutDown()
         {
+            Console.WriteLine("Shutdown");
             lock (_syncObj)
             {
                 if (_mainSignal != null)
@@ -550,9 +553,9 @@ namespace SpotifyClient
                 {
                     try
                     {
-                        //libspotify.sp_error err = libspotify.sp_session_player_unload(Session.SessionPtr);
-                        //err = libspotify.sp_session_logout(Session.SessionPtr);
-                        //err = libspotify.sp_session_release(Session.SessionPtr);
+                        libspotify.sp_error err = libspotify.sp_session_player_unload(Session.SessionPtr);
+                        err = libspotify.sp_session_logout(Session.SessionPtr);
+                        err = libspotify.sp_session_release(Session.SessionPtr);
                     }
                     catch (Exception ex)
                     {
@@ -628,6 +631,8 @@ namespace SpotifyClient
                 _isRunning = false;
                 if (_programSignal != null)
                     _programSignal.Set();
+
+                Process.GetCurrentProcess().Kill(); // Because why not
             }
         }
 

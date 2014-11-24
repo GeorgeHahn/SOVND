@@ -80,6 +80,8 @@ namespace SOVND.Client
             App.client.Run();
             App.client.SubscribedChannelHandler.Subscribe();
             BindToPlaylist();
+
+            App.client.RegisterChannel("ambient", "", "");
         }
 
         private void BindToPlaylist()
