@@ -81,6 +81,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Util\PasswordHelper.cs" />
+    <Compile Include="ViewModels\NewChannelViewModel.cs" />
     <Compile Include="Views\ChannelWindow.xaml.cs">
       <DependentUpon>ChannelWindow.xaml</DependentUpon>
     </Compile>

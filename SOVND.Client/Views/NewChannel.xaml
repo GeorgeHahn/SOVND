@@ -5,9 +5,52 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SOVND.Client.Views"
         mc:Ignorable="d"
-        Title="NewChannel" Height="300" Width="300">
+        Title="Create Channel" Height="150" Width="300">
     <Grid>
-        <TextBox x:Name="channelName" />
-        <TextBox x:Name="channelDesc" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <TextBlock>Channel Name</TextBlock>
+                <TextBox Grid.Column="1"
+                    x:Name="channelName" />
+            </Grid>
+        
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+            <TextBlock>Channel Description</TextBlock>
+            <TextBox Grid.Column="1"
+                x:Name="channelDesc" />
+            </Grid>
+        </StackPanel>
+        
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="2*"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            
+            <!-- TODO this button should probably do something -->
+            <Button
+                Grid.Row="1"
+                Grid.Column="1"
+                Click="Button_Click">
+                Save
+            </Button>
+        </Grid>
     </Grid>
 </Window>

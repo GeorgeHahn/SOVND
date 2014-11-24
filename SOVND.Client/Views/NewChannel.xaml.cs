@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SOVND.Client.ViewModels;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,13 @@ namespace SOVND.Client.Views
         public NewChannel()
         {
             InitializeComponent();
+            DataContext = new NewChannelViewModel();
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if(((NewChannelViewModel) DataContext).Register())
+                this.Close();
         }
     }
 }
