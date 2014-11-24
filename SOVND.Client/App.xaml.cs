@@ -63,6 +63,11 @@ namespace SOVND.Client
         private WaveOut player = null;
 
         private SettingsModel _authSettings;
+        private CancellationTokenSource songToken = null;
+
+        private BufferedWaveProvider wave;
+        private WaveFormat WaveFormat;
+
 
         public SovndClient(IMQTTSettings connectionSettings, IChannelHandlerFactory chf, ISettingsProvider settings)
             : base(connectionSettings.Broker, connectionSettings.Port, settings.GetAuthSettings().SOVNDUsername, settings.GetAuthSettings().SOVNDPassword)
@@ -95,12 +100,38 @@ namespace SOVND.Client
                 if (playingTrack?.SongID == _.Message)
                     return;
 
-                playingTrack = new Track(_.Message);
-                streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr);
-                player = new WaveOut(WindowHandle);
-                player.DeviceNumber = 0;
-                player.Init(streamingaudio.wave);
-                player.Play();
+                if (songToken != null)
+                    songToken.Cancel();
+
+                if (WaveFormat == null)
+                {
+                    WaveFormat = new WaveFormat(44100, 16, 2);
+                    wave = new BufferedWaveProvider(WaveFormat);
+                    wave.BufferDuration = TimeSpan.FromSeconds(5);
+
+                    player = new WaveOut(WindowHandle);
+                    player.DeviceNumber = 0;
+                    player.Init(wave);
+                }
+
+                songToken = new CancellationTokenSource();
+                var token = songToken.Token;
+
+                Task.Factory.StartNew(() =>
+                {
+                    playingTrack = new Track(_.Message);
+                    streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr, wave);
+
+                    player.Play();
+
+                    while (!streamingaudio.Complete && !token.IsCancellationRequested)
+                    {
+                        Thread.Sleep(15);
+                    }
+
+                    streamingaudio.StopStreaming();
+                    player.Pause();
+                }, token);
             };
 
 

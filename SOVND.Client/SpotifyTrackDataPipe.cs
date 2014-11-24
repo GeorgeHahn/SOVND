@@ -46,20 +46,12 @@ namespace SpotifyClient
         private static bool _loaded;
         private static object _syncObj = new object();
 
-        public BufferedWaveProvider wave { get; private set; }
+        private BufferedWaveProvider _wave;
 
-        public WaveFormat WaveFormat { get; private set; }
-
-        public SpotifyTrackDataPipe(IntPtr trackPtr)
+        public SpotifyTrackDataPipe(IntPtr trackPtr, BufferedWaveProvider wave)
         {
-            if (trackPtr == IntPtr.Zero)
-                throw new ArgumentNullException("trackPtr");
-
             _trackPtr = trackPtr;
-
-            WaveFormat = new WaveFormat(44100, 16, 2);
-            wave = new BufferedWaveProvider(WaveFormat);
-            wave.BufferDuration = TimeSpan.FromSeconds(10);
+            _wave = wave;
 
             d_OnAudioDataArrived = new Action<byte[]>(Session_OnAudioDataArrived);
             d_OnAudioStreamComplete = new Action<object>(Session_OnAudioStreamComplete);
@@ -67,8 +59,7 @@ namespace SpotifyClient
             Session.OnAudioDataArrived += d_OnAudioDataArrived;
             Session.OnAudioStreamComplete += d_OnAudioStreamComplete;
             Session.AudioBufferStats += Session_AudioBufferStats;
-
-            (new Task(StartStreaming)).Start();
+            StartStreaming();
         }
 
         public bool Complete { get { return _complete; } }
@@ -115,7 +106,7 @@ namespace SpotifyClient
 
         private void Session_AudioBufferStats(ref libspotify.sp_audio_buffer_stats obj)
         {
-            obj.samples = wave.BufferedBytes;
+            obj.samples = _wave.BufferedBytes;
             obj.stutter = jitter;
             jitter = 0;
         }
@@ -130,10 +121,10 @@ namespace SpotifyClient
             if (!_interrupt && !_complete)
             {
                 // Try to keep buffer 1/2 full
-                if (wave.BufferedDuration.TotalSeconds < wave.BufferDuration.TotalSeconds / 2)
+                if (_wave.BufferedDuration.TotalSeconds < _wave.BufferDuration.TotalSeconds / 2)
                     jitter++;
 
-                wave.AddSamples(buffer, 0, buffer.Length);
+                _wave.AddSamples(buffer, 0, buffer.Length);
             }
         }
     }
