@@ -95,30 +95,46 @@ namespace SOVND.Client
             BindingOperations.SetBinding(lbPlaylist, ListBox.ItemsSourceProperty, myBinding);
         }
 
+        private CancellationTokenSource searchToken = null;
+
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string text = tbSearch.Text;
 
             if (!string.IsNullOrWhiteSpace(text))
             {
+                var shortlist = new List<Track>();
                 var candidates = new List<Track>();
 
-                var searchTask = new Task(() =>
+                if (searchToken != null)
+                    searchToken.Cancel();
+
+                searchToken = new CancellationTokenSource();
+                var token = searchToken.Token;
+
+                var searchTask = Task.Factory.StartNew(() =>
                 {
                     var search = Spotify.GetSearch(text);
-                    foreach (var trackPtr in search?.TrackPtrs)
-                    {
-                        var trackLink = Spotify.GetTrackLink(trackPtr);
-                        var track = new Track(trackLink);
-                        candidates.Add(track);
-                    }
-                    SyncHolder.sync.Send((x) => lbPlaylist.ItemsSource = candidates, null);
-                });
 
-                searchTask.Start();
+                    if (search != null)
+                    {
+                        foreach (var trackPtr in search?.TrackPtrs)
+                        {
+                            if (token.IsCancellationRequested)
+                                return;
+
+                            var trackLink = Spotify.GetTrackLink(trackPtr);
+                            var track = new Track(trackLink);
+                            candidates.Add(track);
+                        }
+                        SyncHolder.sync.Send((x) => lbPlaylist.ItemsSource = candidates, null);
+                    }
+                }, token);
             }
             else
             {
+                if (searchToken != null)
+                    searchToken.Cancel();
                 BindToPlaylist();
             }
         }
