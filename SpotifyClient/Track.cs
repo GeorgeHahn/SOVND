@@ -78,7 +78,8 @@ namespace SpotifyClient
 
         public Track(IntPtr trackPtr)
         {
-            init(trackPtr);
+            if (!init(trackPtr))
+                throw new Exception("Track not loaded");
         }
 
         private bool init(IntPtr trackPtr)
