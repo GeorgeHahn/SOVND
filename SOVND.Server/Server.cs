@@ -245,13 +245,16 @@ namespace SOVND.Server
                 
                 while (true)
                 {
-                    var song = channels[channel].GetTopSong();
+                    Song song = channels[channel].GetTopSong();
                     
                     if (song == null || song.track == null || song.track.Seconds == 0)
                     {
                         if(song != null)
                             song.track = new Track(song.SongID);
-                        Log("Either no song, no track, or no track time; sleeping 1s");
+                        if (song == null)
+                            Log("No song");
+                        else
+                            Log("Either no track or no track time");
                         Thread.Sleep(1000);
                         continue;
                     }
@@ -271,7 +274,7 @@ namespace SOVND.Server
                             Log("Finished playing \{song.track.Name}");
 
                         // Set prev song to 0 votes, 0 vote time
-                        channelHandler._playlist.ClearVotes(song.SongID);
+                        channelHandler.ClearVotes(song.SongID);
 
                         Publish("/\{channel}/playlist/\{song.SongID}/votes", "0");
                         Publish("/\{channel}/playlist/\{song.SongID}/votetime", Timestamp().ToString());

@@ -54,21 +54,21 @@ namespace SOVND.Lib
         /// <returns></returns>
         public Song GetTopSong()
         {
-            Song max = SongsByID.Values.FirstOrDefault();
-            foreach (var song in SongsByID.Values)
-            {
-                if (song == max)
-                    continue;
+            if (Songs.Count == 0)
+                return null;
 
-                if (song.Votes > max.Votes)
-                {
-                    max = song;
-                } else if (song.Votes == max.Votes && song.Votetime < max.Votetime)
-                {
-                    max = song;
-                }
-            }
-            return max;
+            Songs.Sort();
+            return Songs[0];
+        }
+
+        public void ClearVotes(string songID)
+        {
+            _playlist.ClearVotes(songID);
+
+            var keystoclear = Songs.Where((x) => x.SongID == songID);
+
+            foreach (var key in keystoclear)
+                key.Votes = 0;
         }
 
         // TODO Return an enum that counts down from the top of the list (write a sorting function and use C#'s sorting)
