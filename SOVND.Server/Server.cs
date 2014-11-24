@@ -118,11 +118,19 @@ namespace SOVND.Server
 
             On["/user/{username}/register/{channel}/{param}"] = _ =>
             {
+                if (string.IsNullOrWhiteSpace(_.Message))
+                {
+                    Log("\{_.param} was null or whitespace, rejected");
+                    return;
+                }
+
                 Log("\{_.username} created channel \{_.channel}, setting \{_.param} to \{_.Message}");
 
                 // TODO Check permissions
                 // TODO Publish _.username as moderater
                 // TODO If channel hasn't already been created
+                // TODO All names lowercase
+                // TODO Separate name from ID
 
                 List<string> AllowedParams = new List<string> {"name", "description", "image", "moderators"};
 
