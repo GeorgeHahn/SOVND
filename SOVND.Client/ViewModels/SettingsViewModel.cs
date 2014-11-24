@@ -24,8 +24,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.SOVNDUsername = value;
                 _settings.Save();
-                if (PropertyChanged != null)
-                    RaisePropertyChanged(nameof(SOVNDUsername));
+                RaisePropertyChanged(nameof(SOVNDUsername));
             }
         }
 
@@ -36,8 +35,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.SOVNDPassword = value;
                 _settings.Save();
-                if (PropertyChanged != null)
-                    RaisePropertyChanged(nameof(SOVNDPassword));
+                RaisePropertyChanged(nameof(SOVNDPassword));
             }
         }
 
@@ -48,8 +46,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.SpotifyUsername = value;
                 _settings.Save();
-                if (PropertyChanged != null)
-                    RaisePropertyChanged(nameof(SpotifyUsername));
+                RaisePropertyChanged(nameof(SpotifyUsername));
             }
         }
 
@@ -60,8 +57,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.SpotifyPassword = value;
                 _settings.Save();
-                if (PropertyChanged != null)
-                    RaisePropertyChanged(nameof(SpotifyPassword));
+                RaisePropertyChanged(nameof(SpotifyPassword));
             }
         }
 
@@ -72,8 +68,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.LastfmUsername = value;
                 _settings.Save();
-                if (PropertyChanged != null)
-                    RaisePropertyChanged(nameof(LastfmUsername));
+                RaisePropertyChanged(nameof(LastfmUsername));
             }
         }
 
@@ -84,8 +79,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.LastfmPassword = value;
                 _settings.Save();
-                if (PropertyChanged != null)
-                    RaisePropertyChanged(nameof(LastfmPassword));
+                RaisePropertyChanged(nameof(LastfmPassword));
             }
         }
 
