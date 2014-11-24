@@ -11,6 +11,7 @@ namespace SOVND.Lib
     public interface IPlaylistProvider : INotifyPropertyChanged
     {
         bool AddVote(string songID, string username);
+        void ClearVotes(string songID);
         int GetVotes(string songID);
 
         IEnumerable<Song> InOrder { get; }
@@ -50,6 +51,22 @@ namespace SOVND.Lib
                 Log("Vote was invalid");
                 return false;
             }
+        }
+
+        public void ClearVotes(string songID)
+        {
+            votes[songID] = 0;
+
+            // TODO this is nasty
+            var keystoclear = new List<string>();
+            foreach (var key in uservotes.Keys)
+            {
+                if (key.EndsWith(songID))
+                    keystoclear.Add(key);
+            }
+
+            foreach(var key in keystoclear)
+                uservotes[key] = false;
         }
 
         public int GetVotes(string songID)

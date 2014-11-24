@@ -164,7 +164,7 @@ namespace SOVND.Server
                     ChannelHandler channel = chf.CreateChannelHandler(_.channel);
                     channel.Subscribe();
                     channels[_.channel] = channel;
-                    ScheduleNextSong(_.channel);
+                    ScheduleNextSong(channel);
                 }
 
                 channels[_.channel].Name = _.Message;
@@ -215,13 +215,19 @@ namespace SOVND.Server
             Publish("/\{channel}/playlist/\{songID}/blocked", "true");
         }
 
-        private void ScheduleNextSong(string channel, Song prevSong = null)
+        private void ScheduleNextSong(ChannelHandler channelHandler, Song prevSong = null)
         {
+            // TODO Badly in need of refactoring
+
+            var channel = channelHandler.MQTTName;
+
             // Set prev song to 0 votes, 0 vote time
             if (prevSong != null)
             {
                 if(prevSong.track?.Name != null)
                     Log("Finished playing \{prevSong.track.Name}");
+
+                channelHandler._playlist.ClearVotes(prevSong.SongID);
 
                 Publish("/\{channel}/playlist/\{prevSong.SongID}/votes", "0");
                 Publish("/\{channel}/playlist/\{prevSong.SongID}/votetime", Timestamp().ToString());
@@ -245,15 +251,15 @@ namespace SOVND.Server
                 {
                     Log("No song, track, or track time; sleeping 1s");
                     Thread.Sleep(1000);
-                    ScheduleNextSong(channel, null);
+                    ScheduleNextSong(channelHandler, null);
                 }
                 else
                 {
                     var songtime = song.track.Seconds;
                     Log("Sleeping \{songtime} seconds until playing next track");
                     Thread.Sleep((int)Math.Ceiling(songtime * 1000));
-                    ScheduleNextSong(channel, song);
                     Log("Playing next track");
+                    ScheduleNextSong(channelHandler, song);
                 }
             });
             task.Start();
