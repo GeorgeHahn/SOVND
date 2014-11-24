@@ -29,6 +29,7 @@ using System.Collections.Generic;
 
 using libspotifydotnet;
 using System.Diagnostics;
+using System.Threading;
 
 namespace SpotifyClient
 {
@@ -66,9 +67,11 @@ namespace SpotifyClient
 
             SongID = link;
             IntPtr linkPtr = Functions.StringToLinkPtr(link);
+            Thread.Sleep(10);
             try
             {
                 IntPtr trackPtr = libspotify.sp_link_as_track(linkPtr);
+                Thread.Sleep(10);
                 init(trackPtr);
             }
             finally
