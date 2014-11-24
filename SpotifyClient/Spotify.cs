@@ -618,7 +618,7 @@ namespace SpotifyClient
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Spotify thread killed by \{ex.Message} for \{ex.GetType().ToString()}");
+                Console.WriteLine("Spotify thread killed by \{ex.GetType().ToString()}: \{ex.Message}");
                 Log.Error(Plugin.LOG_MODULE, "mainThread() unhandled exception", ex);
             }
             finally
