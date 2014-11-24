@@ -49,10 +49,15 @@
                                     <TextBlock Text="{Binding Path=Album.Name}" />
                                     <TextBlock Text="{Binding Path=AllArtists}" />
                                 </StackPanel>
-                                <TextBlock
-                                    DockPanel.Dock="Left"
-                                    Text="{Binding Path=Votes}"
-                                    Margin="4"/>
+
+                                <StackPanel DockPanel.Dock="Left">
+                                    <TextBlock
+                                        Text="Votes:"
+                                        Margin="4"/>
+                                    <TextBlock
+                                        Text="{Binding Path=Votes}"
+                                        Margin="4"/>
+                                </StackPanel>
                                 <Button
                                     HorizontalAlignment="Right"
                                     HorizontalContentAlignment="Right"
