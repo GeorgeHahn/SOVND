@@ -97,6 +97,10 @@ namespace SpotifyClient
         {
             if (_loaded)
             {
+                Session.OnAudioDataArrived -= d_OnAudioDataArrived;
+                Session.OnAudioStreamComplete -= d_OnAudioStreamComplete;
+                Session.AudioBufferStats -= Session_AudioBufferStats;
+
                 Session.UnloadPlayer();
                 _loaded = false;
             }
