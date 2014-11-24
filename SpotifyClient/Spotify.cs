@@ -605,6 +605,7 @@ namespace SpotifyClient
                         }
                         catch (Exception ex)
                         {
+                            Console.WriteLine("Exception invoking sp_session_process_events: \{ex.GetType().ToString()} - \{ex.Message}");
                             Log.Debug(Plugin.LOG_MODULE, "Exception invoking sp_session_process_events", ex);
                         }
 
