@@ -85,6 +85,12 @@ namespace SOVND.Client
             {
                 Log("Playing: \{_.Message}");
 
+                if (string.IsNullOrWhiteSpace(_.Message))
+                {
+                    playingTrack = null;
+                    return;
+                }
+
                 // TODO This is plain wrong. Need to hold a ref to the waveout and properly destroy and recreate it when new songs play
                 if (playingTrack?.SongID == _.Message)
                     return;

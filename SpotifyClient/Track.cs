@@ -61,6 +61,9 @@ namespace SpotifyClient
 
         public Track(string link)
         {
+            if (string.IsNullOrWhiteSpace(link))
+                throw new ArgumentOutOfRangeException("link");
+
             SongID = link;
             IntPtr linkPtr = Functions.StringToLinkPtr(link);
             try
