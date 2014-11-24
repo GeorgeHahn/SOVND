@@ -50,6 +50,12 @@ namespace SOVND.Server
                 if (_.Message == "vote")
                 {
                     Log("\{_.username} voted for song \{_.songid}");
+                    if (!channels.ContainsKey(_.channel))
+                    {
+                        Log("Got a vote from \{_.username} for nonexistent channel: \{_.channel}");
+                        return;
+                    }
+
                     var playlist = channels[_.channel]._playlist; // TODO Nasty
 
                     if (playlist.AddVote(_.songid, _.username))
