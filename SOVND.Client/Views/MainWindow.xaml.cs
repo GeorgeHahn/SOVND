@@ -20,6 +20,7 @@ using SOVND.Lib;
 using System.Diagnostics;
 using SOVND.Lib.Settings;
 using SOVND.Client.ViewModels;
+using SOVND.Client.Views;
 
 namespace SOVND.Client
 {
@@ -140,6 +141,12 @@ namespace SOVND.Client
 
             App.client.SendChat(chatinput.Text);
             chatinput.Clear();
+        }
+
+        private void NewChannel(object sender, RoutedEventArgs e)
+        {
+            var newch = new NewChannel();
+            newch.ShowDialog();
         }
     }
 }

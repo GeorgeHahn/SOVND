@@ -92,11 +92,16 @@
 
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <ListBox x:Name="chatbox">
+            <Button Click="NewChannel">New Channel</Button>
+            
+            <ListBox 
+                Grid.Row="1"
+                x:Name="chatbox">
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type lib:ChatMessage}">
                         <TextBlock Text="{Binding Path=Message}" />
@@ -105,7 +110,7 @@
             </ListBox>
 
             <DockPanel
-                Grid.Row="1"
+                Grid.Row="2"
                 LastChildFill="True">
                 
                 <Button 

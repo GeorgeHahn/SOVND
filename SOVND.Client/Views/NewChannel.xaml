@@ -20,7 +20,8 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock>Channel Name</TextBlock>
                 <TextBox Grid.Column="1"
-                    x:Name="channelName" />
+                    x:Name="channelName"
+                    Text="{Binding Path=Name}"/>
             </Grid>
         
             <Grid>
@@ -30,7 +31,8 @@
                 </Grid.ColumnDefinitions>
             <TextBlock>Channel Description</TextBlock>
             <TextBox Grid.Column="1"
-                x:Name="channelDesc" />
+                x:Name="channelDesc"
+                Text="{Binding Path=Description}"/>
             </Grid>
         </StackPanel>
         
