@@ -111,9 +111,6 @@ namespace SOVND.Client
                         var trackLink = Spotify.GetTrackLink(trackPtr);
                         var track = new Track(trackLink);
                         candidates.Add(track);
-
-                        if (candidates.Count > 10)
-                            break;
                     }
                     SyncHolder.sync.Send((x) => lbPlaylist.ItemsSource = candidates, null);
                 });
