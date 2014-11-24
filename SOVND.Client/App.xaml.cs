@@ -98,6 +98,7 @@ namespace SOVND.Client
             };
 
 
+            // TODO: We don't need to be subbed to this all the time, just when browsing for channels
             On["/{channel}/info/name"] = _ =>
             {
                 if (!channels.ContainsKey(_.channel))
@@ -127,11 +128,17 @@ namespace SOVND.Client
 
         public bool RegisterChannel(string name, string description, string image)
         {
-            // TODO: Detect success
+            // TODO: Detect success or figure out a way to come close (eg check channels that have been registered locally)
+
+            if (name == null)
+                return false;
 
             Publish("/user/\{Username}/register/\{name}/name", name);
-            Publish("/user/\{Username}/register/\{name}/description", description);
-            Publish("/user/\{Username}/register/\{name}/image", image);
+
+            if(description != null) // Desc and image are optional
+                Publish("/user/\{Username}/register/\{name}/description", description);
+            if(image != null)
+                Publish("/user/\{Username}/register/\{name}/image", image);
 
             return true;
         }
