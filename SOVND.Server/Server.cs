@@ -118,26 +118,26 @@ namespace SOVND.Server
 
             On["/user/{username}/register/{channel}/{param}"] = _ =>
             {
+                // TODO Verify that channel hasn't already been created
+                // TODO Check user permissions
+                // TODO Publish _.username as moderater
+                // TODO Force channel ID to lowercase
+                // TODO Separate channel name from ID
+
                 if (string.IsNullOrWhiteSpace(_.Message))
                 {
                     Log("\{_.param} was null or whitespace, rejected");
-                    return;
                 }
-
-                Log("\{_.username} created channel \{_.channel}, setting \{_.param} to \{_.Message}");
-
-                // TODO Check permissions
-                // TODO Publish _.username as moderater
-                // TODO If channel hasn't already been created
-                // TODO All names lowercase
-                // TODO Separate name from ID
-
-                List<string> AllowedParams = new List<string> {"name", "description", "image", "moderators"};
-
-                if(AllowedParams.Contains(_.param))
-                    Publish("/\{_.channel}/info/\{_.param}", _.Message, true);
                 else
-                    Log("Bad param: \{_.param}");
+                {
+                    Log("\{_.username} created channel \{_.channel}, setting \{_.param} to \{_.Message}");
+
+                    List<string> AllowedParams = new List<string> { "name", "description", "image", "moderators" };
+                    if (AllowedParams.Contains(_.param))
+                        Publish("/\{_.channel}/info/\{_.param}", _.Message, true);
+                    else
+                        Log("Bad param: \{_.param}");
+                }
             };
 
             On["/user/{username}/{channel}/chat"] = _ =>
@@ -146,8 +146,11 @@ namespace SOVND.Server
                 
                 // TODO [LOW] Log chats
                 // TODO [LOW] Allow moderators to mute users
-                
-                Publish("/\{_.channel}/chat", "\{_.username}: \{_.Message}");
+
+                if (channels.ContainsKey(_.channel))
+                    Publish("/\{_.channel}/chat", "\{_.username}: \{_.Message}");
+                else
+                    Log("Chat was for invalid channel");
             };
 
             // ChannelHandler registration
