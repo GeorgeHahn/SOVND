@@ -61,6 +61,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <None Include="libspotify.so">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="password.key">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
