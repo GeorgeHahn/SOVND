@@ -43,9 +43,6 @@ namespace SOVND.Client
             _appname = appname;
             InitializeComponent();
             
-            App.uithread = SynchronizationContext.Current;
-            SyncHolder.sync = SynchronizationContext.Current;
-
             if (!_settings.AuthSettingsSet())
             {
                 SettingsWindow w = new SettingsWindow();
@@ -69,6 +66,8 @@ namespace SOVND.Client
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             App.client.WindowHandle = new WindowInteropHelper(this).Handle;
+            App.uithread = SynchronizationContext.Current;
+            SyncHolder.sync = SynchronizationContext.Current;
 
             Spotify.Initialize();
             if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), _appname.Name, auth.SpotifyUsername, auth.SpotifyPassword))
