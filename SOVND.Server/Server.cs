@@ -193,11 +193,13 @@ namespace SOVND.Server
             Spotify.Initialize();
             if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_server", _spot.Username, _spot.Password))
                 throw new Exception("Login failure");
+            Log("Logged in");
             while (!Spotify.Ready())
                 Thread.Sleep(100);
+            Log("Ready");
 
             Connect();
-            Log("Running");
+            Log("Connected");
         }
 
         private void RemoveSong(string channel, string songID)

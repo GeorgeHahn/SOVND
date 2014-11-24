@@ -15,6 +15,7 @@ namespace SOVND.Lib
 
             Spotify.InvokeOnSpotifyThread(() =>
             {
+                Console.WriteLine("Creating new track");
                 track = new Track(songID);
             });
         }

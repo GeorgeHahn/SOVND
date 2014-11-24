@@ -71,7 +71,7 @@ namespace SOVND.Lib
             return max;
         }
 
-        /// TODO Return an enum that counts down from the top of the list (write a sorting function and use C#'s sorting)
+        // TODO Return an enum that counts down from the top of the list (write a sorting function and use C#'s sorting)
     }
 
     public interface IChannelHandlerFactory

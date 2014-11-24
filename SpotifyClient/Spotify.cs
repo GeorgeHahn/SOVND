@@ -571,6 +571,8 @@ namespace SpotifyClient
         {
             try
             {
+                Console.WriteLine("Starting Spotify thread");
+
                 _mainSignal = new AutoResetEvent(false);
 
                 int timeout = Timeout.Infinite;
@@ -616,10 +618,12 @@ namespace SpotifyClient
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Spotify thread killed by \{ex.Message} for \{ex.GetType().ToString()}");
                 Log.Error(Plugin.LOG_MODULE, "mainThread() unhandled exception", ex);
             }
             finally
             {
+                Console.WriteLine("Spotify dead.");
                 _isRunning = false;
                 if (_programSignal != null)
                     _programSignal.Set();
