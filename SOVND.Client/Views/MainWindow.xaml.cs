@@ -102,15 +102,23 @@ namespace SOVND.Client
             if (!string.IsNullOrWhiteSpace(text))
             {
                 var candidates = new List<Track>();
-                var search = Spotify.GetSearch(text);
-                foreach (var trackPtr in search?.TrackPtrs)
-                {
-                    var trackLink = Spotify.GetTrackLink(trackPtr);
-                    var track = new Track(trackLink);
-                    candidates.Add(track);
-                }
 
-                lbPlaylist.ItemsSource = candidates;
+                var searchTask = new Task(() =>
+                {
+                    var search = Spotify.GetSearch(text);
+                    foreach (var trackPtr in search?.TrackPtrs)
+                    {
+                        var trackLink = Spotify.GetTrackLink(trackPtr);
+                        var track = new Track(trackLink);
+                        candidates.Add(track);
+
+                        if (candidates.Count > 10)
+                            break;
+                    }
+                    SyncHolder.sync.Send((x) => lbPlaylist.ItemsSource = candidates, null);
+                });
+
+                searchTask.Start();
             }
             else
             {
