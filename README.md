@@ -2,10 +2,16 @@
 
 Open source replacement for Soundrop.fm
 
+[Alpha signup](http://104.131.87.42:2880/)
+
 Check the [SPEC.md](SPEC.md) file for implementation details
 
-Public server coming as soon as authentication code is complete. Desktop and Android clients will follow. Third party clients welcome!
+Clients:
+  - Desktop client (alpha release)
+  - Android (coming!)
+
+Third party clients welcome!
 
 On track to release before Soundrop shuts down.
 
-[GratiPay](https://gratipay.com/GeorgeHahn/) tips appreciated!
+Funded by [GratiPay](https://gratipay.com/GeorgeHahn/) tips
