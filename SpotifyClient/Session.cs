@@ -274,11 +274,14 @@ namespace SpotifyClient
 
         private static void message_to_user(IntPtr sessionPtr, string message)
         {
+            Console.WriteLine("Message to user: \{message}");
             Log.Info("libspotify", message);
         }
 
         private static void metadata_updated(IntPtr sessionPtr)
         {
+            Console.WriteLine("Metadata updated");
+            Track.Check();
             Log.Trace(Plugin.LOG_MODULE, "metadata_updated");
         }
 

@@ -50,6 +50,8 @@ namespace SpotifyClient
 
         public string SongID { get; private set; }
 
+        public bool Loaded { get; private set; }
+
         public string[] Artists
         {
             get { return _artists.ToArray(); }
@@ -70,9 +72,9 @@ namespace SpotifyClient
             Thread.Sleep(10);
             try
             {
-                IntPtr trackPtr = libspotify.sp_link_as_track(linkPtr);
+                this.TrackPtr = libspotify.sp_link_as_track(linkPtr);
                 Thread.Sleep(10);
-                init(trackPtr);
+                Init();
             }
             finally
             {
@@ -83,25 +85,59 @@ namespace SpotifyClient
 
         public Track(IntPtr trackPtr)
         {
-            init(trackPtr);
+            this.TrackPtr = trackPtr;
+            Init();
         }
 
-        private bool init(IntPtr trackPtr)
-        {
-            if (!libspotify.sp_track_is_loaded(trackPtr))
-                return false;
+        private static List<Track> ToInitialize = new List<Track>();
+        private static object initlock = new object();
 
-            this.TrackPtr = trackPtr;
-            this.Name = Functions.PtrToString(libspotify.sp_track_name(trackPtr));
-            this.TrackNumber = libspotify.sp_track_index(trackPtr);
-            this.Seconds = (decimal)libspotify.sp_track_duration(trackPtr) / 1000M;
-            IntPtr albumPtr = libspotify.sp_track_album(trackPtr);
+        public static void Check()
+        {
+            if (ToInitialize.Count == 0)
+                return;
+
+            var remove = new List<Track>();
+
+            lock (initlock)
+            {
+                foreach (var track in ToInitialize)
+                {
+                    track.Init();
+                    if (track.Loaded)
+                        remove.Add(track);
+                }
+
+                Console.WriteLine("Tracks loaded: \{remove.Count}");
+                foreach (var removal in remove)
+                    ToInitialize.Remove(removal);
+            }
+        }
+
+        public bool Init()
+        {
+            if (!libspotify.sp_track_is_loaded(this.TrackPtr))
+            {
+                // Queue this track to get initted by spotify thread
+                lock (initlock)
+                {
+                    if(!ToInitialize.Contains(this))
+                        ToInitialize.Add(this);
+                }
+                return false;
+            }
+
+            this.Loaded = true;
+            this.Name = Functions.PtrToString(libspotify.sp_track_name(this.TrackPtr));
+            this.TrackNumber = libspotify.sp_track_index(this.TrackPtr);
+            this.Seconds = (decimal)libspotify.sp_track_duration(this.TrackPtr) / 1000M;
+            IntPtr albumPtr = libspotify.sp_track_album(this.TrackPtr);
             if (albumPtr != IntPtr.Zero)
                 this.Album = new Album(albumPtr);
 
-            for (int i = 0; i < libspotify.sp_track_num_artists(trackPtr); i++)
+            for (int i = 0; i < libspotify.sp_track_num_artists(this.TrackPtr); i++)
             {
-                IntPtr artistPtr = libspotify.sp_track_artist(trackPtr, i);
+                IntPtr artistPtr = libspotify.sp_track_artist(this.TrackPtr, i);
                 if (artistPtr != IntPtr.Zero)
                     _artists.Add(Functions.PtrToString(libspotify.sp_artist_name(artistPtr)));
             }

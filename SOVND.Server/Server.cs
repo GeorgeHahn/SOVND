@@ -50,7 +50,7 @@ namespace SOVND.Server
             On["/user/{username}/{channel}/songssearch/"] = _ =>
             {
                 Search search = Spotify.GetSearch(_.Message);
-                Log("Searched \{_.Message} and is is \{(search.IsLoaded?"is":"is not")} loaded");
+                Log("Searched \{_.Message} and \{(search.IsLoaded ? "is" : "is not")} loaded");
             };
 
             On["/user/{username}/{channel}/songs/{songid}"] = _ =>

@@ -298,6 +298,7 @@ namespace SpotifyClient
 
         private void metadata_updated(IntPtr playlistPtr, IntPtr userDataPtr)
         {
+            Console.WriteLine("Playlist metadata updated");
             Log.Trace(LOG_MODULE, "metadata_updated");
             populateMetadata();
         }
