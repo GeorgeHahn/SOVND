@@ -628,12 +628,16 @@ namespace SpotifyClient
             }
             finally
             {
-                Console.WriteLine("Spotify dead.");
                 _isRunning = false;
                 if (_programSignal != null)
                     _programSignal.Set();
 
-                Process.GetCurrentProcess().Kill(); // Because why not
+                while (true)
+                {
+                    Console.WriteLine("Spotify dead.");
+                    Thread.Sleep(1000);
+                }
+                // TODO Signal rest of application to shutdown
             }
         }
 
