@@ -68,6 +68,7 @@ namespace SOVND.Client
         private BufferedWaveProvider wave;
         private WaveFormat WaveFormat;
 
+        private object soundlock = new object();
 
         public SovndClient(IMQTTSettings connectionSettings, IChannelHandlerFactory chf, ISettingsProvider settings)
             : base(connectionSettings.Broker, connectionSettings.Port, settings.GetAuthSettings().SOVNDUsername, settings.GetAuthSettings().SOVNDPassword)
@@ -100,37 +101,43 @@ namespace SOVND.Client
                 if (playingTrack?.SongID == _.Message)
                     return;
 
-                if (songToken != null)
-                    songToken.Cancel();
-
                 if (WaveFormat == null)
                 {
                     WaveFormat = new WaveFormat(44100, 16, 2);
-                    wave = new BufferedWaveProvider(WaveFormat);
-                    wave.BufferDuration = TimeSpan.FromSeconds(5);
-
-                    player = new WaveOut(WindowHandle);
-                    player.DeviceNumber = 0;
-                    player.Init(wave);
                 }
+
+                if (songToken != null)
+                    songToken.Cancel();
 
                 songToken = new CancellationTokenSource();
                 var token = songToken.Token;
 
                 Task.Factory.StartNew(() =>
                 {
-                    playingTrack = new Track(_.Message);
-                    streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr, wave);
-
-                    player.Play();
-
-                    while (!streamingaudio.Complete && !token.IsCancellationRequested)
+                    lock (soundlock)
                     {
-                        Thread.Sleep(15);
-                    }
+                        using (var player = new WaveOut(WindowHandle))
+                        {
+                            wave = new BufferedWaveProvider(WaveFormat);
+                            wave.BufferDuration = TimeSpan.FromSeconds(15);
 
-                    streamingaudio.StopStreaming();
-                    player.Pause();
+                            player.DeviceNumber = 0;
+                            player.Init(wave);
+
+                            playingTrack = new Track(_.Message);
+                            streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr, wave);
+
+                            player.Play();
+
+                            while (!streamingaudio.Complete && !token.IsCancellationRequested)
+                            {
+                                Thread.Sleep(15);
+                            }
+
+                            streamingaudio.StopStreaming();
+                            player.Pause();
+                        }
+                    }
                 }, token);
             };
 
