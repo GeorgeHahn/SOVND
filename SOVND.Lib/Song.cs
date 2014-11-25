@@ -14,6 +14,17 @@ namespace SOVND.Lib
             SongID = songID;
 
             track = new Track(songID);
+
+            while (!track.Loaded)
+            {
+                Spotify.InvokeOnSpotifyThread(() =>
+                {
+                    track.Init();
+                });
+                if (track.Loaded)
+                    Console.WriteLine("Name: \{track.Name}");
+                Thread.Sleep(5000);
+            }
         }
 
         public string SongID { get; private set; }
