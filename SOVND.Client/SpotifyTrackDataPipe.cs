@@ -110,7 +110,7 @@ namespace SpotifyClient
 
         private void Session_AudioBufferStats(ref libspotify.sp_audio_buffer_stats obj)
         {
-            obj.samples = _wave.BufferedBytes;
+            obj.samples = _wave.BufferedBytes / 2;
             obj.stutter = jitter;
             jitter = 0;
         }
@@ -124,8 +124,8 @@ namespace SpotifyClient
         {
             if (!_interrupt && !_complete)
             {
-                // Try to keep buffer 1/2 full
-                if (_wave.BufferedDuration.TotalSeconds < _wave.BufferDuration.TotalSeconds / 2)
+                // Try to keep buffer mostly full
+                if (_wave.BufferedBytes < _wave.BufferLength - 40000)
                     jitter++;
 
                 _wave.AddSamples(buffer, 0, buffer.Length);
