@@ -7,7 +7,7 @@ namespace SOVND.Server
     {
         public string Broker { get { return "104.131.87.42"; } }
 
-        public int Port { get { return 2883; } }
+        public int Port { get { return 8883; } }
 
         public string Username
         {
