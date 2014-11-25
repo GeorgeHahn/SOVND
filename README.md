@@ -1,4 +1,4 @@
-# SOVND
+![Logo](https://raw.githubusercontent.com/GeorgeHahn/SOVND/gh-pages/Logo.png)
 
 Open source replacement for Soundrop.fm
 
