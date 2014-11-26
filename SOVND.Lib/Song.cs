@@ -1,35 +1,36 @@
 using SpotifyClient;
 using System;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace SOVND.Lib
 {
-    public class Song : IComparable
+    public class Song : IComparable, INotifyPropertyChanged
     {
         public Action<string> Log = _ => Console.WriteLine(_);
+        private int _votes;
 
         public Song(string songID)
         {
             SongID = songID;
 
             track = new Track(songID);
-
-            while (!track.Loaded)
-            {
-                Spotify.InvokeOnSpotifyThread(() =>
-                {
-                    track.Init();
-                });
-                if (track.Loaded)
-                    Console.WriteLine("Name: \{track.Name}");
-                Thread.Sleep(5000);
-            }
         }
 
         public string SongID { get; private set; }
         public long Votetime { get; set; }
-        public int Votes { get; set; }
+
+        public int Votes
+        {
+            get { return _votes; }
+            set
+            {
+                _votes = value;
+                RaisePropertyChanged(nameof(Votes));
+            }
+        }
+
         public string Voters { get; set; }
         public bool Removed { get; set; }
         public Track track { get; set; }
@@ -49,6 +50,16 @@ namespace SOVND.Lib
             if (two.Votetime < Votetime)
                 return 1;
             return 0;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void RaisePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 }
