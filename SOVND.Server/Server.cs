@@ -68,8 +68,8 @@ namespace SOVND.Server
 
                     if (playlist.AddVote(_.songid, _.username))
                     {
-                        Publish("/\{_.channel}/playlist/\{_.songid}/votes", playlist.GetVotes(_.songid).ToString());
-                        Publish("/\{_.channel}/playlist/\{_.songid}/votetime", Timestamp().ToString());
+                        Publish("/\{_.channel}/playlist/\{_.songid}/votes", playlist.GetVotes(_.songid).ToString(), true);
+                        Publish("/\{_.channel}/playlist/\{_.songid}/votetime", Timestamp().ToString(), true);
                     }
                 }
                 else if (_.Message == "unvote")
@@ -212,15 +212,15 @@ namespace SOVND.Server
 
         private void RemoveSong(string channel, string songID)
         {
-            Publish("/\{channel}/playlist/\{songID}/votes", "");
-            Publish("/\{channel}/playlist/\{songID}/removed", "true");
+            Publish("/\{channel}/playlist/\{songID}/votes", "", true);
+            Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
         }
 
         private void BlockSong(string channel, string songID)
         {
-            Publish("/\{channel}/playlist/\{songID}/votes", "");
-            Publish("/\{channel}/playlist/\{songID}/removed", "true");
-            Publish("/\{channel}/playlist/\{songID}/blocked", "true");
+            Publish("/\{channel}/playlist/\{songID}/votes", "", true);
+            Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
+            Publish("/\{channel}/playlist/\{songID}/blocked", "true", true);
         }
 
         private Dictionary<ChannelHandler, bool> runningScheduler = new Dictionary<ChannelHandler, bool>();
