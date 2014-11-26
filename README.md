@@ -10,6 +10,4 @@ Clients:
 
 Third party clients welcome! See [SPEC.md](SPEC.md) for implementation details
 
-On track to release before Soundrop shuts down.
-
 Funded by [GratiPay](https://gratipay.com/GeorgeHahn/) tips
