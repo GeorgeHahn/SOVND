@@ -263,9 +263,9 @@ namespace SOVND.Server
                         if (song.track?.Name != null)
                             Log("Playing \{song.track.Name}");
 
-                        Publish("/\{channel}/nowplaying/songid", "");
-                        Publish("/\{channel}/nowplaying/songid", song.SongID);
-                        Publish("/\{channel}/nowplaying/starttime", Timestamp().ToString());
+                        Publish("/\{channel}/nowplaying/songid", "", true);
+                        Publish("/\{channel}/nowplaying/songid", song.SongID, true);
+                        Publish("/\{channel}/nowplaying/starttime", Timestamp().ToString(), true);
 
                         var songtime = song.track.Seconds;
                         Thread.Sleep((int) Math.Ceiling(songtime*1000));
@@ -276,9 +276,9 @@ namespace SOVND.Server
                         // Set prev song to 0 votes, 0 vote time
                         channelHandler.ClearVotes(song.SongID);
 
-                        Publish("/\{channel}/playlist/\{song.SongID}/votes", "0");
-                        Publish("/\{channel}/playlist/\{song.SongID}/votetime", Timestamp().ToString());
-                        Publish("/\{channel}/playlist/\{song.SongID}/voters", "");
+                        Publish("/\{channel}/playlist/\{song.SongID}/votes", "0", true);
+                        Publish("/\{channel}/playlist/\{song.SongID}/votetime", Timestamp().ToString(), true);
+                        Publish("/\{channel}/playlist/\{song.SongID}/voters", "", true);
                         continue;
                     }
                 }
