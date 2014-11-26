@@ -20,6 +20,8 @@ namespace SOVND.Client.Views
     /// </summary>
     public partial class NewChannel : Window
     {
+        public string ChannelName { get; private set; }
+
         public NewChannel()
         {
             InitializeComponent();
@@ -28,8 +30,11 @@ namespace SOVND.Client.Views
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if(((NewChannelViewModel) DataContext).Register())
+            if (((NewChannelViewModel) DataContext).Register())
+            {
+                ChannelName = ((NewChannelViewModel) DataContext).Name;
                 this.Close();
+            }
         }
     }
 }
