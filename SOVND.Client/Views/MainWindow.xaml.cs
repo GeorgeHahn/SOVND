@@ -21,6 +21,7 @@ using System.Diagnostics;
 using SOVND.Lib.Settings;
 using SOVND.Client.ViewModels;
 using SOVND.Client.Views;
+using System.ComponentModel;
 
 namespace SOVND.Client
 {
@@ -69,7 +70,6 @@ namespace SOVND.Client
             App.client.WindowHandle = new WindowInteropHelper(this).Handle;
             App.uithread = SynchronizationContext.Current;
             SyncHolder.sync = SynchronizationContext.Current;
-
             Spotify.Initialize();
             if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), _appname.Name, auth.SpotifyUsername, auth.SpotifyPassword))
                 throw new Exception("Login failure");
@@ -79,25 +79,36 @@ namespace SOVND.Client
 
             App.client.Run();
             App.client.SubscribedChannelHandler.Subscribe();
-            BindToPlaylist();
 
-            App.client.RegisterChannel("ambient", "", "");
+            playlist = CollectionViewSource.GetDefaultView(App.client.SubscribedChannelHandler._playlist.Songs);
+            playlist.SortDescriptions.Clear();
+            playlist.SortDescriptions.Add(new SortDescription("Votetime", ListSortDirection.Descending));
+            playlist.SortDescriptions.Add(new SortDescription("Votes", ListSortDirection.Ascending));
+            playlist.Refresh();
+
+            App.client.SubscribedChannelHandler.Songs.CollectionChanged += Songs_CollectionChanged;
+            App.client.SubscribedChannelHandler._playlist.PropertyChanged += _playlist_PropertyChanged;
+
+            BindToPlaylist();
         }
 
-        private void BindToPlaylist()
+        private void _playlist_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            Binding myBinding = new Binding();
+            SyncHolder.sync.Send((x) => playlist.Refresh(), null);
+        }
 
-            lbPlaylist.DataContext = App.client.SubscribedChannelHandler._playlist;
-
-            myBinding.Source = App.client.SubscribedChannelHandler._playlist;
-            myBinding.Path = new PropertyPath("InOrder");
-            myBinding.Mode = BindingMode.OneWay;
-            myBinding.UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged;
-            BindingOperations.SetBinding(lbPlaylist, ListBox.ItemsSourceProperty, myBinding);
+        private void Songs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            SyncHolder.sync.Send((x) => playlist.Refresh(), null);
         }
 
         private CancellationTokenSource searchToken = null;
+        private ICollectionView playlist;
+
+        private void BindToPlaylist()
+        {
+            SyncHolder.sync.Send((x) => lbPlaylist.ItemsSource = playlist, null);
+        }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -137,6 +148,7 @@ namespace SOVND.Client
             {
                 if (searchToken != null)
                     searchToken.Cancel();
+
                 BindToPlaylist();
             }
         }
@@ -152,7 +164,7 @@ namespace SOVND.Client
             EnqueueTrack(item);
             tbSearch.Clear();
         }
-
+        
         private void VoteUp_Click(object sender, RoutedEventArgs e)
         {
             var item = ((Button)sender).DataContext as Song;
@@ -178,7 +190,11 @@ namespace SOVND.Client
         private void NewChannel(object sender, RoutedEventArgs e)
         {
             var newch = new NewChannel();
-            newch.ShowDialog();
+            if (newch.ShowDialog().Value == true)
+            {
+                var channel = newch.ChannelName;
+                App.client.SubscribeToChannel(channel);
+            }
         }
     }
 }
