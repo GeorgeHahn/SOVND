@@ -10,4 +10,6 @@ Clients:
 
 Third party clients welcome! See [SPEC.md](SPEC.md) for implementation details
 
+MQTT Server is live at `104.131.87.42:8883`. You must have valid credentials from the alpha signup above to connect.
+
 Funded by [GratiPay](https://gratipay.com/GeorgeHahn/) tips
