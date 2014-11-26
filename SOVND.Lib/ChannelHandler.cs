@@ -25,7 +25,10 @@ namespace SOVND.Lib
 
         public Dictionary<string, Song> SongsByID { get; set; } = new Dictionary<string, Song>();
 
-        public List<Song> Songs { get; set; } = new List<Song>();
+        public ObservableCollection<Song> Songs
+        {
+            get { return _playlist?.Songs; }
+        }
 
         public IPlaylistProvider _playlist { get; private set; } // TODO this should be private with important parts exposed via properties
 
@@ -57,7 +60,7 @@ namespace SOVND.Lib
             if (Songs.Count == 0)
                 return null;
 
-            Songs.Sort();
+            //Songs.Sort();
             return Songs[0];
         }
 

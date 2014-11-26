@@ -1,7 +1,7 @@
 ﻿using Charlotte;
-using SpotifyClient;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +14,7 @@ namespace SOVND.Lib
         void ClearVotes(string songID);
         int GetVotes(string songID);
 
-        IEnumerable<Song> InOrder { get; }
+        ObservableCollection<Song> Songs { get; }
 
         void Subscribe(ChannelHandler channel);
         void Unsubscribe();
@@ -27,6 +27,7 @@ namespace SOVND.Lib
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
+        private readonly ObservableCollection<Song> _songs;
 
         public bool AddVote(string songID, string username) // TODO: THIS DOES NOT BELONG IN THIS CLASS
         {
@@ -41,7 +42,6 @@ namespace SOVND.Lib
 
                 votes[songID]++;
                 uservotes[username + songID] = true;
-
 
                 // TODO publish voter names
                 return true;
@@ -74,13 +74,9 @@ namespace SOVND.Lib
             return votes[songID];
         }
 
-        public IEnumerable<Song> InOrder // TODO need to give WPF something IObservable to bind to
+        public ObservableCollection<Song> Songs
         {
-            get
-            {
-                _channel?.Songs.Sort();
-                return _channel?.Songs;
-            }
+            get { return _songs; }
         }
 
         private void AddNewSong(string ID)
@@ -88,7 +84,13 @@ namespace SOVND.Lib
             Log("Added song \{ID}");
             var song = new Song(ID);
             _channel.SongsByID[ID] = song;
-            _channel.Songs.Add(song);
+
+            if (SyncHolder.sync != null)
+                SyncHolder.sync.Send((x) => _songs.Add(song), null); // TODO Bad bad bad bad
+            else
+                _songs.Add(song);
+
+            RaisePropertyChanged(nameof(Songs));
 
             WaitForTrack(song);
         }
@@ -119,9 +121,8 @@ namespace SOVND.Lib
                 if (!channel.SongsByID.ContainsKey(_.songid))
                     AddNewSong(_.songid);
                 var song = channel.SongsByID[_.songid];
-                song.Votes = int.Parse(_.Message);
 
-                RaisePropertyChanged("InOrder");
+                song.Votes = int.Parse(_.Message);
             };
 
             On["/\{_channel.MQTTName}/playlist/{songid}/votetime"] = _ =>
@@ -143,6 +144,7 @@ namespace SOVND.Lib
         public PlaylistProvider(IMQTTSettings settings)
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
+            _songs = new ObservableCollection<Song>();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
