@@ -72,7 +72,7 @@ namespace SpotifyClient
             Thread.Sleep(10);
             try
             {
-                this.TrackPtr = libspotify.sp_link_as_track(linkPtr);
+                TrackPtr = libspotify.sp_link_as_track(linkPtr);
                 Thread.Sleep(10);
                 Init();
             }
