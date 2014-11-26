@@ -47,6 +47,7 @@ namespace SOVND.Client
 
     public class SovndClient : MqttModule
     {
+        private readonly IChannelHandlerFactory _chf;
         private Action<string> Log = _ => Console.WriteLine(_);
 
         private readonly string Username;
@@ -73,6 +74,7 @@ namespace SOVND.Client
         public SovndClient(IMQTTSettings connectionSettings, IChannelHandlerFactory chf, ISettingsProvider settings)
             : base(connectionSettings.Broker, connectionSettings.Port, settings.GetAuthSettings().SOVNDUsername, settings.GetAuthSettings().SOVNDPassword)
         {
+            _chf = chf;
             _authSettings = settings.GetAuthSettings();
 
             Username = _authSettings.SOVNDUsername;
@@ -187,12 +189,17 @@ namespace SOVND.Client
             return true;
         }
 
+        internal void SubscribeToChannel(string channel)
+        {
+            this.SubscribedChannelHandler = _chf.CreateChannelHandler(channel);
+        }
+
         public void AddTrack(Track track)
         {
             if (SubscribedChannelHandler != null && SubscribedChannelHandler.MQTTName != null)
             {
                 Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/songs/\{track.SongID}", "vote");
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/songssearch/", track.Name + " " + track.Artists[0]);
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/songssearch/", track.Name + " " + track?.Artists[0]);
             }
             else
                 Log("Not subscribed to a channel or channel subscription is malformed (null or MQTTName null)");
