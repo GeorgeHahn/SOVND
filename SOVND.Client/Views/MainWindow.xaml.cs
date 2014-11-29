@@ -37,27 +37,23 @@ namespace SOVND.Client
     {
         private readonly ISettingsProvider _settings;
         private readonly IAppName _appname;
-        private readonly SettingsModel auth;
+        private SettingsModel auth;
 
         public MainWindow(ISettingsProvider settings, IAppName appname)
         {
             _settings = settings;
             _appname = appname;
+
             InitializeComponent();
-            
-            if (!_settings.AuthSettingsSet())
+           
+            Loaded += (_, __) =>
             {
-                SettingsWindow w = new SettingsWindow();
-                var settingsViewModel = new SettingsViewModel(settings.GetAuthSettings());
-                w.DataContext = settingsViewModel;
-                w.ShowDialog();
-                Process.GetCurrentProcess().Kill(); // TODO clean this up
-            }
+                SetupSettings();
+                InitializeSpotify();
+                SetupChannel();
+            };
 
-            auth = _settings.GetAuthSettings();
-
-            Loaded += MainWindow_Loaded;
-            Closed += (a, b) =>
+            Closed += (_, __) =>
             {
                 App.client.Disconnect();
                 Spotify.ShutDown();
@@ -65,11 +61,17 @@ namespace SOVND.Client
             };
         }
 
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private void SetupSettings()
         {
-            InitializeSpotify();
+            if (!_settings.AuthSettingsSet())
+            {
+                SettingsWindow w = new SettingsWindow();
+                var settingsViewModel = new SettingsViewModel(_settings.GetAuthSettings());
+                w.DataContext = settingsViewModel;
+                w.ShowDialog();
+            }
 
-            SetupChannel();
+            auth = _settings.GetAuthSettings();
         }
 
         private void InitializeSpotify()
