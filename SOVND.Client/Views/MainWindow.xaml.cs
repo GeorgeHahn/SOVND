@@ -86,20 +86,11 @@ namespace SOVND.Client
             playlist.SortDescriptions.Add(new SortDescription("Votes", ListSortDirection.Ascending));
             playlist.Refresh();
 
-            App.client.SubscribedChannelHandler.Songs.CollectionChanged += Songs_CollectionChanged;
-            App.client.SubscribedChannelHandler._playlist.PropertyChanged += _playlist_PropertyChanged;
+            Action Refresh = () => { SyncHolder.sync.Send((x) => playlist.Refresh(), null); };
+            App.client.SubscribedChannelHandler.Songs.CollectionChanged += (_, __) => { Refresh(); };
+            App.client.SubscribedChannelHandler._playlist.PropertyChanged += (_, __) => { Refresh(); };
 
             BindToPlaylist();
-        }
-
-        private void _playlist_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            SyncHolder.sync.Send((x) => playlist.Refresh(), null);
-        }
-
-        private void Songs_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            SyncHolder.sync.Send((x) => playlist.Refresh(), null);
         }
 
         private CancellationTokenSource searchToken = null;
