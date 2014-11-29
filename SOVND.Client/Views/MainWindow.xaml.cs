@@ -67,6 +67,13 @@ namespace SOVND.Client
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            InitializeSpotify();
+
+            SetupChannel();
+        }
+
+        private void InitializeSpotify()
+        {
             App.client.WindowHandle = new WindowInteropHelper(this).Handle;
             App.uithread = SynchronizationContext.Current;
             SyncHolder.sync = SynchronizationContext.Current;
@@ -78,6 +85,10 @@ namespace SOVND.Client
                 Thread.Sleep(100);
 
             App.client.Run();
+        }
+
+        private void SetupChannel()
+        {
             App.client.SubscribedChannelHandler.Subscribe();
 
             playlist = CollectionViewSource.GetDefaultView(App.client.SubscribedChannelHandler._playlist.Songs);
@@ -89,6 +100,8 @@ namespace SOVND.Client
             Action Refresh = () => { SyncHolder.sync.Send((x) => playlist.Refresh(), null); };
             App.client.SubscribedChannelHandler.Songs.CollectionChanged += (_, __) => { Refresh(); };
             App.client.SubscribedChannelHandler._playlist.PropertyChanged += (_, __) => { Refresh(); };
+
+            chatbox.ItemsSource = App.client.SubscribedChannelHandler.Chats;
 
             BindToPlaylist();
         }
@@ -172,8 +185,6 @@ namespace SOVND.Client
 
         private void SendChat(object sender, RoutedEventArgs e)
         {
-            chatbox.ItemsSource = App.client.SubscribedChannelHandler.Chats;
-
             App.client.SendChat(chatinput.Text);
             chatinput.Clear();
         }
