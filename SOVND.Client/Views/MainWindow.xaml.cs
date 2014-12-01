@@ -15,6 +15,7 @@ using SOVND.Client.Views;
 using System.ComponentModel;
 using SOVND.Lib.Models;
 using SOVND.Client.Modules;
+using System.Collections;
 
 namespace SOVND.Client
 {
@@ -65,15 +66,9 @@ namespace SOVND.Client
             _client.SubscribedChannelHandler.Subscribe();
             _player.SubscribeTo("ambient");
 
-            playlist = CollectionViewSource.GetDefaultView(_client.SubscribedChannelHandler._playlist.Songs);
-
-            // TODO this section needs to be scrapped //
-            playlist.SortDescriptions.Clear();
-            playlist.SortDescriptions.Add(new SortDescription("Votetime", ListSortDirection.Descending));
-            playlist.SortDescriptions.Add(new SortDescription("Votes", ListSortDirection.Ascending));
-            playlist.Refresh();
-            ////////////////////////////////////////////
-
+            playlist = (ListCollectionView)(CollectionViewSource.GetDefaultView(_client.SubscribedChannelHandler._playlist.Songs));
+            playlist.CustomSort = new SongComparer();
+            
             Action Refresh = () => { _sync.sync.Send((x) => playlist.Refresh(), null); };
             _client.SubscribedChannelHandler.Songs.CollectionChanged += (_, __) => { Refresh(); };
             _client.SubscribedChannelHandler._playlist.PropertyChanged += (_, __) => { Refresh(); };
@@ -83,12 +78,26 @@ namespace SOVND.Client
             BindToPlaylist();
         }
 
+        class SongComparer : IComparer
+        {
+            public int Compare(object x, object y)
+            {
+                var xs = x as Song;
+                var ys = y as Song;
+                if (xs == null || ys == null)
+                    throw new ArgumentOutOfRangeException("Both objects must be of type Song");
+
+                return xs.CompareTo(y);
+            }
+        }
+
         private CancellationTokenSource searchToken = null;
-        private ICollectionView playlist;
+        private ListCollectionView playlist;
 
         private void BindToPlaylist()
         {
             _sync.sync.Send((x) => lbPlaylist.ItemsSource = playlist, null);
+            _sync.sync.Send((x) => playlist.Refresh(), null);
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
