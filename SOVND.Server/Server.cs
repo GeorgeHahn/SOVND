@@ -98,7 +98,7 @@ namespace SOVND.Server
 
                 LogTo.Info("\{_.username} sent channel data for {0}: {1}", (string)_.channel, (string)_.Message);
 
-                Publish("/\{_.channel}/info", _.Message);
+                Publish("/\{_.channel}/info", _.Message, true);
             };
 
             // Handle user chat messages
