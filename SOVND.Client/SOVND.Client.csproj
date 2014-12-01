@@ -96,6 +96,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Audio\SpotifyTrackDataPipe.cs" />
+    <Compile Include="SovndClient.cs" />
     <Compile Include="Util\Logging.cs" />
     <Compile Include="Util\PasswordHelper.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
