@@ -21,6 +21,7 @@ using SOVND.Client.Audio;
 using SOVND.Client.Util;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
+using Newtonsoft.Json;
 
 namespace SOVND.Client
 {
@@ -61,7 +62,7 @@ namespace SOVND.Client
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
-        public Dictionary<string, ChannelHandler> channels = new Dictionary<string, ChannelHandler>();
+        public Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
 
         private SpotifyTrackDataPipe streamingaudio = null;
         private Track playingTrack = null;
@@ -150,20 +151,12 @@ namespace SOVND.Client
 
 
             // TODO: We don't need to be subbed to this all the time, just when browsing for channels
-            On["/{channel}/info/name"] = _ =>
+            On["/{channel}/info"] = _ =>
             {
+                Channel channel = JsonConvert.DeserializeObject<Channel>(_.Message);
+
                 if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = chf.CreateChannelHandler(_.channel);
-
-                channels[_.channel].Name = _.Message;
-            };
-
-            On["/{channel}/info/description"] = _ =>
-            {
-                if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = chf.CreateChannelHandler(_.channel);
-
-                channels[_.channel].Description = _.Message;
+                    channels[_.channel] = channel;
             };
 
             SubscribedChannelHandler = chf.CreateChannelHandler("ambient");
@@ -179,18 +172,24 @@ namespace SOVND.Client
 
         public bool RegisterChannel(string name, string description, string image)
         {
+            var channel = new Channel
+            {
+                Name = name,
+                Description = description
+            };
+            return RegisterChannel(channel);
+        }
+
+        public bool RegisterChannel(Channel channel)
+        {
             // TODO: Detect success or figure out a way to come close (eg check channels that have been registered locally)
 
-            if (name == null)
+            if (channel == null || string.IsNullOrWhiteSpace(channel.Name))
                 return false;
 
-            Publish("/user/\{Username}/register/\{name}/name", name);
+            var msg = JsonConvert.SerializeObject(channel);
 
-            if(description != null) // Desc and image are optional
-                Publish("/user/\{Username}/register/\{name}/description", description);
-            if(image != null)
-                Publish("/user/\{Username}/register/\{name}/image", image);
-
+            Publish("/user/\{Username}/register/\{channel.Name}", msg);
             return true;
         }
 

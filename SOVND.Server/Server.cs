@@ -9,6 +9,7 @@ using Anotar.NLog;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
 using SOVND.Server.Settings;
+using Newtonsoft.Json;
 
 namespace SOVND.Server
 {
@@ -17,11 +18,23 @@ namespace SOVND.Server
         private readonly ServerSpotifyAuth _spot;
         private Dictionary<string, ChannelHandler> channels = new Dictionary<string, ChannelHandler>();
 
+        public new void Run()
+        {
+            Spotify.Initialize();
+            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_server", _spot.Username, _spot.Password))
+                throw new Exception("Spotify login failure");
+            LogTo.Trace("Logged into Spotify");
+            while (!Spotify.Ready())
+                Thread.Sleep(100);
+            Connect();
+            LogTo.Debug("Connected to MQTT");
+        }
+
         public Server(IMQTTSettings settings, IChannelHandlerFactory chf, ServerSpotifyAuth spot)
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
             _spot = spot;
-            LogTo.Trace("Initializing server");
+            LogTo.Trace("Initializing routes");
 
             //////
             // User messages
@@ -66,7 +79,7 @@ namespace SOVND.Server
             };
 
             // Handle channel registration
-            On["/user/{username}/register/{channel}/{param}"] = _ =>
+            On["/user/{username}/register/{channel}"] = _ =>
             {
                 // TODO Verify that channel hasn't already been created
                 // TODO Check user permissions
@@ -74,19 +87,18 @@ namespace SOVND.Server
                 // TODO Force channel ID to lowercase
                 // TODO Separate channel name from ID
 
-                if (string.IsNullOrWhiteSpace(_.Message))
+                Channel channel = JsonConvert.DeserializeObject<Channel>(_.Message);
+
+                if (channel == null || 
+                    string.IsNullOrWhiteSpace(channel.Name))
                 {
-                    LogTo.Warn("\{_.param} was null or whitespace, rejected");
+                    LogTo.Warn("Rejected invalid channel JSON from {0} for channel {1}: {2}", (string)_.username, (string)_.channel, (string)_.Message);
                     return;
                 }
 
-                LogTo.Info("\{_.username} created channel \{_.channel}, setting \{_.param} to \{_.Message}");
+                LogTo.Info("\{_.username} sent channel data for {0}: {1}", (string)_.channel, (string)_.Message);
 
-                List<string> AllowedParams = new List<string> { "name", "description", "image", "moderators" };
-                if (AllowedParams.Contains(_.param))
-                    Publish("/\{_.channel}/info/\{_.param}", _.Message);
-                else
-                    LogTo.Warn("Bad param: \{_.param}");
+                Publish("/\{_.channel}/info", _.Message);
             };
 
             // Handle user chat messages
@@ -109,33 +121,19 @@ namespace SOVND.Server
             // TODO: This should be separate from above
 
             // Handle channel info
-            On["/{channel}/info/name"] = _ =>
+            On["/{channel}/info"] = _ =>
             {
-                LogTo.Info("\{_.channel} got a name: \{_.Message}");
+                LogTo.Info("\{_.channel} got info: \{_.Message}");
+
+                Channel channel = JsonConvert.DeserializeObject<Channel>(_.Message);
 
                 if (!channels.ContainsKey(_.channel))
                 {
-                    ChannelHandler channel = chf.CreateChannelHandler(_.channel);
-                    channel.Subscribe();
-                    channels[_.channel] = channel;
-                    ScheduleNextSong(channel);
+                    ChannelHandler channelHandler = chf.CreateChannelHandler(_.channel);
+                    channelHandler.Subscribe();
+                    channels[_.channel] = channelHandler;
+                    StartChannelScheduler(channelHandler);
                 }
-
-                channels[_.channel].Name = _.Message;
-            };
-
-            On["/{channel}/info/description"] = _ =>
-            {
-                LogTo.Debug("\{_.channel} got a description: \{_.Message}");
-
-                if (!channels.ContainsKey(_.channel))
-                {
-                    ChannelHandler channel = chf.CreateChannelHandler(_.channel);
-                    channel.Subscribe();
-                    channels[_.channel] = channel;
-                }
-
-                channels[_.channel].Description = _.Message;
             };
         }
 
@@ -179,20 +177,6 @@ namespace SOVND.Server
             //}
         }
 
-        public new void Run()
-        {
-            Spotify.Initialize();
-            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_server", _spot.Username, _spot.Password))
-                throw new Exception("Login failure");
-            LogTo.Trace("Server logged in");
-            while (!Spotify.Ready())
-                Thread.Sleep(100);
-            LogTo.Trace("Server is ready");
-
-            Connect();
-            LogTo.Debug("Sever connected");
-        }
-
         private void ReportSong(string channel, string songID, string username)
         {
             LogTo.Debug("\{username} reported song \{songID} on \{channel}");
@@ -213,8 +197,8 @@ namespace SOVND.Server
             // TODO Verify priveleges
             // TODO Remove song
 
-            Publish("/\{channel}/playlist/\{songID}/votes", "", true);
-            Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
+            //Publish("/\{channel}/playlist/\{songID}/votes", "", true);
+            //Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
         }
 
         private void BlockSong(string channel, string songID, string username)
@@ -228,14 +212,14 @@ namespace SOVND.Server
             // TODO Remove song
             // TODO Record block
 
-            Publish("/\{channel}/playlist/\{songID}/votes", "", true);
-            Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
-            Publish("/\{channel}/playlist/\{songID}/blocked", "true", true);
+            //Publish("/\{channel}/playlist/\{songID}/votes", "", true);
+            //Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
+            //Publish("/\{channel}/playlist/\{songID}/blocked", "true", true);
         }
 
         private Dictionary<ChannelHandler, bool> runningScheduler = new Dictionary<ChannelHandler, bool>();
 
-        private void ScheduleNextSong(ChannelHandler channelHandler)
+        private void StartChannelScheduler(ChannelHandler channelHandler)
         {
             lock (runningScheduler)
             {
