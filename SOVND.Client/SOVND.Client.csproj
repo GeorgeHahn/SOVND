@@ -94,10 +94,10 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="App.xaml">
+    <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
+    </ApplicationDefinition>
     <Compile Include="Audio\SpotifyTrackDataPipe.cs" />
     <Compile Include="Models\NewChannelModel.cs" />
     <Compile Include="Modules\NowPlayingHandler.cs" />

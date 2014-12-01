@@ -16,11 +16,6 @@ namespace SOVND.Client
     /// </summary>
     public partial class App : Application
     {
-        public App(MainWindow UI)
-        {
-            UI.Show();
-        }
-
         public static IntPtr WindowHandle { get; internal set; }
     }
 }
