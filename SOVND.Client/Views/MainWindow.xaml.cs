@@ -94,10 +94,13 @@ namespace SOVND.Client
             App.client.SubscribedChannelHandler.Subscribe();
 
             playlist = CollectionViewSource.GetDefaultView(App.client.SubscribedChannelHandler._playlist.Songs);
+
+            // TODO this section needs to be scrapped //
             playlist.SortDescriptions.Clear();
             playlist.SortDescriptions.Add(new SortDescription("Votetime", ListSortDirection.Descending));
             playlist.SortDescriptions.Add(new SortDescription("Votes", ListSortDirection.Ascending));
             playlist.Refresh();
+            ////////////////////////////////////////////
 
             Action Refresh = () => { SyncHolder.sync.Send((x) => playlist.Refresh(), null); };
             App.client.SubscribedChannelHandler.Songs.CollectionChanged += (_, __) => { Refresh(); };

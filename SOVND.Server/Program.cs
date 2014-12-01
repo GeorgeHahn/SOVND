@@ -1,4 +1,5 @@
-﻿using Ninject;
+﻿using Anotar.NLog;
+using Ninject;
 using Ninject.Extensions.Factory;
 using SOVND.Lib;
 using System.Text;

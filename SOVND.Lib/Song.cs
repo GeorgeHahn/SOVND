@@ -8,7 +8,6 @@ namespace SOVND.Lib
 {
     public class Song : IComparable, INotifyPropertyChanged
     {
-        public Action<string> Log = _ => Console.WriteLine(_);
         private int _votes;
 
         public Song(string songID)

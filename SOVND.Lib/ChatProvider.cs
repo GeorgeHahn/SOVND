@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using Charlotte;
+using Anotar.NLog;
 
 namespace SOVND.Lib
 {
@@ -16,7 +17,6 @@ namespace SOVND.Lib
     public class ChatProvider : MqttModule, IChatProvider
     {
         private ChannelHandler _channel;
-        public Action<string> Log = _ => Console.WriteLine(_);
 
         public ObservableCollection<ChatMessage> Chats { get; } = new ObservableCollection<ChatMessage>();
 
@@ -27,7 +27,7 @@ namespace SOVND.Lib
             // ChannelHandler chats
             On["/\{channel.MQTTName}/chat"] = _ =>
             {
-                Log("\{channel.Name} chat - \{_.Message}");
+                LogTo.Trace("\{channel.Name} chat - \{_.Message}");
 
                 if (SyncHolder.sync != null)
                     SyncHolder.sync.Send((x) => Chats.Add(new ChatMessage(_.Message)), null);

@@ -16,6 +16,7 @@ using Ninject.Extensions.Factory;
 using SOVND.Client.Settings;
 using SOVND.Client.ViewModels;
 using SOVND.Lib.Settings;
+using Anotar.NLog;
 
 namespace SOVND.Client
 {
@@ -48,7 +49,6 @@ namespace SOVND.Client
     public class SovndClient : MqttModule
     {
         private readonly IChannelHandlerFactory _chf;
-        private Action<string> Log = _ => Console.WriteLine(_);
 
         private readonly string Username;
 
@@ -78,6 +78,7 @@ namespace SOVND.Client
             _authSettings = settings.GetAuthSettings();
 
             Username = _authSettings.SOVNDUsername;
+            Logging.SetupLogging(Username);
 
             // TODO Track channel list
             // TODO Track playlist for channel
@@ -91,7 +92,7 @@ namespace SOVND.Client
             // TODO Convert nowplaying to a JSON object so songid and playtime come in at the same time?
             On["/{channel}/nowplaying/songid"] = _ =>
             {
-                Log("Playing: \{_.Message}");
+                LogTo.Debug("Playing: \{_.Message}");
 
                 if (string.IsNullOrWhiteSpace(_.Message))
                 {
@@ -169,7 +170,7 @@ namespace SOVND.Client
             if (SubscribedChannelHandler != null)
                 Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/chat", text);
             else
-                Log("Not subscribed to any channel");
+                LogTo.Warn("Cannot send chat: not subscribed to a channel");
         }
 
         public bool RegisterChannel(string name, string description, string image)
@@ -202,7 +203,7 @@ namespace SOVND.Client
                 Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/songssearch/", track.Name + " " + track?.Artists[0]);
             }
             else
-                Log("Not subscribed to a channel or channel subscription is malformed (null or MQTTName null)");
+                LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or MQTTName null)");
         }
 
         protected override void Stop()

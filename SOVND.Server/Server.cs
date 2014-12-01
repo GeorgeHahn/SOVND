@@ -7,6 +7,7 @@ using Charlotte;
 using SOVND.Lib;
 using SpotifyClient;
 using System.Diagnostics;
+using Anotar.NLog;
 
 namespace SOVND.Server
 {
@@ -32,35 +33,34 @@ namespace SOVND.Server
     public class Server : MqttModule, IServer
     {
         private readonly ServerSpotifyAuth _spot;
-        public Action<string> Log = _ => Console.WriteLine(_);
         private Dictionary<string, ChannelHandler> channels = new Dictionary<string, ChannelHandler>();
 
         public Server(IMQTTSettings settings, IChannelHandlerFactory chf, ServerSpotifyAuth spot)
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
             _spot = spot;
-            Log("Starting up");
+            LogTo.Trace("Starting up");
 
             On["#"] = _ =>
             {
-                Log("\{_.Topic}: \{_.Message}");
+                LogTo.Trace("\{_.Topic}: \{_.Message}");
             };
 
 
             On["/user/{username}/{channel}/songssearch/"] = _ =>
             {
                 Search search = Spotify.GetSearch(_.Message);
-                Log("Searched \{_.Message} and \{(search.IsLoaded ? "is" : "is not")} loaded");
+                LogTo.Debug("Searched \{_.Message} and \{(search.IsLoaded ? "is" : "is not")} loaded");
             };
 
             On["/user/{username}/{channel}/songs/{songid}"] = _ =>
             {
                 if (_.Message == "vote")
                 {
-                    Log("\{_.username} voted for song \{_.songid}");
+                    LogTo.Debug("\{_.username} voted for song \{_.songid}");
                     if (!channels.ContainsKey(_.channel))
                     {
-                        Log("Got a vote from \{_.username} for nonexistent channel: \{_.channel}");
+                        LogTo.Warn("Got a vote from \{_.username} for nonexistent channel: \{_.channel}");
                         return;
                     }
 
@@ -74,7 +74,7 @@ namespace SOVND.Server
                 }
                 else if (_.Message == "unvote")
                 {
-                    Log("Unvoting currently disabled");
+                    LogTo.Warn("Unvoting currently disabled");
                     return;
 
                     //Log("\{_.username} unvoted for song \{_.songid}");
@@ -95,20 +95,20 @@ namespace SOVND.Server
                 }
                 else if (_.Message == "report")
                 {
-                    Log("\{_.username} reported song \{_.songid} on \{_.channel}");
+                    LogTo.Debug("\{_.username} reported song \{_.songid} on \{_.channel}");
 
                     // TODO Record report
                 }
                 else if (_.Message == "remove")
                 {
-                    Log("\{_.username} removed song \{_.songid} on \{_.channel}");
+                    LogTo.Debug("\{_.username} removed song \{_.songid} on \{_.channel}");
 
                     // TODO Verify priveleges
                     // TODO Remove song
                 }
                 else if (_.Message == "block")
                 {
-                    Log("\{_.username} blocked song \{_.songid} on \{_.channel}");
+                    LogTo.Debug("\{_.username} blocked song \{_.songid} on \{_.channel}");
 
                     // TODO Verify priveleges
                     // TODO Remove song
@@ -117,7 +117,7 @@ namespace SOVND.Server
 
                 else
                 {
-                    Log("Invalid command: \{_.Topic}: \{_.Message}");
+                    LogTo.Warn("Invalid command: \{_.Topic}: \{_.Message}");
                     return;
                 }
             };
@@ -134,22 +134,22 @@ namespace SOVND.Server
 
                 if (string.IsNullOrWhiteSpace(_.Message))
                 {
-                    Log("\{_.param} was null or whitespace, rejected");
+                    LogTo.Warn("\{_.param} was null or whitespace, rejected");
                     return;
                 }
 
-                Log("\{_.username} created channel \{_.channel}, setting \{_.param} to \{_.Message}");
+                LogTo.Info("\{_.username} created channel \{_.channel}, setting \{_.param} to \{_.Message}");
 
                 List<string> AllowedParams = new List<string> { "name", "description", "image", "moderators" };
                 if (AllowedParams.Contains(_.param))
                     Publish("/\{_.channel}/info/\{_.param}", _.Message);
                 else
-                    Log("Bad param: \{_.param}");
+                    LogTo.Warn("Bad param: \{_.param}");
             };
 
             On["/user/{username}/{channel}/chat"] = _ =>
             {
-                Log("\{_.channel}-> \{_.username}: \{_.Message}");
+                LogTo.Trace("\{_.channel}-> \{_.username}: \{_.Message}");
                 
                 // TODO [LOW] Log chats
                 // TODO [LOW] Allow moderators to mute users
@@ -157,7 +157,7 @@ namespace SOVND.Server
                 if (channels.ContainsKey(_.channel))
                     Publish("/\{_.channel}/chat", "\{_.username}: \{_.Message}");
                 else
-                    Log("Chat was for invalid channel");
+                    LogTo.Debug("Chat was for invalid channel");
             };
 
             // ChannelHandler registration
@@ -165,7 +165,7 @@ namespace SOVND.Server
 
             On["/{channel}/info/name"] = _ => // TODO: This should maybe be chan/info/{PARAM}
             {
-                Log("\{_.channel} got a name: \{_.Message}");
+                LogTo.Info("\{_.channel} got a name: \{_.Message}");
 
                 if (!channels.ContainsKey(_.channel))
                 {
@@ -180,7 +180,7 @@ namespace SOVND.Server
 
             On["/{channel}/info/description"] = _ =>
             {
-                Log("\{_.channel} got a description: \{_.Message}");
+                LogTo.Debug("\{_.channel} got a description: \{_.Message}");
 
                 if (!channels.ContainsKey(_.channel))
                 {
@@ -201,13 +201,13 @@ namespace SOVND.Server
             Spotify.Initialize();
             if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_server", _spot.Username, _spot.Password))
                 throw new Exception("Login failure");
-            Log("Logged in");
+            LogTo.Trace("Server logged in");
             while (!Spotify.Ready())
                 Thread.Sleep(100);
-            Log("Ready");
+            LogTo.Trace("Server is ready");
 
             Connect();
-            Log("Connected");
+            LogTo.Debug("Sever connected");
         }
 
         private void RemoveSong(string channel, string songID)
@@ -231,7 +231,7 @@ namespace SOVND.Server
             {
                 if (runningScheduler.ContainsKey(channelHandler) && runningScheduler[channelHandler])
                 {
-                    Log("Already running scheduler for \{channelHandler.MQTTName}");
+                    LogTo.Debug("Already running scheduler for {0}", channelHandler.MQTTName);
                     return;
                 }
                 else
@@ -241,7 +241,7 @@ namespace SOVND.Server
             var task = Task.Factory.StartNew(() =>
             {
                 var channel = channelHandler.MQTTName;
-                Log("Starting track scheduler for \{channel}");
+                LogTo.Debug("Starting track scheduler for \{channel}");
                 
                 while (true)
                 {
@@ -252,16 +252,16 @@ namespace SOVND.Server
                         if(song != null)
                             song.track = new Track(song.SongID);
                         if (song == null)
-                            Log("No song");
+                            LogTo.Info("No song");
                         else
-                            Log("Either no track or no track time");
+                            LogTo.Debug("Either no track or no track time");
                         Thread.Sleep(1000);
                         continue;
                     }
                     else
                     {
                         if (song.track?.Name != null)
-                            Log("Playing \{song.track.Name}");
+                            LogTo.Debug("Playing \{song.track.Name}");
 
                         Publish("/\{channel}/nowplaying/songid", "", true);
                         Publish("/\{channel}/nowplaying/songid", song.SongID, true);
@@ -271,7 +271,7 @@ namespace SOVND.Server
                         Thread.Sleep((int) Math.Ceiling(songtime*1000));
 
                         if (song.track?.Name != null)
-                            Log("Finished playing \{song.track.Name}");
+                            LogTo.Trace("Finished playing \{song.track.Name}");
 
                         // Set prev song to 0 votes, 0 vote time
                         channelHandler.ClearVotes(song.SongID);

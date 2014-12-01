@@ -1,4 +1,5 @@
-﻿using Charlotte;
+﻿using Anotar.NLog;
+using Charlotte;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -23,7 +24,6 @@ namespace SOVND.Lib
     public class PlaylistProvider : MqttModule, IPlaylistProvider
     {
         private ChannelHandler _channel;
-        public Action<string> Log = _ => Console.WriteLine(_);
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
@@ -33,7 +33,7 @@ namespace SOVND.Lib
         {
             if (!uservotes.ContainsKey(username + songID) || !uservotes[username + songID])
             {
-                Log("Vote was valid");
+                LogTo.Trace("Vote was valid");
 
                 if (!votes.ContainsKey(songID))
                 {
@@ -48,7 +48,7 @@ namespace SOVND.Lib
             }
             else
             {
-                Log("Vote was invalid");
+                LogTo.Error("Vote was invalid: {0} voted for {1}", username, songID);
                 return false;
             }
         }
@@ -81,7 +81,7 @@ namespace SOVND.Lib
 
         private void AddNewSong(string ID)
         {
-            Log("Added song \{ID}");
+            LogTo.Trace("Added song \{ID}");
             var song = new Song(ID);
             _channel.SongsByID[ID] = song;
 
@@ -105,7 +105,7 @@ namespace SOVND.Lib
                     WaitForTrack(song);
                 }
                 else
-                    Log("Song is \{song.track.Name}");
+                    LogTo.Debug("Song arrived: {0}", song.track.Name);
             })).Start();
         }
 
@@ -116,7 +116,7 @@ namespace SOVND.Lib
             // ChannelHandler playlists
             On["/\{_channel.MQTTName}/playlist/{songid}/votes"] = _ =>
             {
-                Log("\{_channel.Name} got a vote for \{_.songid}");
+                LogTo.Trace("\{_channel.Name} got a vote for \{_.songid}");
 
                 if (!channel.SongsByID.ContainsKey(_.songid))
                     AddNewSong(_.songid);
