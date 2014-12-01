@@ -12,12 +12,11 @@ namespace SOVND.Client.Modules
     public class NowPlayingHandler : SOVNDModule
     {
         private Track playingTrack;
-        public IntPtr WindowHandle;
         private SpotifyTrackDataPipe streamingaudio;
         private BufferedWaveProvider wave;
         private WaveFormat WaveFormat;
         private CancellationTokenSource songToken;
-        private object soundlock = new object();
+        private static object soundlock = new object();
         private string _channel;
 
         public NowPlayingHandler(AuthPair auth) : base(auth)

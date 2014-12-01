@@ -218,10 +218,11 @@ namespace SOVND.Server
         }
 
         private Dictionary<ChannelHandler, bool> runningScheduler = new Dictionary<ChannelHandler, bool>();
+        private static object schedulerlock = new object();
 
         private void StartChannelScheduler(ChannelHandler channelHandler)
         {
-            lock (runningScheduler)
+            lock (schedulerlock)
             {
                 if (runningScheduler.ContainsKey(channelHandler) && runningScheduler[channelHandler])
                 {
