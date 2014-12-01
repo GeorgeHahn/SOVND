@@ -16,6 +16,7 @@ using System.ComponentModel;
 using SOVND.Lib.Models;
 using SOVND.Client.Modules;
 using System.Collections;
+using SOVND.Lib.Handlers;
 
 namespace SOVND.Client
 {
@@ -66,12 +67,15 @@ namespace SOVND.Client
             _client.SubscribedChannelHandler.Subscribe();
             _player.SubscribeTo("ambient");
 
-            playlist = (ListCollectionView)(CollectionViewSource.GetDefaultView(_client.SubscribedChannelHandler._playlist.Songs));
+            var observablePlaylist = ((IObservablePlaylistProvider)_client.SubscribedChannelHandler.Playlist);
+
+            playlist = (ListCollectionView)(CollectionViewSource.GetDefaultView(observablePlaylist.Songs));
             playlist.CustomSort = new SongComparer();
-            
-            Action Refresh = () => { _sync.sync.Send((x) => playlist.Refresh(), null); };
-            _client.SubscribedChannelHandler.Songs.CollectionChanged += (_, __) => { Refresh(); };
-            _client.SubscribedChannelHandler._playlist.PropertyChanged += (_, __) => { Refresh(); };
+
+            observablePlaylist.PropertyChanged += (_, __) =>
+            {
+                _sync.sync.Send((x) => playlist.Refresh(), null);
+            };
 
             chatbox.ItemsSource = _client.SubscribedChannelHandler.Chats;
 

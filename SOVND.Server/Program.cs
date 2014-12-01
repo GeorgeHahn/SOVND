@@ -18,7 +18,7 @@ namespace SOVND.Server
             {
                 IKernel kernel = new StandardKernel();
                 kernel.Bind<IChannelHandlerFactory>().ToFactory();
-                kernel.Bind<IPlaylistProvider>().To<PlaylistProvider>();
+                kernel.Bind<IPlaylistProvider>().To<SortedPlaylistProvider>();
                 kernel.Bind<IChatProvider>().To<ChatProvider>();
 
                 kernel.Bind<IMQTTSettings>().To<ServerMqttSettings>();

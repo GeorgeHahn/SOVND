@@ -75,6 +75,7 @@
     <Compile Include="Handlers\ChannelHandler.cs" />
     <Compile Include="Handlers\ChatProvider.cs" />
     <Compile Include="Handlers\PlaylistProvider.cs" />
+    <Compile Include="Handlers\SortedPlaylistProvider.cs" />
     <Compile Include="Models\Channel.cs" />
     <Compile Include="Models\ChatMessage.cs" />
     <Compile Include="Models\ConnectionSettings.cs" />

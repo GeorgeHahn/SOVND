@@ -25,7 +25,7 @@ namespace SOVND.Client
             IKernel kernel = new StandardKernel();
             kernel.Bind<IMQTTSettings>().To<SovndMqttSettings>();
             kernel.Bind<IChannelHandlerFactory>().ToFactory();
-            kernel.Bind<IPlaylistProvider>().To<PlaylistProvider>();
+            kernel.Bind<IPlaylistProvider>().To<ObservablePlaylistProvider>();
             kernel.Bind<IChatProvider>().To<ChatProvider>();
             kernel.Bind<ISettingsProvider>().To<FilesystemSettingsProvider>();
             kernel.Bind<IFileLocationProvider>().To<AppDataLocationProvider>();

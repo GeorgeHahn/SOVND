@@ -146,7 +146,7 @@ namespace SOVND.Server
                 return;
             }
 
-            var playlist = channels[channel]._playlist; // TODO Nasty
+            var playlist = channels[channel].Playlist; // TODO Nasty
 
             if (playlist.AddVote(songid, username))
             {
@@ -236,11 +236,12 @@ namespace SOVND.Server
             var task = Task.Factory.StartNew(() =>
             {
                 var channel = channelHandler.MQTTName;
+                var playlist = (ISortedPlaylistProvider)channels[channel].Playlist;
                 LogTo.Debug("Starting track scheduler for \{channel}");
                 
                 while (true)
                 {
-                    Song song = channels[channel].GetTopSong();
+                    Song song = playlist.GetTopSong();
                     
                     if (song == null || song.track == null || song.track.Seconds == 0)
                     {
