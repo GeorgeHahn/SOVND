@@ -22,10 +22,10 @@ namespace SOVND.Client.Views
     {
         public string ChannelName { get; private set; }
 
-        public NewChannel()
+        public NewChannel(NewChannelViewModel viewmodel)
         {
             InitializeComponent();
-            DataContext = new NewChannelViewModel();
+            DataContext = viewmodel;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

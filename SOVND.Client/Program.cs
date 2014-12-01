@@ -31,13 +31,14 @@ namespace SOVND.Client
             kernel.Bind<IFileLocationProvider>().To<AppDataLocationProvider>();
             kernel.Bind<IAppName>().To<AppName>();
 
+            kernel.Bind<NowPlayingHandler>().ToSelf().InSingletonScope();
+            kernel.Bind<SovndClient>().ToSelf().InSingletonScope();
+
             // Instantiating this class checks settings and shows UI if they're not set
             kernel.Get<CheckSettings>();
 
             // Instantiating this initializes Spotify
             kernel.Get<StartSpotify>();
-
-            App.Player = kernel.Get<NowPlayingHandler>();
 
             var app = kernel.Get<App>();
             app.Run();

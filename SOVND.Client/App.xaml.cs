@@ -16,18 +16,13 @@ namespace SOVND.Client
     /// </summary>
     public partial class App : Application
     {
-        public App(SovndClient client, MainWindow UI)
+        public App(MainWindow UI)
         {
-            App.Client = client;
             UI.Show();
         }
 
         public static IntPtr WindowHandle { get; internal set; }
 
-        public static SovndClient Client { get; internal set; }
-
         public static SynchronizationContext UIThread { get; internal set; }
-
-        public static NowPlayingHandler Player { get; internal set; }
     }
 }

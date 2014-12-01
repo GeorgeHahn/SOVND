@@ -25,31 +25,35 @@ namespace SOVND.Client
     {
         private readonly ISettingsProvider _settings;
         private readonly IAppName _appname;
+        private readonly SovndClient _client;
+        private readonly NowPlayingHandler _player;
         private SettingsModel _auth;
 
-        public MainWindow(ISettingsProvider settings, IAppName appname)
+        public MainWindow(ISettingsProvider settings, IAppName appname, SovndClient client, NowPlayingHandler player)
         {
-            _settings = settings;
-            _appname = appname;
-            
             InitializeComponent();
 
+            _settings = settings;
+            _appname = appname;
+            _client = client;
+            _player = player;
             _auth = _settings.GetAuthSettings();
-
 
             Loaded += (_, __) =>
             {
                 App.WindowHandle = new WindowInteropHelper(this).Handle;
                 App.UIThread = SynchronizationContext.Current;
                 SyncHolder.sync = SynchronizationContext.Current;
-                App.Client.Run();
-                App.Player.Run();
+
+                _client.Run();
+                _player.Run();
+
                 SetupChannel();
             };
 
             Closed += (_, __) =>
             {
-                App.Client.Disconnect();
+                _client.Disconnect();
                 Spotify.ShutDown();
                 Process.GetCurrentProcess().Kill(); // TODO That's really inelegant
             };
@@ -57,10 +61,10 @@ namespace SOVND.Client
 
         private void SetupChannel()
         {
-            App.Client.SubscribedChannelHandler.Subscribe();
-            App.Player.SubscribeTo("ambient");
+            _client.SubscribedChannelHandler.Subscribe();
+            _player.SubscribeTo("ambient");
 
-            playlist = CollectionViewSource.GetDefaultView(App.Client.SubscribedChannelHandler._playlist.Songs);
+            playlist = CollectionViewSource.GetDefaultView(_client.SubscribedChannelHandler._playlist.Songs);
 
             // TODO this section needs to be scrapped //
             playlist.SortDescriptions.Clear();
@@ -70,10 +74,10 @@ namespace SOVND.Client
             ////////////////////////////////////////////
 
             Action Refresh = () => { SyncHolder.sync.Send((x) => playlist.Refresh(), null); };
-            App.Client.SubscribedChannelHandler.Songs.CollectionChanged += (_, __) => { Refresh(); };
-            App.Client.SubscribedChannelHandler._playlist.PropertyChanged += (_, __) => { Refresh(); };
+            _client.SubscribedChannelHandler.Songs.CollectionChanged += (_, __) => { Refresh(); };
+            _client.SubscribedChannelHandler._playlist.PropertyChanged += (_, __) => { Refresh(); };
 
-            chatbox.ItemsSource = App.Client.SubscribedChannelHandler.Chats;
+            chatbox.ItemsSource = _client.SubscribedChannelHandler.Chats;
 
             BindToPlaylist();
         }
@@ -152,22 +156,22 @@ namespace SOVND.Client
 
         private void EnqueueTrack(Track track)
         {
-            App.Client.AddTrack(track);
+            _client.AddTrack(track);
         }
 
         private void SendChat(object sender, RoutedEventArgs e)
         {
-            App.Client.SendChat(chatinput.Text);
+            _client.SendChat(chatinput.Text);
             chatinput.Clear();
         }
 
         private void NewChannel(object sender, RoutedEventArgs e)
         {
-            var newch = new NewChannel();
+            var newch = new NewChannel(new NewChannelViewModel(_client));
             if (newch.ShowDialog().Value == true)
             {
                 var channel = newch.ChannelName;
-                App.Client.SubscribeToChannel(channel);
+                _client.SubscribeToChannel(channel);
             }
         }
     }

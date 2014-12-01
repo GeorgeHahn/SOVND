@@ -99,6 +99,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Audio\SpotifyTrackDataPipe.cs" />
+    <Compile Include="Models\NewChannelModel.cs" />
     <Compile Include="Modules\NowPlayingHandler.cs" />
     <Compile Include="Modules\SovndClient.cs" />
     <Compile Include="Program.cs" />
