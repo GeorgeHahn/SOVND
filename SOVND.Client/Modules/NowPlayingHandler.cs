@@ -16,16 +16,21 @@ namespace SOVND.Client.Modules
         private SpotifyTrackDataPipe streamingaudio;
         private BufferedWaveProvider wave;
         private WaveFormat WaveFormat;
-        private CancellationTokenSource songToken = null;
+        private CancellationTokenSource songToken;
         private object soundlock = new object();
+        private string _channel;
 
         public NowPlayingHandler(AuthPair auth) : base(auth)
         {
             // TODO Use channel/nowplaying/starttime to seek to correct position
             // TODO Convert nowplaying to a JSON object so songid and playtime come in at the same time?
 
+            // TODO Should subscribe to only /_channel/... instead of /+/...
             On["/{channel}/nowplaying/songid"] = _ =>
             {
+                if (_channel != _.channel)
+                    return;
+
                 string song = _.Message;
                 if (string.IsNullOrWhiteSpace(song))
                 {
@@ -36,6 +41,11 @@ namespace SOVND.Client.Modules
 
                 PlaySong(song);
             };
+        }
+
+        public void SubscribeTo(string channel)
+        {
+            _channel = channel;
         }
 
         private void PlaySong(string songID)

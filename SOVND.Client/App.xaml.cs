@@ -27,5 +27,7 @@ namespace SOVND.Client
         public static SovndClient Client { get; internal set; }
 
         public static SynchronizationContext UIThread { get; internal set; }
+
+        public static NowPlayingHandler Player { get; internal set; }
     }
 }

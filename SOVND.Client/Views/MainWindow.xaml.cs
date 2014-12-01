@@ -14,6 +14,7 @@ using SOVND.Client.ViewModels;
 using SOVND.Client.Views;
 using System.ComponentModel;
 using SOVND.Lib.Models;
+using SOVND.Client.Modules;
 
 namespace SOVND.Client
 {
@@ -24,19 +25,25 @@ namespace SOVND.Client
     {
         private readonly ISettingsProvider _settings;
         private readonly IAppName _appname;
-        private SettingsModel auth;
+        private SettingsModel _auth;
 
         public MainWindow(ISettingsProvider settings, IAppName appname)
         {
             _settings = settings;
             _appname = appname;
-
+            
             InitializeComponent();
-           
+
+            _auth = _settings.GetAuthSettings();
+
+
             Loaded += (_, __) =>
             {
-                SetupSettings();
-                InitializeSpotify();
+                App.WindowHandle = new WindowInteropHelper(this).Handle;
+                App.UIThread = SynchronizationContext.Current;
+                SyncHolder.sync = SynchronizationContext.Current;
+                App.Client.Run();
+                App.Player.Run();
                 SetupChannel();
             };
 
@@ -48,37 +55,10 @@ namespace SOVND.Client
             };
         }
 
-        private void SetupSettings()
-        {
-            if (!_settings.AuthSettingsSet())
-            {
-                SettingsWindow w = new SettingsWindow();
-                var settingsViewModel = new SettingsViewModel(_settings.GetAuthSettings());
-                w.DataContext = settingsViewModel;
-                w.ShowDialog();
-            }
-
-            auth = _settings.GetAuthSettings();
-        }
-
-        private void InitializeSpotify()
-        {
-            App.WindowHandle = new WindowInteropHelper(this).Handle;
-            App.UIThread = SynchronizationContext.Current;
-            SyncHolder.sync = SynchronizationContext.Current;
-            Spotify.Initialize();
-            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), _appname.Name, auth.SpotifyUsername, auth.SpotifyPassword))
-                throw new Exception("Login failure");
-
-            while (!Spotify.Ready())
-                Thread.Sleep(100);
-
-            App.Client.Run();
-        }
-
         private void SetupChannel()
         {
             App.Client.SubscribedChannelHandler.Subscribe();
+            App.Player.SubscribeTo("ambient");
 
             playlist = CollectionViewSource.GetDefaultView(App.Client.SubscribedChannelHandler._playlist.Songs);
 
