@@ -26,13 +26,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using libspotifydotnet;
 using NAudio.Wave;
-using System.Threading.Tasks;
-using NAudio.Utils;
+using SpotifyClient;
 
-namespace SpotifyClient
+namespace SOVND.Client.Audio
 {
     public class SpotifyTrackDataPipe
     {
