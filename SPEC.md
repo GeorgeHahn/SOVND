@@ -10,10 +10,12 @@ MQTT Communication spec
 	/{channel}/nowplaying/starttime # ID of currently playing song
 
 	/{channel}/info
-		/name
-		/description
-		/image
-		/moderators?
+		JSON with:
+			name
+			description
+			image
+			headerimage
+			moderators
 	/{channel}/playlist/{songid}
 		/votetime # time of the first vote on this song (TODO: spec time format)
 		/votes    # number of votes
