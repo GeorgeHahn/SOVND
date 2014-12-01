@@ -36,6 +36,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>SOVND.Client.Program</StartupObject>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Anotar.NLog">
       <HintPath>..\packages\Anotar.NLog.Fody.2.12.1\Lib\Anotar.NLog.dll</HintPath>
@@ -96,9 +99,13 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Audio\SpotifyTrackDataPipe.cs" />
-    <Compile Include="SovndClient.cs" />
+    <Compile Include="Modules\NowPlayingHandler.cs" />
+    <Compile Include="Modules\SovndClient.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Util\AuthPair.cs" />
     <Compile Include="Util\Logging.cs" />
     <Compile Include="Util\PasswordHelper.cs" />
+    <Compile Include="Util\SOVNDModule.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
     <Compile Include="Views\ChannelWindow.xaml.cs">
       <DependentUpon>ChannelWindow.xaml</DependentUpon>
