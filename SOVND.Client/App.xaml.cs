@@ -18,6 +18,9 @@ using SOVND.Client.ViewModels;
 using SOVND.Lib.Settings;
 using Anotar.NLog;
 using SOVND.Client.Audio;
+using SOVND.Client.Util;
+using SOVND.Lib.Handlers;
+using SOVND.Lib.Models;
 
 namespace SOVND.Client
 {

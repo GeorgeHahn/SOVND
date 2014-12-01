@@ -7,6 +7,7 @@
         xmlns:local="clr-namespace:SOVND.Client"
         xmlns:spotify="clr-namespace:SpotifyClient;assembly=SpotifyClient"
         xmlns:lib="clr-namespace:SOVND.Lib;assembly=SOVND.Lib"
+        xmlns:models="clr-namespace:SOVND.Lib.Models;assembly=SOVND.Lib"
         mc:Ignorable="d"
         Title="SOVND" Height="350" Width="525">
     <Window.Resources>
@@ -35,7 +36,7 @@
                 x:Name="lbPlaylist"
                 HorizontalContentAlignment="Stretch">
                 <ListBox.Resources>
-                    <DataTemplate DataType="{x:Type lib:Song}">
+                    <DataTemplate DataType="{x:Type models:Song}">
                         <!-- This is a song in the playlist -->
                         <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
                             <DockPanel>
@@ -112,7 +113,7 @@
                 Grid.Row="1"
                 x:Name="chatbox">
                 <ListBox.Resources>
-                    <DataTemplate DataType="{x:Type lib:ChatMessage}">
+                    <DataTemplate DataType="{x:Type models:ChatMessage}">
                         <TextBlock Text="{Binding Path=Message}" />
                     </DataTemplate>
                 </ListBox.Resources>

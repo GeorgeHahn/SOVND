@@ -8,6 +8,8 @@ using SOVND.Lib;
 using SpotifyClient;
 using System.Diagnostics;
 using Anotar.NLog;
+using SOVND.Lib.Handlers;
+using SOVND.Lib.Models;
 
 namespace SOVND.Server
 {

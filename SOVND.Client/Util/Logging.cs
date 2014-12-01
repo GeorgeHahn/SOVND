@@ -1,13 +1,8 @@
 ﻿using NLog;
 using NLog.Config;
 using NLog.Slack;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace SOVND.Client
+namespace SOVND.Client.Util
 {
     public static class Logging
     {

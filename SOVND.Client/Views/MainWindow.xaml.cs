@@ -22,6 +22,7 @@ using SOVND.Lib.Settings;
 using SOVND.Client.ViewModels;
 using SOVND.Client.Views;
 using System.ComponentModel;
+using SOVND.Lib.Models;
 
 namespace SOVND.Client
 {
