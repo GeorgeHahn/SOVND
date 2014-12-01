@@ -7,6 +7,7 @@ using SOVND.Client.Settings;
 using SOVND.Lib.Settings;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
+using System;
 
 namespace SOVND.Client
 {
@@ -15,13 +16,16 @@ namespace SOVND.Client
     /// </summary>
     public partial class App : Application
     {
-        public static SovndClient client;
-        public static SynchronizationContext uithread;
-
-        public App(SovndClient client, MainWindow ui)
+        public App(SovndClient client, MainWindow UI)
         {
-            App.client = client;
-            ui.Show();
+            App.Client = client;
+            UI.Show();
         }
+
+        public static IntPtr WindowHandle { get; internal set; }
+
+        public static SovndClient Client { get; internal set; }
+
+        public static SynchronizationContext UIThread { get; internal set; }
     }
 }

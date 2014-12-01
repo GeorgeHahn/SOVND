@@ -17,11 +17,6 @@ using SOVND.Lib.Models;
 
 namespace SOVND.Client
 {
-    public class AppName : IAppName
-    {
-        public string Name { get { return "SOVND_client"; } }
-    }
-
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -47,7 +42,7 @@ namespace SOVND.Client
 
             Closed += (_, __) =>
             {
-                App.client.Disconnect();
+                App.Client.Disconnect();
                 Spotify.ShutDown();
                 Process.GetCurrentProcess().Kill(); // TODO That's really inelegant
             };
@@ -69,7 +64,7 @@ namespace SOVND.Client
         private void InitializeSpotify()
         {
             App.WindowHandle = new WindowInteropHelper(this).Handle;
-            App.uithread = SynchronizationContext.Current;
+            App.UIThread = SynchronizationContext.Current;
             SyncHolder.sync = SynchronizationContext.Current;
             Spotify.Initialize();
             if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), _appname.Name, auth.SpotifyUsername, auth.SpotifyPassword))
@@ -78,14 +73,14 @@ namespace SOVND.Client
             while (!Spotify.Ready())
                 Thread.Sleep(100);
 
-            App.client.Run();
+            App.Client.Run();
         }
 
         private void SetupChannel()
         {
-            App.client.SubscribedChannelHandler.Subscribe();
+            App.Client.SubscribedChannelHandler.Subscribe();
 
-            playlist = CollectionViewSource.GetDefaultView(App.client.SubscribedChannelHandler._playlist.Songs);
+            playlist = CollectionViewSource.GetDefaultView(App.Client.SubscribedChannelHandler._playlist.Songs);
 
             // TODO this section needs to be scrapped //
             playlist.SortDescriptions.Clear();
@@ -95,10 +90,10 @@ namespace SOVND.Client
             ////////////////////////////////////////////
 
             Action Refresh = () => { SyncHolder.sync.Send((x) => playlist.Refresh(), null); };
-            App.client.SubscribedChannelHandler.Songs.CollectionChanged += (_, __) => { Refresh(); };
-            App.client.SubscribedChannelHandler._playlist.PropertyChanged += (_, __) => { Refresh(); };
+            App.Client.SubscribedChannelHandler.Songs.CollectionChanged += (_, __) => { Refresh(); };
+            App.Client.SubscribedChannelHandler._playlist.PropertyChanged += (_, __) => { Refresh(); };
 
-            chatbox.ItemsSource = App.client.SubscribedChannelHandler.Chats;
+            chatbox.ItemsSource = App.Client.SubscribedChannelHandler.Chats;
 
             BindToPlaylist();
         }
@@ -177,12 +172,12 @@ namespace SOVND.Client
 
         private void EnqueueTrack(Track track)
         {
-            App.client.AddTrack(track);
+            App.Client.AddTrack(track);
         }
 
         private void SendChat(object sender, RoutedEventArgs e)
         {
-            App.client.SendChat(chatinput.Text);
+            App.Client.SendChat(chatinput.Text);
             chatinput.Clear();
         }
 
@@ -192,7 +187,7 @@ namespace SOVND.Client
             if (newch.ShowDialog().Value == true)
             {
                 var channel = newch.ChannelName;
-                App.client.SubscribeToChannel(channel);
+                App.Client.SubscribeToChannel(channel);
             }
         }
     }

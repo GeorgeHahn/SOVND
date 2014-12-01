@@ -30,7 +30,7 @@ namespace SOVND.Client.ViewModels
 
         public bool Register()
         {
-            return App.client.RegisterChannel(Name, Description, Image);
+            return App.Client.RegisterChannel(Name, Description, Image);
         }
     }
 

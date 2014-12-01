@@ -102,6 +102,7 @@
     <Compile Include="Modules\NowPlayingHandler.cs" />
     <Compile Include="Modules\SovndClient.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Settings\AppName.cs" />
     <Compile Include="Util\AuthPair.cs" />
     <Compile Include="Util\Logging.cs" />
     <Compile Include="Util\PasswordHelper.cs" />
