@@ -27,9 +27,10 @@ namespace SOVND.Client
         private readonly IAppName _appname;
         private readonly SovndClient _client;
         private readonly NowPlayingHandler _player;
+        private readonly SyncHolder _sync;
         private SettingsModel _auth;
 
-        public MainWindow(ISettingsProvider settings, IAppName appname, SovndClient client, NowPlayingHandler player)
+        public MainWindow(ISettingsProvider settings, IAppName appname, SovndClient client, NowPlayingHandler player, SyncHolder sync)
         {
             InitializeComponent();
 
@@ -37,13 +38,13 @@ namespace SOVND.Client
             _appname = appname;
             _client = client;
             _player = player;
+            _sync = sync;
             _auth = _settings.GetAuthSettings();
 
             Loaded += (_, __) =>
             {
                 App.WindowHandle = new WindowInteropHelper(this).Handle;
-                App.UIThread = SynchronizationContext.Current;
-                SyncHolder.sync = SynchronizationContext.Current;
+                _sync.sync = SynchronizationContext.Current;
 
                 _client.Run();
                 _player.Run();
@@ -73,7 +74,7 @@ namespace SOVND.Client
             playlist.Refresh();
             ////////////////////////////////////////////
 
-            Action Refresh = () => { SyncHolder.sync.Send((x) => playlist.Refresh(), null); };
+            Action Refresh = () => { _sync.sync.Send((x) => playlist.Refresh(), null); };
             _client.SubscribedChannelHandler.Songs.CollectionChanged += (_, __) => { Refresh(); };
             _client.SubscribedChannelHandler._playlist.PropertyChanged += (_, __) => { Refresh(); };
 
@@ -87,7 +88,7 @@ namespace SOVND.Client
 
         private void BindToPlaylist()
         {
-            SyncHolder.sync.Send((x) => lbPlaylist.ItemsSource = playlist, null);
+            _sync.sync.Send((x) => lbPlaylist.ItemsSource = playlist, null);
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -120,7 +121,7 @@ namespace SOVND.Client
                             var track = new Track(trackLink);
                             candidates.Add(track);
                         }
-                        SyncHolder.sync.Send((x) => lbPlaylist.ItemsSource = candidates, null);
+                        _sync.sync.Send((x) => lbPlaylist.ItemsSource = candidates, null);
                     }
                 }, token);
             }

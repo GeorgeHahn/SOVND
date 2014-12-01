@@ -31,6 +31,8 @@ namespace SOVND.Client
             kernel.Bind<IFileLocationProvider>().To<AppDataLocationProvider>();
             kernel.Bind<IAppName>().To<AppName>();
 
+            kernel.Bind<SyncHolder>().ToSelf().InSingletonScope();
+
             kernel.Bind<NowPlayingHandler>().ToSelf().InSingletonScope();
             kernel.Bind<SovndClient>().ToSelf().InSingletonScope();
 

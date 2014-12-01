@@ -22,7 +22,5 @@ namespace SOVND.Client
         }
 
         public static IntPtr WindowHandle { get; internal set; }
-
-        public static SynchronizationContext UIThread { get; internal set; }
     }
 }
