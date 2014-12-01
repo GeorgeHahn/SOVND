@@ -624,8 +624,7 @@ namespace SpotifyClient
             }
             catch (Exception ex)
             {
-                LogTo.FatalException("Spotify thread killed by \{ex.GetType().ToString()}: \{ex.Message}", ex);
-                Log.Error(Plugin.LOG_MODULE, "mainThread() unhandled exception", ex);
+                LogTo.FatalException("Spotify mainthread() unhandled \{ex.GetType().ToString()}: \{ex.Message}", ex);
             }
             finally
             {
@@ -635,7 +634,7 @@ namespace SpotifyClient
 
                 while (true)
                 {
-                    LogTo.Fatal("Spotify dead.");
+                    LogTo.Fatal("Spotify thread is dead.");
                     Thread.Sleep(1000);
                 }
                 // TODO Signal rest of application to shutdown
