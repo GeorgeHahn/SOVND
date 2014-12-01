@@ -14,6 +14,7 @@ using SOVND.Lib.Settings;
 using SOVND.Client.ViewModels;
 using SpotifyClient;
 using SOVND.Client.Modules;
+using SOVND.Client.Util;
 
 namespace SOVND.Client
 {
@@ -24,17 +25,23 @@ namespace SOVND.Client
         {
             IKernel kernel = new StandardKernel();
             kernel.Bind<IMQTTSettings>().To<SovndMqttSettings>();
-            kernel.Bind<IChannelHandlerFactory>().ToFactory();
             kernel.Bind<IPlaylistProvider>().To<ObservablePlaylistProvider>();
             kernel.Bind<IChatProvider>().To<ChatProvider>();
             kernel.Bind<ISettingsProvider>().To<FilesystemSettingsProvider>();
             kernel.Bind<IFileLocationProvider>().To<AppDataLocationProvider>();
             kernel.Bind<IAppName>().To<AppName>();
 
+            // TODO Refactor this out
             kernel.Bind<SyncHolder>().ToSelf().InSingletonScope();
 
+            // Singleton classes
+            kernel.Bind<ChannelDirectory>().ToSelf().InSingletonScope();
             kernel.Bind<NowPlayingHandler>().ToSelf().InSingletonScope();
             kernel.Bind<SovndClient>().ToSelf().InSingletonScope();
+
+            // Factories
+            kernel.Bind<IChannelHandlerFactory>().ToFactory();
+
 
             // Instantiating this class checks settings and shows UI if they're not set
             kernel.Get<CheckSettings>();

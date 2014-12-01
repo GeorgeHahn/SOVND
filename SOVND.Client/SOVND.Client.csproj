@@ -105,6 +105,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Settings\AppName.cs" />
     <Compile Include="Util\AuthPair.cs" />
+    <Compile Include="Util\ChannelDirectory.cs" />
     <Compile Include="Util\Logging.cs" />
     <Compile Include="Util\PasswordHelper.cs" />
     <Compile Include="Util\SOVNDModule.cs" />

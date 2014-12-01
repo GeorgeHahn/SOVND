@@ -18,9 +18,8 @@ namespace SOVND.Client.Modules
 
         private Dictionary<string, int> votes = new Dictionary<string, int>();
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
-        public Dictionary<string, Channel> channels = new Dictionary<string, Channel>();
 
-        public SovndClient(AuthPair auth, IChannelHandlerFactory chf) : base(auth)
+        public SovndClient(AuthPair auth, IChannelHandlerFactory chf, ChannelDirectory channels) : base(auth)
         {
             _chf = chf;
 
@@ -40,8 +39,7 @@ namespace SOVND.Client.Modules
             {
                 Channel channel = JsonConvert.DeserializeObject<Channel>(_.Message);
 
-                if (!channels.ContainsKey(_.channel))
-                    channels[_.channel] = channel;
+                channels.AddChannel(channel);
             };
 
             SubscribedChannelHandler = chf.CreateChannelHandler("ambient");
