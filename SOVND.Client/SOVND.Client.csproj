@@ -95,7 +95,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="Logging.cs" />
+    <Compile Include="Audio\SpotifyTrackDataPipe.cs" />
+    <Compile Include="Util\Logging.cs" />
     <Compile Include="Util\PasswordHelper.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
     <Compile Include="Views\ChannelWindow.xaml.cs">
@@ -111,7 +112,6 @@
     <Compile Include="Settings\IListeningSettings.cs" />
     <Compile Include="Settings\SovndListeningSettings.cs" />
     <Compile Include="Settings\SovndMqttSettings.cs" />
-    <Compile Include="SpotifyTrackDataPipe.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Page Include="Views\ChannelWindow.xaml">
       <SubType>Designer</SubType>
@@ -180,9 +180,7 @@
       <Name>SpotifyClient</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Models\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="FodyWeavers.xml" />
   </ItemGroup>

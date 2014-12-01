@@ -1,8 +1,7 @@
-using SOVND.Lib;
 using System.IO;
 using SOVND.Lib.Models;
 
-namespace SOVND.Server
+namespace SOVND.Server.Settings
 {
     public class ServerMqttSettings : IMQTTSettings
     {

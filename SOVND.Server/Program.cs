@@ -6,6 +6,7 @@ using System;
 using System.Text;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
+using SOVND.Server.Settings;
 
 namespace SOVND.Server
 {
@@ -17,13 +18,12 @@ namespace SOVND.Server
             {
                 IKernel kernel = new StandardKernel();
                 kernel.Bind<IChannelHandlerFactory>().ToFactory();
-                kernel.Bind<IServer>().To<Server>();
                 kernel.Bind<IPlaylistProvider>().To<PlaylistProvider>();
                 kernel.Bind<IChatProvider>().To<ChatProvider>();
 
                 kernel.Bind<IMQTTSettings>().To<ServerMqttSettings>();
 
-                var server = kernel.Get<IServer>();
+                var server = kernel.Get<Server>();
                 server.Run();
             }
             catch (Exception e)

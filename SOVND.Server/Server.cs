@@ -4,35 +4,15 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Charlotte;
-using SOVND.Lib;
 using SpotifyClient;
-using System.Diagnostics;
 using Anotar.NLog;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
+using SOVND.Server.Settings;
 
 namespace SOVND.Server
 {
-    public interface IServer
-    {
-        void Run();
-        void Disconnect();
-    }
-
-    public class ServerSpotifyAuth
-    {
-        public string Username
-        {
-            get { return File.ReadAllText("spot.username.key"); }
-        }
-
-        public string Password
-        {
-            get { return File.ReadAllText("spot.password.key"); }
-        }
-    }
-
-    public class Server : MqttModule, IServer
+    public class Server : MqttModule
     {
         private readonly ServerSpotifyAuth _spot;
         private Dictionary<string, ChannelHandler> channels = new Dictionary<string, ChannelHandler>();
