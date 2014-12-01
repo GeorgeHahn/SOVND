@@ -21,91 +21,51 @@ namespace SOVND.Server
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
             _spot = spot;
-            LogTo.Trace("Starting up");
+            LogTo.Trace("Initializing server");
 
-            On["#"] = _ =>
-            {
-                LogTo.Trace("\{_.Topic}: \{_.Message}");
-            };
-
-
+            //////
+            // User messages
+            //////
+            /// 
+            // Dirty hack to get libspotify to load songs
             On["/user/{username}/{channel}/songssearch/"] = _ =>
             {
                 Search search = Spotify.GetSearch(_.Message);
-                LogTo.Debug("Searched \{_.Message} and \{(search.IsLoaded ? "is" : "is not")} loaded");
+                LogTo.Debug("SONG LOAD HACK: Searched \{_.Message} and \{(search.IsLoaded ? "is" : "is not")} loaded");
             };
 
-            On["/user/{username}/{channel}/songs/{songid}"] = _ =>
+            // Handle user-channel interaction
+            On["/user/{username}/{channel}/songs/{songid}"] = msg =>
             {
-                if (_.Message == "vote")
+
+                if (msg.Message == "vote")
                 {
-                    LogTo.Debug("\{_.username} voted for song \{_.songid}");
-                    if (!channels.ContainsKey(_.channel))
-                    {
-                        LogTo.Warn("Got a vote from \{_.username} for nonexistent channel: \{_.channel}");
-                        return;
-                    }
-
-                    var playlist = channels[_.channel]._playlist; // TODO Nasty
-
-                    if (playlist.AddVote(_.songid, _.username))
-                    {
-                        Publish("/\{_.channel}/playlist/\{_.songid}/votes", playlist.GetVotes(_.songid).ToString(), true);
-                        Publish("/\{_.channel}/playlist/\{_.songid}/votetime", Timestamp().ToString(), true);
-                    }
+                    AddVote(msg.channel, msg.songid, msg.username);
                 }
-                else if (_.Message == "unvote")
+                else if (msg.Message == "unvote")
                 {
-                    LogTo.Warn("Unvoting currently disabled");
-                    return;
-
-                    //Log("\{_.username} unvoted for song \{_.songid}");
-
-                    //// TODO if songid is valid
-                    //if (uservotes[_.username + _.songid])
-                    //{
-                    //    votes[_.songid]--;
-                    //    uservotes[_.username + _.songid] = false;
-
-                    //    Publish("/\{_.channel}/playlist/\{_.songid}/votes", votes[_.songid].ToString());
-                    //}
-                    //else
-                    //{
-                    //    Log("Unvote was invalid");
-                    //    return;
-                    //}
+                    RemoveVote(msg.channel, msg.songid, msg.username);
                 }
-                else if (_.Message == "report")
+                else if (msg.Message == "report")
                 {
-                    LogTo.Debug("\{_.username} reported song \{_.songid} on \{_.channel}");
-
-                    // TODO Record report
+                    ReportSong(msg.channel, msg.songid, msg.username);
                 }
-                else if (_.Message == "remove")
+                else if (msg.Message == "remove")
                 {
-                    LogTo.Debug("\{_.username} removed song \{_.songid} on \{_.channel}");
-
-                    // TODO Verify priveleges
-                    // TODO Remove song
+                    RemoveSong(msg.channel, msg.songid, msg.username);
                 }
-                else if (_.Message == "block")
+                else if (msg.Message == "block")
                 {
-                    LogTo.Debug("\{_.username} blocked song \{_.songid} on \{_.channel}");
-
-                    // TODO Verify priveleges
-                    // TODO Remove song
-                    // TODO Record block
+                    BlockSong(msg.channel, msg.songid, msg.username);
                 }
-
                 else
                 {
-                    LogTo.Warn("Invalid command: \{_.Topic}: \{_.Message}");
+                    LogTo.Warn("Invalid command: {0}: {1}, by {2}", (string)msg.Topic, (string)msg.Message, (string)msg.username);
                     return;
                 }
             };
 
-            // ChannelHandler creation
-
+            // Handle channel registration
             On["/user/{username}/register/{channel}/{param}"] = _ =>
             {
                 // TODO Verify that channel hasn't already been created
@@ -129,6 +89,7 @@ namespace SOVND.Server
                     LogTo.Warn("Bad param: \{_.param}");
             };
 
+            // Handle user chat messages
             On["/user/{username}/{channel}/chat"] = _ =>
             {
                 LogTo.Trace("\{_.channel}-> \{_.username}: \{_.Message}");
@@ -142,10 +103,13 @@ namespace SOVND.Server
                     LogTo.Debug("Chat was for invalid channel");
             };
 
-            // ChannelHandler registration
-            // TODO: ChannelHandler info should probably be stored as JSON data so it comes as one message
+            //////
+            // Channel messages
+            //////
+            // TODO: This should be separate from above
 
-            On["/{channel}/info/name"] = _ => // TODO: This should maybe be chan/info/{PARAM}
+            // Handle channel info
+            On["/{channel}/info/name"] = _ =>
             {
                 LogTo.Info("\{_.channel} got a name: \{_.Message}");
 
@@ -173,9 +137,46 @@ namespace SOVND.Server
 
                 channels[_.channel].Description = _.Message;
             };
+        }
 
-            // TODO Image
-            // TODO Moderators
+        private void AddVote(string channel, string songid, string username)
+        {
+            LogTo.Debug("\{username} voted for song \{songid}");
+            if (!channels.ContainsKey(channel))
+            {
+                LogTo.Warn("Got a vote from \{username} for nonexistent channel: \{channel}");
+                return;
+            }
+
+            var playlist = channels[channel]._playlist; // TODO Nasty
+
+            if (playlist.AddVote(songid, username))
+            {
+                Publish("/\{channel}/playlist/\{songid}/votes", playlist.GetVotes(songid).ToString(), true);
+                Publish("/\{channel}/playlist/\{songid}/votetime", Timestamp().ToString(), true);
+            }
+        }
+
+        private void RemoveVote(string channel, string songid, string username)
+        {
+            LogTo.Warn("Unvoting currently disabled");
+            return;
+
+            //Log("\{username} unvoted for song \{songid}");
+
+            //// TODO if songid is valid
+            //if (uservotes[username + songid])
+            //{
+            //    votes[songid]--;
+            //    uservotes[username + songid] = false;
+
+            //    Publish("/\{channel}/playlist/\{songid}/votes", votes[songid].ToString());
+            //}
+            //else
+            //{
+            //    Log("Unvote was invalid");
+            //    return;
+            //}
         }
 
         public new void Run()
@@ -192,14 +193,41 @@ namespace SOVND.Server
             LogTo.Debug("Sever connected");
         }
 
-        private void RemoveSong(string channel, string songID)
+        private void ReportSong(string channel, string songID, string username)
         {
+            LogTo.Debug("\{username} reported song \{songID} on \{channel}");
+
+            LogTo.Warn("Song removal is currently disabled");
+            return;
+
+            // TODO Record report
+        }
+
+        private void RemoveSong(string channel, string songID, string username)
+        {
+            LogTo.Debug("\{username} removed song \{songID} on \{channel}");
+
+            LogTo.Warn("Song removal is currently disabled");
+            return;
+
+            // TODO Verify priveleges
+            // TODO Remove song
+
             Publish("/\{channel}/playlist/\{songID}/votes", "", true);
             Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
         }
 
-        private void BlockSong(string channel, string songID)
+        private void BlockSong(string channel, string songID, string username)
         {
+            LogTo.Debug("\{username} blocked song \{songID} on \{channel}");
+
+            LogTo.Warn("Song removal is currently disabled");
+            return;
+
+            // TODO Verify priveleges
+            // TODO Remove song
+            // TODO Record block
+
             Publish("/\{channel}/playlist/\{songID}/votes", "", true);
             Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
             Publish("/\{channel}/playlist/\{songID}/blocked", "true", true);
