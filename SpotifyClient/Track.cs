@@ -30,6 +30,7 @@ using System.Collections.Generic;
 using libspotifydotnet;
 using System.Diagnostics;
 using System.Threading;
+using Anotar.NLog;
 
 namespace SpotifyClient
 {
@@ -108,7 +109,7 @@ namespace SpotifyClient
                         remove.Add(track);
                 }
 
-                Console.WriteLine("Tracks loaded: \{remove.Count}");
+                LogTo.Trace("Tracks loaded: \{remove.Count}");
                 foreach (var removal in remove)
                     ToInitialize.Remove(removal);
             }

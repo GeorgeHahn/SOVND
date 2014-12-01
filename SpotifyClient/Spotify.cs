@@ -30,6 +30,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using libspotifydotnet;
 using System.Diagnostics;
+using Anotar.NLog;
 
 namespace SpotifyClient
 {
@@ -121,7 +122,7 @@ namespace SpotifyClient
 
                     _programSignal.WaitOne();
 
-                    Console.WriteLine("Message thread running");
+                    LogTo.Debug("Message thread running");
                     Log.Debug(Plugin.LOG_MODULE, "Message thread running...");
 
                     _initted = true;
@@ -540,7 +541,7 @@ namespace SpotifyClient
 
         public static void ShutDown()
         {
-            Console.WriteLine("Shutdown");
+            LogTo.Warn("Shutdown");
             lock (_syncObj)
             {
                 if (_mainSignal != null)
@@ -574,7 +575,7 @@ namespace SpotifyClient
         {
             try
             {
-                Console.WriteLine("Starting Spotify thread");
+                LogTo.Debug("Starting Spotify thread");
 
                 _mainSignal = new AutoResetEvent(false);
 
@@ -609,7 +610,7 @@ namespace SpotifyClient
                         }
                         catch (Exception ex)
                         {
-                            Console.WriteLine("Exception invoking sp_session_process_events: \{ex.GetType().ToString()} - \{ex.Message}");
+                            LogTo.ErrorException("Exception invoking sp_session_process_events: \{ex.GetType().ToString()} - \{ex.Message}", ex);
                             Log.Debug(Plugin.LOG_MODULE, "Exception invoking sp_session_process_events", ex);
                         }
 
@@ -623,7 +624,7 @@ namespace SpotifyClient
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Spotify thread killed by \{ex.GetType().ToString()}: \{ex.Message}");
+                LogTo.FatalException("Spotify thread killed by \{ex.GetType().ToString()}: \{ex.Message}", ex);
                 Log.Error(Plugin.LOG_MODULE, "mainThread() unhandled exception", ex);
             }
             finally
@@ -634,7 +635,7 @@ namespace SpotifyClient
 
                 while (true)
                 {
-                    Console.WriteLine("Spotify dead.");
+                    LogTo.Fatal("Spotify dead.");
                     Thread.Sleep(1000);
                 }
                 // TODO Signal rest of application to shutdown

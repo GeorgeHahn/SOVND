@@ -30,6 +30,7 @@ using System.Runtime.InteropServices;
 
 using libspotifydotnet;
 using libspotifydotnet.libspotify;
+using Anotar.NLog;
 
 namespace SpotifyClient
 {
@@ -274,13 +275,13 @@ namespace SpotifyClient
 
         private static void message_to_user(IntPtr sessionPtr, string message)
         {
-            Console.WriteLine("Message to user: \{message}");
+            LogTo.Info("Message to user: \{message}");
             Log.Info("libspotify", message);
         }
 
         private static void metadata_updated(IntPtr sessionPtr)
         {
-            Console.WriteLine("Metadata updated");
+            LogTo.Trace("Metadata updated");
             Track.Check();
             Log.Trace(Plugin.LOG_MODULE, "metadata_updated");
         }
