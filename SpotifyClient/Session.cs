@@ -324,7 +324,7 @@ namespace SpotifyClient
 
         private static void start_playback(IntPtr sessionPtr)
         {
-            Log.Debug(Plugin.LOG_MODULE, "start_playback");
+            Log.Trace(Plugin.LOG_MODULE, "start_playback");
         }
 
         private static void stop_playback(IntPtr sessionPtr)

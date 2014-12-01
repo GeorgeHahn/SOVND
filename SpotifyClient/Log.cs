@@ -11,22 +11,22 @@ namespace SpotifyClient
     {
         public static void Trace(object blah, string message)
         {
-            LogTo.Trace(message);
+            //LogTo.Trace(message);
         }
 
         public static void Trace(object blah, string message, params object[] format)
         {
-            LogTo.Trace(message, format);
+            //LogTo.Trace(message, format);
         }
 
         public static void Debug(object blah, string message)
         {
-            LogTo.Debug(message);
+            //LogTo.Debug(message);
         }
 
         public static void Debug(object blah, string message, params object[] format)
         {
-            LogTo.Debug(message, format);
+            //LogTo.Debug(message, format);
         }
 
         public static void Info(object blah, string message)
