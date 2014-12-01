@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using libspotifydotnet;
 using NAudio.Wave;
 using SpotifyClient;
+using System.Threading;
 
 namespace SOVND.Client.Audio
 {
@@ -79,8 +80,16 @@ namespace SOVND.Client.Audio
                 _loaded = true;
                 var error = Session.LoadPlayer(_trackPtr);
 
+                while (error == libspotify.sp_error.IS_LOADING)
+                {
+                    Thread.Sleep(100);
+                    error = Session.LoadPlayer(_trackPtr);
+                }
+
                 if (error != libspotify.sp_error.OK)
+                {
                     throw new Exception("[Spotify] \{libspotify.sp_error_message(error)}");
+                }
 
                 libspotify.sp_availability avail = libspotify.sp_track_get_availability(Session.SessionPtr, _trackPtr);
             
