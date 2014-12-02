@@ -68,7 +68,11 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="libspotify_album.cs" />
+    <Compile Include="albumbrowse_complete_cb_delegate.cs" />
+    <Compile Include="artistbrowse_complete_cb_delegate.cs" />
+    <Compile Include="image_loaded_cb_delegate.cs" />
+    <Compile Include="inboxpost_complete_cb.cs" />
+    <Compile Include="libspotify.cs" />
     <Compile Include="libspotify_albumbrowsing.cs" />
     <Compile Include="libspotify_artist.cs" />
     <Compile Include="libspotify_artistbrowsing.cs" />
@@ -83,6 +87,8 @@
     <Compile Include="libspotify_track.cs" />
     <Compile Include="libspotify_user.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="search_complete_cb_delegate.cs" />
+    <Compile Include="sp_search_type.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="libspotifydotnet.snk" />

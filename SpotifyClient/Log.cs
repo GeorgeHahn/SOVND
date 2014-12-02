@@ -59,9 +59,4 @@ namespace SpotifyClient
             LogTo.Error(message, format);
         }
     }
-
-    public enum Plugin
-    {
-        LOG_MODULE
-    }
 }

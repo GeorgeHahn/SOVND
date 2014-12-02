@@ -28,9 +28,6 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace libspotifydotnet {
-
-    public delegate void albumbrowse_complete_cb_delegate(IntPtr result, IntPtr userDataPtr);
-
     public static partial class libspotify {
         
         [DllImport("libspotify")]

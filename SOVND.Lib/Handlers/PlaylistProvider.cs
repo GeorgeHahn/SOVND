@@ -1,90 +1,13 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Anotar.NLog;
 using Charlotte;
 using SOVND.Lib.Models;
 using System;
-using System.Linq;
 
 namespace SOVND.Lib.Handlers
 {
-    public interface IObservablePlaylistProvider : IPlaylistProvider, INotifyPropertyChanged
-    {
-        ObservableCollection<Song> Songs { get; }
-    }
-
-    public interface ISortedPlaylistProvider : IPlaylistProvider
-    {
-        List<Song> Songs { get; }
-        Song GetTopSong();
-    }
-
-    public interface IPlaylistProvider
-    {
-        bool AddVote(string songID, string username);
-        void ClearVotes(string songID);
-        int GetVotes(string songID);
-        void Subscribe(ChannelHandler channel);
-        void Unsubscribe();
-    }
-
-    public class ObservablePlaylistProvider : PlaylistProvider, IObservablePlaylistProvider
-    {
-        private readonly SyncHolder _sync;
-        private readonly ObservableCollection<Song> _songs;
-
-        public ObservableCollection<Song> Songs
-        {
-            get { return _songs; }
-        }
-
-        internal override void AddSong(Song song)
-        {
-            if (_sync.sync != null)
-                _sync.sync.Send((x) => _songs.Add(song), null); // TODO Bad bad bad bad
-            else
-                _songs.Add(song);
-
-            RaisePropertyChanged(nameof(Songs));
-        }
-
-        internal override void ClearSongVotes(string id)
-        {
-            var songs = _songs.Where(x => x.SongID == id);
-            if(songs.Count() > 1)
-                LogTo.Error("Songs in list should be unique");
-
-            foreach (var song in songs)
-            {
-                // TODO Maybe Song should know where and how to publish itself / or hook into a service that can handle publishing changes
-                song.Votes = 0;
-                song.Voters = "";
-            }
-        }
-
-        public ObservablePlaylistProvider(IMQTTSettings settings, SyncHolder sync)
-            : base(settings)
-        {
-            _sync = sync;
-            _songs = new ObservableCollection<Song>();
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private void RaisePropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
-    }
-
-
-
     public abstract class PlaylistProvider : MqttModule, IPlaylistProvider
     {
         private ChannelHandler _channel;

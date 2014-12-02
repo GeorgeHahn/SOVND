@@ -28,14 +28,6 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace libspotifydotnet {
-
-    public delegate void search_complete_cb_delegate(IntPtr searchPtr, IntPtr userDataPtr);
-
-    public enum sp_search_type {
-        SP_SEARCH_STANDARD = 0,
-        SP_SEARCH_SUGGEST = 1,
-    }
-
     public static partial class libspotify {
         
         [DllImport("libspotify")]

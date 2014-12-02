@@ -28,9 +28,6 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace libspotifydotnet {
-
-    public delegate void image_loaded_cb_delegate(IntPtr imagePtr, IntPtr userDataPtr);
-
     public static partial class libspotify {
 
         public enum sp_imageformat {

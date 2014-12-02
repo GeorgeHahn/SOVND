@@ -28,9 +28,6 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace libspotifydotnet {
-    
-    public delegate void artistbrowse_complete_cb_delegate(IntPtr result, IntPtr userDataPtr);
-
     public static partial class libspotify {
 
         public enum sp_artistbrowse_type {

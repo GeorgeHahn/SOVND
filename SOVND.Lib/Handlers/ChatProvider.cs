@@ -5,15 +5,6 @@ using SOVND.Lib.Models;
 
 namespace SOVND.Lib.Handlers
 {
-    public interface IChatProvider
-    {
-        ObservableCollection<ChatMessage> Chats { get; }
-
-        void Subscribe(ChannelHandler channel);
-
-        //void Unsubscribe();
-    }
-
     public class ChatProvider : MqttModule, IChatProvider
     {
         private readonly SyncHolder _sync;

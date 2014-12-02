@@ -106,9 +106,11 @@
     <Compile Include="Settings\AppName.cs" />
     <Compile Include="Util\AuthPair.cs" />
     <Compile Include="Util\ChannelDirectory.cs" />
+    <Compile Include="Util\CheckSettings.cs" />
     <Compile Include="Util\Logging.cs" />
     <Compile Include="Util\PasswordHelper.cs" />
     <Compile Include="Util\SOVNDModule.cs" />
+    <Compile Include="Util\StartSpotify.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
     <Compile Include="Views\ChannelWindow.xaml.cs">
       <DependentUpon>ChannelWindow.xaml</DependentUpon>

@@ -74,11 +74,17 @@
   <ItemGroup>
     <Compile Include="Handlers\ChannelHandler.cs" />
     <Compile Include="Handlers\ChatProvider.cs" />
+    <Compile Include="Handlers\IChannelHandlerFactory.cs" />
+    <Compile Include="Handlers\IChatProvider.cs" />
+    <Compile Include="Handlers\IObservablePlaylistProvider.cs" />
+    <Compile Include="Handlers\IPlaylistProvider.cs" />
+    <Compile Include="Handlers\ISortedPlaylistProvider.cs" />
+    <Compile Include="Handlers\ObservablePlaylistProvider.cs" />
     <Compile Include="Handlers\PlaylistProvider.cs" />
     <Compile Include="Handlers\SortedPlaylistProvider.cs" />
     <Compile Include="Models\Channel.cs" />
     <Compile Include="Models\ChatMessage.cs" />
-    <Compile Include="Models\ConnectionSettings.cs" />
+    <Compile Include="Models\IMQTTSettings.cs" />
     <Compile Include="Models\Song.cs" />
     <Compile Include="Models\SyncHolder.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
