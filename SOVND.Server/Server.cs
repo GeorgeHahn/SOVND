@@ -248,9 +248,9 @@ namespace SOVND.Server
                         if(song != null)
                             song.track = new Track(song.SongID);
                         if (song == null)
-                            LogTo.Info("No song");
+                            LogTo.Trace("No songs in channel: {0}", channel);
                         else
-                            LogTo.Debug("Either no track or no track time");
+                            LogTo.Debug("Either no track or no track time for track {0} in channel {1}", song.SongID, channel);
                         Thread.Sleep(1000);
                         continue;
                     }
