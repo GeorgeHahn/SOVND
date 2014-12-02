@@ -27,7 +27,7 @@ namespace SOVND.Client.Modules
 
             _channel = channelName;
 
-            On["/{" + channelName + "}/nowplaying/songid"] = _ =>
+            On["/" + channelName + "/nowplaying/songid"] = _ =>
             {
                 string song = _.Message;
                 if (string.IsNullOrWhiteSpace(song))
