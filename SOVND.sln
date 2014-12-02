@@ -13,8 +13,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOVND.Lib", "SOVND.Lib\SOVN
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libspotifydotnet", "libspotifydotnet\libspotifydotnet.csproj", "{1DE51E4D-4E01-4662-8C22-026974FADED9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Charlotte", "..\..\..\github\Charlotte\Charlotte\Charlotte.csproj", "{4D601F15-2FA6-4501-A95A-5E44832C35E7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,14 +61,6 @@ Global
 		{1DE51E4D-4E01-4662-8C22-026974FADED9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1DE51E4D-4E01-4662-8C22-026974FADED9}.Release|x86.ActiveCfg = Release|x86
 		{1DE51E4D-4E01-4662-8C22-026974FADED9}.Release|x86.Build.0 = Release|x86
-		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Debug|x86.Build.0 = Debug|Any CPU
-		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Release|x86.ActiveCfg = Release|Any CPU
-		{4D601F15-2FA6-4501-A95A-5E44832C35E7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
