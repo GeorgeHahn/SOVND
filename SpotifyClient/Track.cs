@@ -70,11 +70,9 @@ namespace SpotifyClient
 
             SongID = link;
             IntPtr linkPtr = Functions.StringToLinkPtr(link);
-            Thread.Sleep(10);
             try
             {
                 TrackPtr = libspotify.sp_link_as_track(linkPtr);
-                Thread.Sleep(10);
                 Init();
             }
             finally

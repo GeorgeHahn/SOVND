@@ -72,22 +72,6 @@ namespace SOVND.Lib.Handlers
             _channel.SongsByID[ID] = song;
 
             AddSong(song);
-
-            WaitForTrack(song);
-        }
-
-        private void WaitForTrack(Song song)
-        {
-            (new Task(() =>
-            {
-                if (song.track == null)
-                {
-                    Thread.Sleep(100);
-                    WaitForTrack(song);
-                }
-                else
-                    LogTo.Debug("Song arrived: {0}", song.track.Name);
-            })).Start();
         }
 
         public void Subscribe(ChannelHandler channel)
@@ -97,7 +81,7 @@ namespace SOVND.Lib.Handlers
             // ChannelHandler playlists
             On["/\{_channel.MQTTName}/playlist/{songid}/votes"] = _ =>
             {
-                LogTo.Trace("\{_channel.Name} got a vote for \{_.songid}");
+                LogTo.Debug("\{_channel.Name} got a vote for \{_.songid}");
 
                 if (!channel.SongsByID.ContainsKey(_.songid))
                     AddNewSong(_.songid);

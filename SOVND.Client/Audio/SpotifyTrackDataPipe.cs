@@ -82,7 +82,7 @@ namespace SOVND.Client.Audio
 
                 while (error == libspotify.sp_error.IS_LOADING)
                 {
-                    Thread.Sleep(100);
+                    Thread.Sleep(10);
                     error = Session.LoadPlayer(_trackPtr);
                 }
 
