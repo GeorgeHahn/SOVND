@@ -3,13 +3,22 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="clr-namespace:SOVND.Lib.Models;assembly=SOVND.Lib"
         xmlns:local="clr-namespace:SOVND.Client"
         mc:Ignorable="d"
         Title="ChannelWindow" Height="300" Width="300">
     <Grid>
         <ListBox
-            x:Name="channelbox"
-            ></ListBox>
-        
+            x:Name="channelbox">
+            <ListBox.Resources>
+                <DataTemplate DataType="{x:Type models:Channel}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding Path=Name}" />
+                        <TextBlock Text="{Binding Path=Description}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.Resources>
+        </ListBox>
+
     </Grid>
 </Window>

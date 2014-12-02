@@ -17,6 +17,7 @@ using SOVND.Lib.Models;
 using SOVND.Client.Modules;
 using System.Collections;
 using SOVND.Lib.Handlers;
+using SOVND.Client.Util;
 
 namespace SOVND.Client
 {
@@ -29,10 +30,11 @@ namespace SOVND.Client
         private readonly IAppName _appname;
         private readonly SovndClient _client;
         private readonly NowPlayingHandler _player;
+        private readonly ChannelDirectory _channels;
         private readonly SyncHolder _sync;
         private SettingsModel _auth;
 
-        public MainWindow(ISettingsProvider settings, IAppName appname, SovndClient client, NowPlayingHandler player, SyncHolder sync)
+        public MainWindow(ISettingsProvider settings, IAppName appname, SovndClient client, NowPlayingHandler player, ChannelDirectory channels, SyncHolder sync)
         {
             InitializeComponent();
 
@@ -40,6 +42,7 @@ namespace SOVND.Client
             _appname = appname;
             _client = client;
             _player = player;
+            _channels = channels;
             _sync = sync;
             _auth = _settings.GetAuthSettings();
 
@@ -186,6 +189,17 @@ namespace SOVND.Client
             {
                 var channel = newch.ChannelName;
                 _client.SubscribeToChannel(channel);
+            }
+        }
+
+        private void SwitchChannel(object sender, RoutedEventArgs e)
+        {
+            var pickedChannel = new ChannelWindow(_channels);
+            if (pickedChannel.ShowDialog().Value == true)
+            {
+                var channel = pickedChannel.SelectedChannel;
+                if(channel != null)
+                    _client.SubscribeToChannel(channel.Name);
             }
         }
     }

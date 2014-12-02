@@ -107,7 +107,20 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <Button Click="NewChannel">New Channel</Button>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                
+                <Button
+                    Grid.Column="0"
+                    Click="NewChannel">New Channel</Button>
+                
+                <Button 
+                    Grid.Column="1"
+                    Click="SwitchChannel">Pick Channel</Button>
+            </Grid>
             
             <ListBox 
                 Grid.Row="1"

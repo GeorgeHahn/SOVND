@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SOVND.Client.Util;
+using SOVND.Lib.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,9 +21,19 @@ namespace SOVND.Client
     /// </summary>
     public partial class ChannelWindow : Window
     {
-        public ChannelWindow()
+        private readonly ChannelDirectory _channels;
+
+        public ChannelWindow(ChannelDirectory channels)
         {
+            _channels = channels;
             InitializeComponent();
+
+            channelbox.ItemsSource = channels.channels;
+        }
+
+        public Channel SelectedChannel
+        { 
+            get { return ((Channel) channelbox.SelectedItem); }
         }
     }
 }
