@@ -49,10 +49,10 @@ namespace SOVND.Client
             // Instantiating this initializes Spotify
             kernel.Get<StartSpotify>();
 
-            kernel.Get<MainWindow>().Show();
+            var window = kernel.Get<MainWindow>();
 
             var app = kernel.Get<App>();
-            app.Run();
+            app.Run(window);
         }
     }
 
