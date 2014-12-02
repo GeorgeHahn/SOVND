@@ -7,33 +7,29 @@ namespace SOVND.Lib.Handlers
 {
     public class ChatProvider : MqttModule, IChatProvider
     {
-        private readonly SyncHolder _sync;
-        private ChannelHandler _channel;
+        public ObservableCollection<ChatMessage> Chats { get; private set; } = new ObservableCollection<ChatMessage>();
 
-        public ObservableCollection<ChatMessage> Chats { get; } = new ObservableCollection<ChatMessage>();
-
-        public void Subscribe(ChannelHandler channel)
+        public void ShutdownHandler()
         {
-            _channel = channel;
+            Disconnect();
+            Chats = null;
+        }
 
+        public ChatProvider(IMQTTSettings settings, SyncHolder sync, Channel channel)
+            : base(settings.Broker, settings.Port, settings.Username, settings.Password)
+        {
             // ChannelHandler chats
-            On["/\{channel.MQTTName}/chat"] = _ =>
+            On["/\{channel.Name}/chat"] = _ =>
             {
                 LogTo.Trace("\{channel.Name} chat - \{_.Message}");
 
-                if (_sync.sync != null)
-                    _sync.sync.Send((x) => Chats.Add(new ChatMessage(_.Message)), null);
+                if (sync.sync != null)
+                    sync.sync.Send((x) => Chats.Add(new ChatMessage(_.Message)), null);
                 else
                     Chats.Add(new ChatMessage(_.Message));
             };
 
             Run();
-        }
-
-        public ChatProvider(IMQTTSettings settings, SyncHolder sync)
-            : base(settings.Broker, settings.Port, settings.Username, settings.Password)
-        {
-            _sync = sync;
         }
     }
 }

@@ -41,14 +41,12 @@ namespace SOVND.Client.Modules
 
                 channels.AddChannel(channel);
             };
-
-            SubscribedChannelHandler = chf.CreateChannelHandler("ambient");
         }
 
         internal void SendChat(string text)
         {
             if (SubscribedChannelHandler != null)
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/chat", text);
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/chat", text);
             else
                 LogTo.Warn("Cannot send chat: not subscribed to a channel");
         }
@@ -78,18 +76,22 @@ namespace SOVND.Client.Modules
 
         internal void SubscribeToChannel(string channel)
         {
-            this.SubscribedChannelHandler = _chf.CreateChannelHandler(channel);
+            if (SubscribedChannelHandler != null)
+                SubscribedChannelHandler.ShutdownHandler();
+
+            SubscribedChannelHandler = _chf.CreateChannelHandler(channel);
+            SubscribedChannelHandler.Subscribe();
         }
 
         public void AddTrack(Track track)
         {
-            if (SubscribedChannelHandler != null && SubscribedChannelHandler.MQTTName != null)
+            if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
             {
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/songs/\{track.SongID}", "vote");
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.MQTTName}/songssearch/", track.Name + " " + track?.Artists[0]);
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{track.SongID}", "vote");
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songssearch/", track.Name + " " + track?.Artists[0]);
             }
             else
-                LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or MQTTName null)");
+                LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");
         }
     }
 }

@@ -7,18 +7,29 @@ namespace SOVND.Lib.Handlers
 {
     public class ChannelHandler
     {
-        public ChannelHandler(IPlaylistProvider playlistProvider, IChatProvider chatProvider, string MQTTName)
+        private readonly IChatProviderFactory _chatProviderFactory;
+
+        public ChannelHandler(IPlaylistProvider playlistProvider, IChatProviderFactory chatProviderFactory, string name)
         {
+            _chatProviderFactory = chatProviderFactory;
             Playlist = playlistProvider;
-            _chat = chatProvider;
-            this.MQTTName = MQTTName;
+            
+            Name = name;
         }
 
-        public string MQTTName { get; set; }
+        private Channel thisChannel = new Channel();
 
-        public string Name { get; set; }
+        public string Name
+        {
+            get { return thisChannel.Name; }
+            private set { thisChannel.Name = value; }
+        }
 
-        public string Description { get; set; }
+        public string Description
+        {
+            get { return thisChannel.Description; }
+            set { thisChannel.Description = value; }
+        }
 
         public string Image { get; set; }
 
@@ -38,13 +49,22 @@ namespace SOVND.Lib.Handlers
         public void Subscribe()
         {
             Playlist.Subscribe(this);
-            _chat.Subscribe(this);
+            _chat = _chatProviderFactory.CreateChatProvider(thisChannel);
         }
 
-        public void Unsubscribe()
+        public void ShutdownHandler()
         {
-            Playlist.Unsubscribe();
-            Playlist = null;
+            if (Playlist != null)
+            {
+                Playlist.ShutdownHandler();
+                Playlist = null;
+            }
+
+            if (_chat != null)
+            {
+                _chat.ShutdownHandler();
+                _chat = null;
+            }
         }
 
         public void ClearVotes(string songID)

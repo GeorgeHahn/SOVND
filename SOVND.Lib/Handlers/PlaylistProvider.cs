@@ -79,7 +79,7 @@ namespace SOVND.Lib.Handlers
             _channel = channel;
 
             // ChannelHandler playlists
-            On["/\{_channel.MQTTName}/playlist/{songid}/votes"] = _ =>
+            On["/\{_channel.Name}/playlist/{songid}/votes"] = _ =>
             {
                 LogTo.Debug("\{_channel.Name} got a vote for \{_.songid}");
 
@@ -90,7 +90,7 @@ namespace SOVND.Lib.Handlers
                 song.Votes = int.Parse(_.Message);
             };
 
-            On["/\{_channel.MQTTName}/playlist/{songid}/votetime"] = _ =>
+            On["/\{_channel.Name}/playlist/{songid}/votetime"] = _ =>
             {
                 if (!channel.SongsByID.ContainsKey(_.songid))
                     AddNewSong(_.songid);
@@ -101,9 +101,14 @@ namespace SOVND.Lib.Handlers
             Run();
         }
 
-        public void Unsubscribe()
+        public void ShutdownHandler()
         {
-            Stop();
+            Disconnect();
+            _channel = null;
+
+            // This instance is no longer useful
+            votes = null;
+            uservotes = null;
         }
 
         public PlaylistProvider(IMQTTSettings settings)

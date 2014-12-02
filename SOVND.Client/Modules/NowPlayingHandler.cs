@@ -17,34 +17,30 @@ namespace SOVND.Client.Modules
         private WaveFormat WaveFormat;
         private CancellationTokenSource songToken;
         private static object soundlock = new object();
-        private string _channel;
 
-        public NowPlayingHandler(AuthPair auth) : base(auth)
+        private readonly string _channel;
+
+        public NowPlayingHandler(AuthPair auth, string channelName) : base(auth)
         {
             // TODO Use channel/nowplaying/starttime to seek to correct position
             // TODO Convert nowplaying to a JSON object so songid and playtime come in at the same time?
 
-            // TODO Should subscribe to only /_channel/... instead of /+/...
-            On["/{channel}/nowplaying/songid"] = _ =>
-            {
-                if (_channel != _.channel)
-                    return;
+            _channel = channelName;
 
+            On["/{" + channelName + "}/nowplaying/songid"] = _ =>
+            {
                 string song = _.Message;
                 if (string.IsNullOrWhiteSpace(song))
                 {
                     playingTrack = null;
-                    LogTo.Warn("Server asked to play empty song on channel {0}", (string)_.channel);
+                    LogTo.Warn("Server asked to play empty song on channel {0}", _channel);
                     return;
                 }
 
                 PlaySong(song);
             };
-        }
 
-        public void SubscribeTo(string channel)
-        {
-            _channel = channel;
+            Run();
         }
 
         private void PlaySong(string songID)
@@ -90,8 +86,11 @@ namespace SOVND.Client.Modules
             }, token);
         }
 
-        protected override void Stop()
+        protected override void OnStop()
         {
+            if (songToken != null)
+                songToken.Cancel();
+
             if (streamingaudio != null)
                 streamingaudio.StopStreaming();
         }

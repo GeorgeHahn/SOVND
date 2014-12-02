@@ -29,21 +29,22 @@ namespace SOVND.Client
         private readonly ISettingsProvider _settings;
         private readonly IAppName _appname;
         private readonly SovndClient _client;
-        private readonly NowPlayingHandler _player;
         private readonly ChannelDirectory _channels;
         private readonly SyncHolder _sync;
+        private readonly IPlayerFactory _playerFactory;
         private SettingsModel _auth;
+        private NowPlayingHandler _player;
 
-        public MainWindow(ISettingsProvider settings, IAppName appname, SovndClient client, NowPlayingHandler player, ChannelDirectory channels, SyncHolder sync)
+        public MainWindow(ISettingsProvider settings, IAppName appname, SovndClient client, ChannelDirectory channels, SyncHolder sync, IPlayerFactory playerFactory)
         {
             InitializeComponent();
 
             _settings = settings;
             _appname = appname;
             _client = client;
-            _player = player;
             _channels = channels;
             _sync = sync;
+            _playerFactory = playerFactory;
             _auth = _settings.GetAuthSettings();
 
             Loaded += (_, __) =>
@@ -52,9 +53,9 @@ namespace SOVND.Client
                 _sync.sync = SynchronizationContext.Current;
 
                 _client.Run();
-                _player.Run();
 
-                SetupChannel();
+                // if(preferences_for_channel_set)
+                //      SetupChannel(channel_pref);
             };
 
             Closed += (_, __) =>
@@ -67,23 +68,41 @@ namespace SOVND.Client
 
         private void SetupChannel()
         {
-            _client.SubscribedChannelHandler.Subscribe();
-            _player.SubscribeTo("ambient");
-
             var observablePlaylist = ((IObservablePlaylistProvider)_client.SubscribedChannelHandler.Playlist);
 
             playlist = (ListCollectionView)(CollectionViewSource.GetDefaultView(observablePlaylist.Songs));
             playlist.CustomSort = new SongComparer();
 
-            observablePlaylist.PropertyChanged += (_, __) =>
-            {
-                _sync.sync.Send((x) => playlist.Refresh(), null);
-            };
+            observablePlaylist.PropertyChanged += OnObservablePlaylistOnPropertyChanged;
 
             chatbox.ItemsSource = _client.SubscribedChannelHandler.Chats;
 
             BindToPlaylist();
         }
+
+        private void DropChannel()
+        {
+            _player?.Disconnect();
+
+            _sync.sync.Send((x) => lbPlaylist.ItemsSource = null, null);
+
+            if (_client?.SubscribedChannelHandler?.Playlist != null)
+            {
+                var observablePlaylist = ((IObservablePlaylistProvider)_client.SubscribedChannelHandler.Playlist);
+                observablePlaylist.PropertyChanged -= OnObservablePlaylistOnPropertyChanged;
+            }
+
+            _client?.SubscribedChannelHandler?.ShutdownHandler();
+
+            playlist = null;
+            chatbox.ItemsSource = null;
+        }
+
+        private void OnObservablePlaylistOnPropertyChanged(object _, PropertyChangedEventArgs __)
+        {
+            _sync.sync.Send((x) => playlist.Refresh(), null);
+        }
+
 
         class SongComparer : IComparer
         {
@@ -103,6 +122,9 @@ namespace SOVND.Client
 
         private void BindToPlaylist()
         {
+            if (playlist == null)
+                return;
+
             _sync.sync.Send((x) => lbPlaylist.ItemsSource = playlist, null);
             _sync.sync.Send((x) => playlist.Refresh(), null);
         }
@@ -195,11 +217,18 @@ namespace SOVND.Client
         private void SwitchChannel(object sender, RoutedEventArgs e)
         {
             var pickedChannel = new ChannelWindow(_channels);
-            if (pickedChannel.ShowDialog().Value == true)
+            pickedChannel.ShowDialog(); // TODO: Add picker OK button
+
             {
                 var channel = pickedChannel.SelectedChannel;
-                if(channel != null)
+                if (channel != null)
+                {
+                    DropChannel();
+
+                    _player = _playerFactory.CreatePlayer(channel.Name);
                     _client.SubscribeToChannel(channel.Name);
+                    SetupChannel();
+                }
             }
         }
     }

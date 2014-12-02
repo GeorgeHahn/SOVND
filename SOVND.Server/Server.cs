@@ -220,13 +220,14 @@ namespace SOVND.Server
         private Dictionary<ChannelHandler, bool> runningScheduler = new Dictionary<ChannelHandler, bool>();
         private static object schedulerlock = new object();
 
+        // TODO: This should be refactored away from a thread-per-channel design, this won't scale well
         private void StartChannelScheduler(ChannelHandler channelHandler)
         {
             lock (schedulerlock)
             {
                 if (runningScheduler.ContainsKey(channelHandler) && runningScheduler[channelHandler])
                 {
-                    LogTo.Debug("Already running scheduler for {0}", channelHandler.MQTTName);
+                    LogTo.Debug("Already running scheduler for {0}", channelHandler.Name);
                     return;
                 }
                 else
@@ -235,7 +236,7 @@ namespace SOVND.Server
 
             var task = Task.Factory.StartNew(() =>
             {
-                var channel = channelHandler.MQTTName;
+                var channel = channelHandler.Name;
                 var playlist = (ISortedPlaylistProvider)channels[channel].Playlist;
                 LogTo.Debug("Starting track scheduler for \{channel}");
                 

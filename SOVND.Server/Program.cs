@@ -17,10 +17,12 @@ namespace SOVND.Server
             try
             {
                 IKernel kernel = new StandardKernel();
-                kernel.Bind<IChannelHandlerFactory>().ToFactory();
-                kernel.Bind<IPlaylistProvider>().To<SortedPlaylistProvider>();
-                kernel.Bind<IChatProvider>().To<ChatProvider>();
 
+                kernel.Bind<IChannelHandlerFactory>().ToFactory();
+                kernel.Bind<IChatProviderFactory>().ToFactory();
+
+                kernel.Bind<IPlaylistProvider>().To<SortedPlaylistProvider>();
+                
                 kernel.Bind<IMQTTSettings>().To<ServerMqttSettings>();
 
                 var server = kernel.Get<Server>();

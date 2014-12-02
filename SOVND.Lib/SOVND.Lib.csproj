@@ -39,10 +39,6 @@
     <Reference Include="Castle.Core">
       <HintPath>..\packages\Castle.Core.3.2.0\lib\net45\Castle.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Charlotte, Version=0.0.4.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Charlotte.0.0.4\lib\Charlotte.dll</HintPath>
-    </Reference>
     <Reference Include="M2Mqtt, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\M2Mqtt.3.6\lib\net45\M2Mqtt.dll</HintPath>
@@ -75,6 +71,7 @@
     <Compile Include="Handlers\ChannelHandler.cs" />
     <Compile Include="Handlers\ChatProvider.cs" />
     <Compile Include="Handlers\IChannelHandlerFactory.cs" />
+    <Compile Include="Handlers\IChatProviderFactory.cs" />
     <Compile Include="Handlers\IChatProvider.cs" />
     <Compile Include="Handlers\IObservablePlaylistProvider.cs" />
     <Compile Include="Handlers\IPlaylistProvider.cs" />
@@ -95,6 +92,10 @@
     <Compile Include="Settings\SettingsModel.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\github\Charlotte\Charlotte\Charlotte.csproj">
+      <Project>{4d601f15-2fa6-4501-a95a-5e44832c35e7}</Project>
+      <Name>Charlotte</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SpotifyClient\SpotifyClient.csproj">
       <Project>{0c4c71ab-4181-40c2-ba24-807f34ec1545}</Project>
       <Name>SpotifyClient</Name>
