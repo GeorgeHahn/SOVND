@@ -98,7 +98,7 @@ namespace SpotifyClient
 
             if (appkey == null)
             {
-                LogTo.Debug("Appkey not embedded, trying to read from spotify_appkey.key");
+                LogTo.Debug("Appkey not embedded, trying to read from {0}", resourceName);
                 appkey = File.ReadAllBytes(resourceName);
             }
 
