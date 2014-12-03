@@ -9,10 +9,8 @@
         xmlns:lib="clr-namespace:SOVND.Lib;assembly=SOVND.Lib"
         xmlns:models="clr-namespace:SOVND.Lib.Models;assembly=SOVND.Lib"
         mc:Ignorable="d"
-        Title="SOVND" Height="350" Width="525">
-    <Window.Resources>
-    </Window.Resources>
-
+        Title="SOVND" Height="450" Width="700">
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*" />
@@ -51,22 +49,48 @@
                                     <TextBlock Text="{Binding Path=AllArtists}" />
                                 </StackPanel>
 
-                                <StackPanel DockPanel.Dock="Right">
-                                    <TextBlock
-                                        Text="Votes:"
-                                        Margin="4"/>
-                                    <TextBlock
-                                        Text="{Binding Path=Votes}"
-                                        Margin="4"/>
-                                </StackPanel>
-                                <Button
+                                <StackPanel
                                     HorizontalAlignment="Right"
-                                    HorizontalContentAlignment="Right"
-                                    DockPanel.Dock="Right"
-                                    Click="VoteUp_Click"
-                                    Margin="3">
-                                    UP
-                                </Button>
+                                    DockPanel.Dock="Right" 
+                                    Orientation="Horizontal">
+                                    
+                                    <StackPanel>
+                                        <TextBlock
+                                            Text="Votes:"
+                                            Margin="4"/>
+                                        <TextBlock
+                                            Text="{Binding Path=Votes}"
+                                            Margin="4"/>
+                                    </StackPanel>
+                                    
+                                    <Button
+                                        DockPanel.Dock="Right"
+                                        Click="VoteUp_Click"
+                                        Margin="3">
+                                        UP
+                                    </Button>
+                                    
+                                    <Button
+                                        DockPanel.Dock="Right"
+                                        Click="Del_Click"
+                                        Margin="3">
+                                        DEL
+                                    </Button>
+                                    
+                                    <Button
+                                        DockPanel.Dock="Right"
+                                        Click="Blk_Click"
+                                        Margin="3">
+                                        BLK
+                                    </Button>
+                                    
+                                    <Button
+                                        DockPanel.Dock="Right"
+                                        Click="Rpt_Click"
+                                        Margin="3">
+                                        RPT
+                                    </Button>
+                                </StackPanel>
                             </DockPanel>
                         </Border>
                     </DataTemplate>

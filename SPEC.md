@@ -17,9 +17,9 @@ MQTT Communication spec
 			headerimage
 			moderators
 	/{channel}/playlist/{songid}
-		/votetime # time of the first vote on this song (TODO: spec time format)
+		/votetime # time of the first vote on this song (unix epoch)
 		/votes    # number of votes
-		/voters   # users who have voted for this song (TODO: comma delimited?)
+		/voters   # users who have voted for this song (TODO: format. Comma delimited?)
 		/removed
 	/{channel}/stats
 		/users     # number of active users

@@ -7,6 +7,8 @@ using System.Text;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
 using SOVND.Server.Settings;
+using System.Threading;
+using System.Linq;
 
 namespace SOVND.Server
 {
@@ -27,6 +29,11 @@ namespace SOVND.Server
 
                 var server = kernel.Get<Server>();
                 server.Run();
+
+                if (args.Any(s => s.Equals("-d", StringComparison.CurrentCultureIgnoreCase)))
+                {
+                    Thread.Sleep(Timeout.Infinite);
+                }
             }
             catch (Exception e)
             {

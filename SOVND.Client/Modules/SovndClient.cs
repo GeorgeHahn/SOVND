@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Anotar.NLog;
 using Newtonsoft.Json;
@@ -96,6 +97,39 @@ namespace SOVND.Client.Modules
 
                 if(track.Loaded)
                     Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songssearch/", track.Name + " " + track?.Artists[0]);
+            }
+            else
+                LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");
+        }
+
+        public void DeleteSong(Song item)
+        {
+            if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
+            {
+                LogTo.Info("Deleting song {0} on channel {1}", item.track.Loaded ? item.track.Name : item.SongID, SubscribedChannelHandler.Name);
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{item.SongID}", "remove");
+            }
+            else
+                LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");
+        }
+
+        public void BlockSong(Song item)
+        {
+            if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
+            {
+                LogTo.Info("Blocking song {0} on channel {1}", item.track.Loaded ? item.track.Name : item.SongID, SubscribedChannelHandler.Name);
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{item.SongID}", "block");
+            }
+            else
+                LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");
+        }
+
+        public void ReportSong(Song item)
+        {
+            if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
+            {
+                LogTo.Info("Reporting song {0} on channel {1}", item.track.Loaded ? item.track.Name : item.SongID, SubscribedChannelHandler.Name);
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{item.SongID}", "report");
             }
             else
                 LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");

@@ -232,5 +232,32 @@ namespace SOVND.Client
                 }
             }
         }
+
+        private void Del_Click(object sender, RoutedEventArgs e)
+        {
+            var item = ((Button)sender).DataContext as Song;
+            if (item == null)
+                return;
+
+            _client.DeleteSong(item);
+        }
+
+        private void Blk_Click(object sender, RoutedEventArgs e)
+        {
+            var item = ((Button)sender).DataContext as Song;
+            if (item == null)
+                return;
+
+            _client.BlockSong(item);
+        }
+
+        private void Rpt_Click(object sender, RoutedEventArgs e)
+        {
+            var item = ((Button)sender).DataContext as Song;
+            if (item == null)
+                return;
+
+            _client.ReportSong(item);
+        }
     }
 }

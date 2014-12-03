@@ -16,6 +16,7 @@ namespace SOVND.Lib.Handlers
         private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
 
         internal abstract void AddSong(Song song);
+        internal abstract void RemoveSong(Song song);
         internal abstract void ClearSongVotes(string id);
 
         public bool AddVote(string songID, string username) // TODO: THIS DOES NOT BELONG IN THIS CLASS
@@ -85,7 +86,7 @@ namespace SOVND.Lib.Handlers
             _channel = channel;
 
             // ChannelHandler playlists
-            On["/" + this._channel.Name + "/playlist/{songid}/votes"] = _ =>
+            On["/" + _channel.Name + "/playlist/{songid}/votes"] = _ =>
             {
                 if (_.Message == "")
                 {
@@ -93,6 +94,7 @@ namespace SOVND.Lib.Handlers
                     if (_channel.SongsByID.ContainsKey(_.songid))
                     {
                         Song song = _channel.SongsByID[_.songid];
+                        RemoveSong(song);
                         LogTo.Debug("[{0}] Removed song {1}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID);
                         _channel.SongsByID.Remove(_.songid);
                     }

@@ -74,7 +74,7 @@ namespace SOVND.Server
                 }
                 else
                 {
-                    LogTo.Warn("Invalid command: {0}: {1}, by {2}", (string)msg.Topic, (string)msg.Message, (string)msg.username);
+                    LogTo.Warn("[{0}] Invalid command: {1}: {2}, by {3}", (string)msg.channel, (string)msg.Topic, (string)msg.Message, (string)msg.username);
                     return;
                 }
             };
@@ -124,7 +124,7 @@ namespace SOVND.Server
             // Handle channel info
             On["/{channel}/info"] = _ =>
             {
-                LogTo.Info("\{_.channel} got info: \{_.Message}");
+                LogTo.Info("[{0}] Got info: \{_.Message}", (string)_.channel);
 
                 Channel channel = JsonConvert.DeserializeObject<Channel>(_.Message);
 
@@ -140,10 +140,10 @@ namespace SOVND.Server
 
         private void AddVote(string channel, string songid, string username)
         {
-            LogTo.Debug("\{username} voted for song \{songid}");
+            LogTo.Debug("{0} voted for song {1}", username, songid);
             if (!channels.ContainsKey(channel))
             {
-                LogTo.Warn("Got a vote from \{username} for nonexistent channel: \{channel}");
+                LogTo.Warn("Got a vote from {0} for nonexistent channel: {1}", username, channel);
                 return;
             }
 
@@ -158,7 +158,7 @@ namespace SOVND.Server
 
         private void RemoveVote(string channel, string songid, string username)
         {
-            LogTo.Warn("Unvoting currently disabled");
+            LogTo.Warn("Unvoting is currently disabled");
             return;
 
             //Log("\{username} unvoted for song \{songid}");
@@ -180,9 +180,7 @@ namespace SOVND.Server
 
         private void ReportSong(string channel, string songID, string username)
         {
-            LogTo.Debug("\{username} reported song \{songID} on \{channel}");
-
-            LogTo.Warn("Song reporting is currently disabled");
+            LogTo.Debug("[{0}] \{username} reported song \{songID}", channel);
 
             // TODO Record that user reported song
 
@@ -191,13 +189,13 @@ namespace SOVND.Server
 
         private void RemoveSong(string channel, string songID, string username)
         {
-            LogTo.Debug("\{username} removed song \{songID} on \{channel}");
+            LogTo.Debug("[{0}] \{username} removed song \{songID}", channel);
 
             // TODO Verify priveleges
             
             Publish("/\{channel}/playlist/\{songID}/votes", "", true);
-            Publish("/\{channel}/playlist/\{songID}/votetime", "");
-            Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
+            Publish("/\{channel}/playlist/\{songID}/votetime", "", true);
+            Publish("/\{channel}/playlist/\{songID}/removed", "true");
         }
 
         private void BlockSong(string channel, string songID, string username)
@@ -207,10 +205,7 @@ namespace SOVND.Server
             // TODO Verify priveleges
             // TODO Record block
 
-            Publish("/\{channel}/playlist/\{songID}/votes", "");
-            Publish("/\{channel}/playlist/\{songID}/votetime", "");
-            Publish("/\{channel}/playlist/\{songID}/removed", "true");
-            Publish("/\{channel}/playlist/\{songID}/blocked", "true");
+            RemoveSong(channel, songID, username);
         }
 
         private Dictionary<ChannelHandler, bool> runningScheduler = new Dictionary<ChannelHandler, bool>();
@@ -234,7 +229,7 @@ namespace SOVND.Server
             {
                 var channel = channelHandler.Name;
                 var playlist = (ISortedPlaylistProvider)channels[channel].Playlist;
-                LogTo.Debug("Starting track scheduler for \{channel}");
+                LogTo.Debug("[{0}] Starting track scheduler", channel);
                 
                 while (true)
                 {
@@ -245,37 +240,50 @@ namespace SOVND.Server
                         if(song != null)
                             song.track = new Track(song.SongID);
                         if (song == null)
-                            LogTo.Trace("No songs in channel: {0}", channel);
+                            LogTo.Trace("[{0}] No songs in channel", channel);
                         else
-                            LogTo.Debug("Either no track or no track time for track {0} in channel {1}", song.SongID, channel);
+                        {
+                            LogTo.Debug("[{1}] Skipping song: Either no track or no track time for track {0}", song.SongID, channel);
+                            ClearSong(channelHandler, song);
+                        }
                         Thread.Sleep(1000);
                         continue;
                     }
                     else
                     {
                         if (song.track?.Name != null)
-                            LogTo.Debug("Playing \{song.track.Name}");
+                            LogTo.Debug("[{0}] Playing \{song.track.Name}", channel);
 
-                        Publish("/\{channel}/nowplaying/songid", "", true);
-                        Publish("/\{channel}/nowplaying/songid", song.SongID, true);
-                        Publish("/\{channel}/nowplaying/starttime", Time.Timestamp().ToString(), true);
+                        PlaySong(channelHandler, song.SongID);
 
                         var songtime = song.track.Seconds;
                         Thread.Sleep((int) Math.Ceiling(songtime*1000));
 
                         if (song.track?.Name != null)
-                            LogTo.Trace("Finished playing \{song.track.Name}");
+                            LogTo.Trace("[{0}] Finished playing \{song.track.Name}", channel);
 
-                        // Set prev song to 0 votes, 0 vote time
-                        channelHandler.ClearVotes(song.SongID);
-
-                        Publish("/\{channel}/playlist/\{song.SongID}/votes", "0", true);
-                        Publish("/\{channel}/playlist/\{song.SongID}/votetime", Time.Timestamp().ToString(), true);
-                        Publish("/\{channel}/playlist/\{song.SongID}/voters", "", true);
+                        ClearSong(channelHandler, song);
                         continue;
                     }
                 }
             });
+        }
+
+        private void PlaySong(ChannelHandler channel, string songid)
+        {
+            Publish("/\{channel.Name}/nowplaying/songid", "");
+            Publish("/\{channel.Name}/nowplaying/songid", songid, true);
+            Publish("/\{channel.Name}/nowplaying/starttime", Time.Timestamp().ToString(), true);
+        }
+
+        private void ClearSong(ChannelHandler channel, Song song)
+        {
+            // Set prev song to 0 votes, 0 vote time
+            channel.ClearVotes(song.SongID);
+
+            Publish("/\{channel.Name}/playlist/\{song.SongID}/votes", "0", true);
+            Publish("/\{channel.Name}/playlist/\{song.SongID}/votetime", Time.Timestamp().ToString(), true);
+            Publish("/\{channel.Name}/playlist/\{song.SongID}/voters", "", true);
         }
     }
 }

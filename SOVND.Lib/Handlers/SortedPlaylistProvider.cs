@@ -37,6 +37,11 @@ namespace SOVND.Lib.Handlers
             Songs.Sort();
         }
 
+        internal override void RemoveSong(Song song)
+        {
+            Songs.Remove(song);
+        }
+
         internal override void ClearSongVotes(string id)
         {
             var songs = Songs.Where(x => x.SongID == id);

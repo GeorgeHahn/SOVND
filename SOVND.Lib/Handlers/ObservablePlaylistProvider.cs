@@ -1,3 +1,4 @@
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -24,6 +25,18 @@ namespace SOVND.Lib.Handlers
                 _songs.Add(song);
 
             song.PropertyChanged += Song_PropertyChanged;
+
+            RaisePropertyChanged("Songs");
+        }
+
+        internal override void RemoveSong(Song song)
+        {
+            if (_sync.sync != null)
+                _sync.sync.Send((x) => _songs.Remove(song), null); // TODO Bad bad bad bad
+            else
+                _songs.Remove(song);
+
+            song.PropertyChanged -= Song_PropertyChanged;
 
             RaisePropertyChanged("Songs");
         }
