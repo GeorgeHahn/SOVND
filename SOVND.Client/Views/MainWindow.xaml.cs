@@ -103,6 +103,8 @@ namespace SOVND.Client
             _sync.sync.Send((x) => playlist.Refresh(), null);
         }
 
+        private void Refresh() => OnObservablePlaylistOnPropertyChanged(null, null);
+
 
         class SongComparer : IComparer
         {
@@ -126,7 +128,7 @@ namespace SOVND.Client
                 return;
 
             _sync.sync.Send((x) => lbPlaylist.ItemsSource = playlist, null);
-            _sync.sync.Send((x) => playlist.Refresh(), null);
+            Refresh();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
