@@ -152,7 +152,7 @@ namespace SOVND.Server
             if (playlist.AddVote(songid, username))
             {
                 Publish("/\{channel}/playlist/\{songid}/votes", playlist.GetVotes(songid).ToString(), true);
-                Publish("/\{channel}/playlist/\{songid}/votetime", Util.Timestamp().ToString(), true);
+                Publish("/\{channel}/playlist/\{songid}/votetime", Time.Timestamp().ToString(), true);
             }
         }
 
@@ -263,7 +263,7 @@ namespace SOVND.Server
 
                         Publish("/\{channel}/nowplaying/songid", "", true);
                         Publish("/\{channel}/nowplaying/songid", song.SongID, true);
-                        Publish("/\{channel}/nowplaying/starttime", Util.Timestamp().ToString(), true);
+                        Publish("/\{channel}/nowplaying/starttime", Time.Timestamp().ToString(), true);
 
                         var songtime = song.track.Seconds;
                         Thread.Sleep((int) Math.Ceiling(songtime*1000));
@@ -275,7 +275,7 @@ namespace SOVND.Server
                         channelHandler.ClearVotes(song.SongID);
 
                         Publish("/\{channel}/playlist/\{song.SongID}/votes", "0", true);
-                        Publish("/\{channel}/playlist/\{song.SongID}/votetime", Util.Timestamp().ToString(), true);
+                        Publish("/\{channel}/playlist/\{song.SongID}/votetime", Time.Timestamp().ToString(), true);
                         Publish("/\{channel}/playlist/\{song.SongID}/voters", "", true);
                         continue;
                     }
