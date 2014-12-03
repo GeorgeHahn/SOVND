@@ -1,4 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Weavers>
   <Anotar.NLog/>
+  <Costura>
+    <ExcludeAssemblies>
+      Castle.Core
+      Ninject
+      Ninject.Extensions.Conventions
+      Ninject.Extensions.Factory
+    </ExcludeAssemblies>
+    <Unmanaged32Assemblies>
+      libspotify
+    </Unmanaged32Assemblies>
+  </Costura>
 </Weavers>
