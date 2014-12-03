@@ -85,21 +85,38 @@ namespace SOVND.Lib.Handlers
             _channel = channel;
 
             // ChannelHandler playlists
-            On["/" + _channel.Name + "/playlist/{songid}/votes"] = _ =>
+            On["/" + this._channel.Name + "/playlist/{songid}/votes"] = _ =>
             {
-                if (!channel.SongsByID.ContainsKey(_.songid))
-                    AddNewSong(_.songid);
-                Song song = channel.SongsByID[_.songid];
-                song.Votes = int.Parse(_.Message);
+                if (_.Message == "")
+                {
+                    // Remove song
+                    if (_channel.SongsByID.ContainsKey(_.songid))
+                    {
+                        Song song = _channel.SongsByID[_.songid];
+                        LogTo.Debug("[{0}] Removed song {1}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID);
+                        _channel.SongsByID.Remove(_.songid);
+                    }
+                }
+                else
+                {
+                    if (!_channel.SongsByID.ContainsKey(_.songid))
+                        AddNewSong(_.songid);
+                    Song song = _channel.SongsByID[_.songid];
+                    song.Votes = int.Parse(_.Message);
 
-                LogTo.Debug("[{0}] Votes for song {1} set to {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.Votes);
+                    LogTo.Debug("[{0}] Votes for song {1} set to {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.Votes);
+                }
             };
 
             On["/" + _channel.Name + "/playlist/{songid}/votetime"] = _ =>
             {
-                if (!channel.SongsByID.ContainsKey(_.songid))
+                // See if this is just to delete the song
+                if (_.Message == "")
+                    return;
+
+                if (!_channel.SongsByID.ContainsKey(_.songid))
                     AddNewSong(_.songid);
-                var song = channel.SongsByID[_.songid];
+                var song = _channel.SongsByID[_.songid];
                 song.Votetime = long.Parse(_.Message);
             };
 
@@ -109,11 +126,6 @@ namespace SOVND.Lib.Handlers
         public void ShutdownHandler()
         {
             Disconnect();
-            _channel = null;
-
-            // This instance is no longer useful
-            votes = null;
-            uservotes = null;
         }
 
         public PlaylistProviderBase(IMQTTSettings settings)

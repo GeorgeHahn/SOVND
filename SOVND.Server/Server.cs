@@ -182,40 +182,35 @@ namespace SOVND.Server
         {
             LogTo.Debug("\{username} reported song \{songID} on \{channel}");
 
-            LogTo.Warn("Song removal is currently disabled");
-            return;
+            LogTo.Warn("Song reporting is currently disabled");
 
-            // TODO Record report
+            // TODO Record that user reported song
+
+            Publish("/\{channel}/playlist/\{songID}/reported", "true");
         }
 
         private void RemoveSong(string channel, string songID, string username)
         {
             LogTo.Debug("\{username} removed song \{songID} on \{channel}");
 
-            LogTo.Warn("Song removal is currently disabled");
-            return;
-
             // TODO Verify priveleges
-            // TODO Remove song
-
-            //Publish("/\{channel}/playlist/\{songID}/votes", "", true);
-            //Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
+            
+            Publish("/\{channel}/playlist/\{songID}/votes", "", true);
+            Publish("/\{channel}/playlist/\{songID}/votetime", "");
+            Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
         }
 
         private void BlockSong(string channel, string songID, string username)
         {
             LogTo.Debug("\{username} blocked song \{songID} on \{channel}");
 
-            LogTo.Warn("Song removal is currently disabled");
-            return;
-
             // TODO Verify priveleges
-            // TODO Remove song
             // TODO Record block
 
-            //Publish("/\{channel}/playlist/\{songID}/votes", "", true);
-            //Publish("/\{channel}/playlist/\{songID}/removed", "true", true);
-            //Publish("/\{channel}/playlist/\{songID}/blocked", "true", true);
+            Publish("/\{channel}/playlist/\{songID}/votes", "");
+            Publish("/\{channel}/playlist/\{songID}/votetime", "");
+            Publish("/\{channel}/playlist/\{songID}/removed", "true");
+            Publish("/\{channel}/playlist/\{songID}/blocked", "true");
         }
 
         private Dictionary<ChannelHandler, bool> runningScheduler = new Dictionary<ChannelHandler, bool>();
