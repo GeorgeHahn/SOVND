@@ -81,7 +81,7 @@
     <Compile Include="Handlers\IPlaylistProvider.cs" />
     <Compile Include="Handlers\ISortedPlaylistProvider.cs" />
     <Compile Include="Handlers\ObservablePlaylistProvider.cs" />
-    <Compile Include="Handlers\PlaylistProvider.cs" />
+    <Compile Include="Handlers\PlaylistProviderBase.cs" />
     <Compile Include="Handlers\SortedPlaylistProvider.cs" />
     <Compile Include="Models\Channel.cs" />
     <Compile Include="Models\ChatMessage.cs" />
