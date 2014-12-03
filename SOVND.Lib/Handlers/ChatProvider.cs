@@ -19,9 +19,9 @@ namespace SOVND.Lib.Handlers
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
             // ChannelHandler chats
-            On["/\{channel.Name}/chat"] = _ =>
+            On["/" + channel.Name + "/chat"] = _ =>
             {
-                LogTo.Trace("\{channel.Name} chat - \{_.Message}");
+                LogTo.Trace("{0} chat - {1}", channel.Name, (string)_.Message);
 
                 if (sync.sync != null)
                     sync.sync.Send((x) => Chats.Add(new ChatMessage(_.Message)), null);

@@ -13,6 +13,10 @@ namespace SOVND.Lib.Models
         {
             SongID = songID;
 
+            // TODO Super nasty, need to decouple Song and Track
+            if (songID == "test")
+                return;
+
             track = new Track(songID);
             track.onLoad = () => LogTo.Info("Loaded {0}: {1}", track.SongID, track.Name);
         }
@@ -26,7 +30,7 @@ namespace SOVND.Lib.Models
             set
             {
                 _votes = value;
-                RaisePropertyChanged(nameof(Votes));
+                RaisePropertyChanged("Votes");
             }
         }
 

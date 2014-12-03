@@ -43,7 +43,12 @@ namespace SOVND.Lib.Handlers
 
         public ObservableCollection<ChatMessage> Chats
         {
-            get { return _chat?.Chats; }
+            get
+            {
+                if(_chat != null)
+                    return _chat.Chats;
+                return null;
+            }
         }
 
         public void Subscribe()

@@ -609,7 +609,8 @@ namespace SpotifyClient
                         }
                         catch (Exception ex)
                         {
-                            LogTo.ErrorException("Exception invoking sp_session_process_events: \{ex.GetType().ToString()} - \{ex.Message}", ex);
+                            LogTo.Error("Exception invoking sp_session_process_events: {0} - {1}", ex.GetType().ToString(), ex.Message);
+                            LogTo.ErrorException("Exception was: ", ex);
                             Log.Debug(Plugin.LOG_MODULE, "Exception invoking sp_session_process_events", ex);
                         }
 
@@ -623,7 +624,8 @@ namespace SpotifyClient
             }
             catch (Exception ex)
             {
-                LogTo.FatalException("Spotify mainthread() unhandled \{ex.GetType().ToString()}: \{ex.Message}", ex);
+                LogTo.Fatal("Spotify mainthread() unhandled {0}: {1}", ex.GetType().ToString(), ex.Message);
+                LogTo.FatalException("Exception was: ", ex);
             }
             finally
             {

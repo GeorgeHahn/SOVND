@@ -8,6 +8,8 @@
 *.suo
 *.user
 *.sln.docstates
+*.ncrunchsolution
+*.ncrunchproject
 
 # Build results
 [Dd]ebug/

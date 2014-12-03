@@ -275,7 +275,7 @@ namespace SpotifyClient
 
         private static void message_to_user(IntPtr sessionPtr, string message)
         {
-            LogTo.Info("Message to user: \{message}");
+            LogTo.Info("Message to user: {0}", message);
         }
 
         private static void metadata_updated(IntPtr sessionPtr)
