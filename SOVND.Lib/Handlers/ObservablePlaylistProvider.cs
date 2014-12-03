@@ -23,6 +23,13 @@ namespace SOVND.Lib.Handlers
             else
                 _songs.Add(song);
 
+            song.PropertyChanged += Song_PropertyChanged;
+
+            RaisePropertyChanged("Songs");
+        }
+
+        private void Song_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
             RaisePropertyChanged("Songs");
         }
 
