@@ -2,11 +2,11 @@ using System;
 
 namespace SOVND.Lib.Utils
 {
-    public class Util
+    public class Time
     {
         public static long Timestamp()
         {
-            return DateTime.Now.ToUniversalTime().Ticks;
+            return (long)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalMilliseconds;
         }
     }
 }
