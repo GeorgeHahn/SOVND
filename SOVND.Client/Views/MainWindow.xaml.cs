@@ -144,7 +144,7 @@ namespace SOVND.Client
                 searchToken = new CancellationTokenSource();
                 var token = searchToken.Token;
 
-                var searchTask = Task.Factory.StartNew(() =>
+                var fac = Task.Factory.StartNew(() =>
                 {
                     var search = Spotify.GetSearch(text);
 
@@ -153,10 +153,9 @@ namespace SOVND.Client
                         foreach (var trackPtr in search?.TrackPtrs)
                         {
                             if (token.IsCancellationRequested)
-                                return;
+                               return;
 
-                            var trackLink = Spotify.GetTrackLink(trackPtr);
-                            var track = new Track(trackLink);
+                            var track = new Track(trackPtr);
                             candidates.Add(track);
                         }
                         _sync.sync.Send((x) => lbPlaylist.ItemsSource = candidates, null);
@@ -167,7 +166,7 @@ namespace SOVND.Client
             {
                 if (searchToken != null)
                     searchToken.Cancel();
-
+                Track.Check();
                 BindToPlaylist();
             }
         }

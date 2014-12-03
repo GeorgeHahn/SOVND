@@ -33,7 +33,7 @@ namespace SOVND.Client.Modules
             // On /selectedchannel/ nowplaying,playlist,stats,chat -> track playlist, subscribed channel details
 
             // TODO: Need to move all of this to somewhere channel specific
-            
+
             // TODO: We don't need to be subbed to this all the time, just when browsing for channels
             On["/{channel}/info"] = _ =>
             {
@@ -85,6 +85,11 @@ namespace SOVND.Client.Modules
 
         public void AddTrack(Track track)
         {
+            if (!track.Loaded)
+            {
+                LogTo.Warn("Tried to vote for a track that wasn't loaded");
+            }
+
             if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
             {
                 Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{track.SongID}", "vote");

@@ -10,6 +10,7 @@ using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
 using SOVND.Server.Settings;
 using Newtonsoft.Json;
+using SOVND.Lib.Utils;
 
 namespace SOVND.Server
 {
@@ -151,7 +152,7 @@ namespace SOVND.Server
             if (playlist.AddVote(songid, username))
             {
                 Publish("/\{channel}/playlist/\{songid}/votes", playlist.GetVotes(songid).ToString(), true);
-                Publish("/\{channel}/playlist/\{songid}/votetime", Timestamp().ToString(), true);
+                Publish("/\{channel}/playlist/\{songid}/votetime", Util.Timestamp().ToString(), true);
             }
         }
 
@@ -262,7 +263,7 @@ namespace SOVND.Server
 
                         Publish("/\{channel}/nowplaying/songid", "", true);
                         Publish("/\{channel}/nowplaying/songid", song.SongID, true);
-                        Publish("/\{channel}/nowplaying/starttime", Timestamp().ToString(), true);
+                        Publish("/\{channel}/nowplaying/starttime", Util.Timestamp().ToString(), true);
 
                         var songtime = song.track.Seconds;
                         Thread.Sleep((int) Math.Ceiling(songtime*1000));
@@ -274,17 +275,12 @@ namespace SOVND.Server
                         channelHandler.ClearVotes(song.SongID);
 
                         Publish("/\{channel}/playlist/\{song.SongID}/votes", "0", true);
-                        Publish("/\{channel}/playlist/\{song.SongID}/votetime", Timestamp().ToString(), true);
+                        Publish("/\{channel}/playlist/\{song.SongID}/votetime", Util.Timestamp().ToString(), true);
                         Publish("/\{channel}/playlist/\{song.SongID}/voters", "", true);
                         continue;
                     }
                 }
             });
-        }
-
-        private static long Timestamp()
-        {
-            return DateTime.Now.ToUniversalTime().Ticks;
         }
     }
 }

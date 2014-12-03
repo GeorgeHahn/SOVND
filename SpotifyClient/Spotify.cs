@@ -591,7 +591,6 @@ namespace SpotifyClient
                         break;
 
                     _mainSignal.WaitOne(timeout, false);
-                    Track.Check();
 
                     if (_shutDown)
                         break;

@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using SpotifyClient;
+using Anotar.NLog;
 
 namespace SOVND.Lib.Models
 {
@@ -13,6 +14,7 @@ namespace SOVND.Lib.Models
             SongID = songID;
 
             track = new Track(songID);
+            track.onLoad = () => LogTo.Info("Loaded {0}: {1}", track.SongID, track.Name);
         }
 
         public string SongID { get; private set; }

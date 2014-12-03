@@ -67,8 +67,14 @@ namespace SOVND.Lib.Handlers
 
         private void AddNewSong(string ID)
         {
-            LogTo.Trace("Added song \{ID}");
             var song = new Song(ID);
+
+            // This means the song ID wasn't valid
+            // TODO cleaner way
+            if (song.SongID != ID)
+                return;
+
+            LogTo.Trace("Added song \{ID}");
             _channel.SongsByID[ID] = song;
 
             AddSong(song);

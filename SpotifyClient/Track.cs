@@ -63,33 +63,42 @@ namespace SpotifyClient
             get { return string.Join(", ", Artists); }
         }
 
+        public Action onLoad { get; set; }
+
         public Track(string link)
         {
             if (string.IsNullOrWhiteSpace(link))
                 throw new ArgumentOutOfRangeException("link");
 
-            SongID = link;
             IntPtr linkPtr = Functions.StringToLinkPtr(link);
-            try
+            if (linkPtr != IntPtr.Zero)
             {
-                TrackPtr = libspotify.sp_link_as_track(linkPtr);
-                Init();
+                SongID = link;
+
+                try
+                {
+                    TrackPtr = libspotify.sp_link_as_track(linkPtr);
+                    Init();
+                }
+                finally
+                {
+                    if (linkPtr != IntPtr.Zero)
+                        libspotify.sp_link_release(linkPtr);
+                }
             }
-            finally
-            {
-                if (linkPtr != IntPtr.Zero)
-                    libspotify.sp_link_release(linkPtr);
-            }
+
         }
 
         public Track(IntPtr trackPtr)
         {
             this.TrackPtr = trackPtr;
+            SongID = Spotify.GetTrackLink(trackPtr);
             Init();
         }
 
         private static List<Track> ToInitialize = new List<Track>();
-        private static object initlock = new object();
+        private static readonly object initlock = new Object();
+        private static readonly object toinit = new Object();
 
         public static void Check()
         {
@@ -98,7 +107,7 @@ namespace SpotifyClient
 
             var remove = new List<Track>();
 
-            lock (initlock)
+            lock (toinit)
             {
                 foreach (var track in ToInitialize)
                 {
@@ -107,7 +116,7 @@ namespace SpotifyClient
                         remove.Add(track);
                 }
 
-                LogTo.Trace("Tracks loaded: \{remove.Count}");
+                LogTo.Debug("Tracks loaded: {0}", remove.Count);
                 foreach (var removal in remove)
                     ToInitialize.Remove(removal);
             }
@@ -115,21 +124,25 @@ namespace SpotifyClient
 
         public bool Init()
         {
+            if (Loaded)
+                return true;
+
             if (!libspotify.sp_track_is_loaded(this.TrackPtr))
             {
                 // Queue this track to get initted by spotify thread
-                lock (initlock)
+                if (!ToInitialize.Contains(this))
                 {
-                    if(!ToInitialize.Contains(this))
+                    lock (toinit)
+                    {
                         ToInitialize.Add(this);
+                    }
                 }
                 return false;
             }
 
-            this.Loaded = true;
             this.Name = Functions.PtrToString(libspotify.sp_track_name(this.TrackPtr));
             this.TrackNumber = libspotify.sp_track_index(this.TrackPtr);
-            this.Seconds = (decimal)libspotify.sp_track_duration(this.TrackPtr) / 1000M;
+            this.Seconds = (decimal) libspotify.sp_track_duration(this.TrackPtr)/1000M;
             IntPtr albumPtr = libspotify.sp_track_album(this.TrackPtr);
             if (albumPtr != IntPtr.Zero)
                 this.Album = new Album(albumPtr);
@@ -141,7 +154,11 @@ namespace SpotifyClient
                     _artists.Add(Functions.PtrToString(libspotify.sp_artist_name(artistPtr)));
             }
 
+            if (onLoad != null)
+                onLoad();
+            this.Loaded = true;
             return true;
         }
+
     }
 }
