@@ -93,7 +93,9 @@ namespace SOVND.Client.Modules
             if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
             {
                 Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{track.SongID}", "vote");
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songssearch/", track.Name + " " + track?.Artists[0]);
+
+                if(track.Loaded)
+                    Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songssearch/", track.Name + " " + track?.Artists[0]);
             }
             else
                 LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");
