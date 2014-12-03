@@ -22,9 +22,10 @@ namespace SOVND.Lib.Handlers
 
             Songs.Sort();
 
-            var first = Songs[0].Votetime;
-            for (int i = 0; i < Songs.Count; i++)
-                LogTo.Debug("Song {0}: {1} has {2} votes at {3} (o {4})", i, Songs[i].track?.Name, Songs[i].Votes, Songs[i].Votetime, Songs[i].Votetime - first);
+            // TODO Ability to toggle verbose debugging like this at runtime
+            //var first = Songs[0].Votetime;
+            //for (int i = 0; i < Songs.Count; i++)
+            //    LogTo.Debug("Song {0}: {1} has {2} votes at {3} (o {4})", i, Songs[i].track?.Name, Songs[i].Votes, Songs[i].Votetime, Songs[i].Votetime - first);
 
             return Songs[0];
         }
