@@ -37,9 +37,9 @@ namespace SOVND.Lib.Tests
         {
             var songs = new List<Song>();
 
-            var top = new Song("test") {Votetime = 1417576976};
-            var mid = new Song("test") {Votetime = 1417577976};
-            var bot = new Song("test") {Votetime = 1417578976};
+            var top = new Song("test") {Votetime = 1000};
+            var mid = new Song("test") {Votetime = 2000};
+            var bot = new Song("test") {Votetime = 5000};
 
             songs.Add(bot);
             songs.Add(top);
