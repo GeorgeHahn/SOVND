@@ -21,6 +21,11 @@ namespace SOVND.Lib.Handlers
                 return null;
 
             Songs.Sort();
+
+            var first = Songs[0].Votetime;
+            for (int i = 0; i < Songs.Count; i++)
+                LogTo.Debug("Song {0}: {1} has {2} votes at {3} (o {4})", i, Songs[i].track?.Name, Songs[i].Votes, Songs[i].Votetime, Songs[i].Votetime - first);
+
             return Songs[0];
         }
 
@@ -37,13 +42,13 @@ namespace SOVND.Lib.Handlers
             if (songs.Count() > 1)
                 LogTo.Error("Songs in list should be unique");
 
-            foreach (var song in Songs)
-            {
-                // TODO Maybe Song should know where and how to publish itself / or hook into a service that can handle publishing changes
-                song.Votes = 0;
-                song.Voters = "";
-                song.Votetime = Util.Timestamp();
-            }
+            var song = songs.First();
+
+            // TODO Maybe Song should know where and how to publish itself / or hook into a service that can handle publishing changes
+            song.Votes = 0;
+            song.Voters = "";
+            song.Votetime = Time.Timestamp();
+
             Songs.Sort();
         }
 
