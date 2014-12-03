@@ -8,6 +8,7 @@ namespace SOVND.Lib.Models
     public class Song : IComparable, INotifyPropertyChanged
     {
         private int _votes;
+        private long _votetime;
 
         public Song(string songID)
         {
@@ -22,7 +23,16 @@ namespace SOVND.Lib.Models
         }
 
         public string SongID { get; private set; }
-        public long Votetime { get; set; }
+
+        public long Votetime
+        {
+            get { return _votetime; }
+            set
+            {
+                _votetime = value;
+                RaisePropertyChanged("Votetime");
+            }
+        }
 
         public int Votes
         {
