@@ -13,7 +13,7 @@ namespace SOVND.Client.Util
             var _auth = settings.GetAuthSettings();
 
             Spotify.Initialize();
-            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), _appname.Name, _auth.SpotifyUsername, _auth.SpotifyPassword))
+            if (!Spotify.Login(_appname.Name, _auth.SpotifyUsername, _auth.SpotifyPassword))
                 throw new Exception("Login failure");
 
             while (!Spotify.Ready())

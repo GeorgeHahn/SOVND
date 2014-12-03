@@ -31,6 +31,8 @@ using System.Threading;
 using libspotifydotnet;
 using System.Diagnostics;
 using Anotar.NLog;
+using System.Reflection;
+using System.IO;
 
 namespace SpotifyClient
 {
@@ -79,8 +81,27 @@ namespace SpotifyClient
             get { return _isLoggedIn; }
         }
 
-        public static bool Login(byte[] appkey, string appname, string username, string password)
+        public static bool Login(string appname, string username, string password)
         {
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = "spotify_appkey.key";
+            
+            byte[] appkey = null;
+            using (Stream stream = assembly.GetManifestResourceStream(assembly.GetName().Name + '.' + resourceName))
+            {
+                if (stream != null)
+                {
+                    appkey = new byte[stream.Length];
+                    stream.Read(appkey, 0, appkey.Length);
+                }
+            }
+
+            if (appkey == null)
+            {
+                LogTo.Debug("Appkey not embedded, trying to read from spotify_appkey.key");
+                appkey = File.ReadAllBytes("spotify_appkey.key");
+            }
+
             lock (_initSync)
             {
                 if (!_initted)

@@ -22,7 +22,7 @@ namespace SOVND.Server
         public new void Run()
         {
             Spotify.Initialize();
-            if (!Spotify.Login(File.ReadAllBytes("spotify_appkey.key"), "SOVND_server", _spot.Username, _spot.Password))
+            if (!Spotify.Login("SOVND_server", _spot.Username, _spot.Password))
                 throw new Exception("Spotify login failure");
             LogTo.Trace("Logged into Spotify");
             while (!Spotify.Ready())
