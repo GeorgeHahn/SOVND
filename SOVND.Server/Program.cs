@@ -9,6 +9,7 @@ using SOVND.Lib.Models;
 using SOVND.Server.Settings;
 using System.Threading;
 using System.Linq;
+using SOVND.Server.Handlers;
 
 namespace SOVND.Server
 {
@@ -20,11 +21,15 @@ namespace SOVND.Server
             {
                 IKernel kernel = new StandardKernel();
 
+                // Factories
                 kernel.Bind<IChannelHandlerFactory>().ToFactory();
                 kernel.Bind<IChatProviderFactory>().ToFactory();
 
+                // Singletons
+                kernel.Bind<RedisProvider>().ToSelf().InSingletonScope();
+
+                // Standard lifetime
                 kernel.Bind<IPlaylistProvider>().To<SortedPlaylistProvider>();
-                
                 kernel.Bind<IMQTTSettings>().To<ServerMqttSettings>();
 
                 var server = kernel.Get<Server>();

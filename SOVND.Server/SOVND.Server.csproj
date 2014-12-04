@@ -46,6 +46,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Charlotte.0.0.5\lib\Charlotte.dll</HintPath>
     </Reference>
+    <Reference Include="csredis">
+      <HintPath>..\packages\csredis.3.2.1\lib\net40\csredis.dll</HintPath>
+    </Reference>
     <Reference Include="M2Mqtt">
       <HintPath>..\packages\M2Mqtt.3.6\lib\net45\M2Mqtt.dll</HintPath>
     </Reference>
@@ -81,9 +84,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Handlers\SortedPlaylistProvider.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="Settings\RedisProvider.cs" />
     <Compile Include="Settings\ServerMqttSettings.cs" />
     <Compile Include="Settings\ServerSpotifyAuth.cs" />
   </ItemGroup>

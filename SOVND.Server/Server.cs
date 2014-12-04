@@ -17,6 +17,7 @@ namespace SOVND.Server
     public class Server : MqttModule
     {
         private readonly ServerSpotifyAuth _spot;
+        private readonly RedisProvider _redis;
         private Dictionary<string, ChannelHandler> channels = new Dictionary<string, ChannelHandler>();
 
         public new void Run()
@@ -31,10 +32,11 @@ namespace SOVND.Server
             LogTo.Debug("Connected to MQTT");
         }
 
-        public Server(IMQTTSettings settings, IChannelHandlerFactory chf, ServerSpotifyAuth spot)
+        public Server(IMQTTSettings settings, IChannelHandlerFactory chf, ServerSpotifyAuth spot, RedisProvider redis)
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
             _spot = spot;
+            _redis = redis;
             LogTo.Trace("Initializing routes");
 
             //////
