@@ -1,4 +1,4 @@
-﻿using CSRedis;
+﻿using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,16 +9,16 @@ namespace SOVND.Server.Settings
 {
     public class RedisProvider
     {
-        private readonly RedisClient _redis;
+        private readonly ConnectionMultiplexer _redis;
 
-        public RedisClient redis
+        public ConnectionMultiplexer redis
         {
             get { return _redis; }
         }
 
         public RedisProvider()
         {
-            _redis = new RedisClient("localhost");
+            _redis = ConnectionMultiplexer.Connect("localhost");
         }
     }
 }

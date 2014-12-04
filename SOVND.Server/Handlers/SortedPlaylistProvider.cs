@@ -6,13 +6,13 @@ using SOVND.Lib.Models;
 using SOVND.Lib.Utils;
 using Charlotte;
 using SOVND.Server.Settings;
-using CSRedis;
+using StackExchange.Redis;
 
 namespace SOVND.Server.Handlers
 {
     public class SortedPlaylistProvider : MqttModule, IPlaylistProvider, ISortedPlaylistProvider
     {
-        private readonly RedisClient _redis;
+        private readonly IDatabase _redis;
         private ChannelHandler _channel;
         private string chname;
 
@@ -31,12 +31,12 @@ namespace SOVND.Server.Handlers
             var song_voters = GetVotersID(songID);
             var song_votes = GetVotesID(songID);
 
-            if (!_redis.SIsMember(song_voters, username))
+            if (!_redis.SetContains(song_voters, username))
             {
                 LogTo.Trace("Vote was valid");
 
-                _redis.Incr(song_votes);
-                _redis.SAdd(song_voters, username);
+                _redis.StringIncrement(song_votes);
+                _redis.SetAdd(song_voters, username);
 
                 // TODO publish voter names
                 return true;
@@ -55,13 +55,13 @@ namespace SOVND.Server.Handlers
 
             ClearSongVotes(songID);
 
-            _redis.Set(song_votes, 0);
-            _redis.Del(song_voters);
+            _redis.StringSet(song_votes, 0);
+            _redis.KeyDelete(song_voters);
         }
 
         public int GetVotes(string songID)
         {
-            return int.Parse(_redis.Get(GetVotesID(songID)));
+            return int.Parse(_redis.StringGet(GetVotesID(songID)));
         }
 
         private void AddNewSong(string ID)
@@ -183,7 +183,7 @@ namespace SOVND.Server.Handlers
         public SortedPlaylistProvider(IMQTTSettings settings, RedisProvider redis)
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
-            _redis = redis.redis;
+            _redis = redis.redis.GetDatabase();
             Songs = new List<Song>();
         }
     }
