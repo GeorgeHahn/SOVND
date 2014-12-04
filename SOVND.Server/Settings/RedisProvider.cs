@@ -18,7 +18,7 @@ namespace SOVND.Server.Settings
 
         public RedisProvider()
         {
-            _redis = ConnectionMultiplexer.Connect("localhost");
+            _redis = ConnectionMultiplexer.Connect("127.0.0.1");
         }
     }
 }
