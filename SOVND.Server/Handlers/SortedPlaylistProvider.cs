@@ -5,29 +5,38 @@ using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
 using SOVND.Lib.Utils;
 using Charlotte;
+using SOVND.Server.Settings;
+using CSRedis;
 
 namespace SOVND.Server.Handlers
 {
     public class SortedPlaylistProvider : MqttModule, IPlaylistProvider, ISortedPlaylistProvider
     {
+        private readonly RedisClient _redis;
         private ChannelHandler _channel;
+        private string chname;
 
-        private Dictionary<string, int> votes = new Dictionary<string, int>();
-        private Dictionary<string, bool> uservotes = new Dictionary<string, bool>();
+        private string GetVotesID(string songID)
+        {
+            return chname + songID + ".votes";
+        }
+
+        private string GetVotersID(string songID)
+        {
+            return chname + songID + ".voters";
+        }
 
         public bool AddVote(string songID, string username) // TODO: THIS DOES NOT BELONG IN THIS CLASS
         {
-            if (!uservotes.ContainsKey(username + songID) || !uservotes[username + songID])
+            var song_voters = GetVotersID(songID);
+            var song_votes = GetVotesID(songID);
+
+            if (!_redis.SIsMember(song_voters, username))
             {
                 LogTo.Trace("Vote was valid");
 
-                if (!votes.ContainsKey(songID))
-                {
-                    votes[songID] = 0;
-                }
-
-                votes[songID]++;
-                uservotes[username + songID] = true;
+                _redis.Incr(song_votes);
+                _redis.SAdd(song_voters, username);
 
                 // TODO publish voter names
                 return true;
@@ -41,25 +50,18 @@ namespace SOVND.Server.Handlers
 
         public void ClearVotes(string songID)
         {
+            var song_voters = GetVotersID(songID);
+            var song_votes = GetVotesID(songID);
+
             ClearSongVotes(songID);
 
-            votes[songID] = 0;
-
-            // TODO this is nasty
-            var keystoclear = new List<string>();
-            foreach (var key in uservotes.Keys)
-            {
-                if (key.EndsWith(songID))
-                    keystoclear.Add(key);
-            }
-
-            foreach (var key in keystoclear)
-                uservotes[key] = false;
+            _redis.Set(song_votes, 0);
+            _redis.Del(song_voters);
         }
 
         public int GetVotes(string songID)
         {
-            return votes[songID];
+            return int.Parse(_redis.Get(GetVotesID(songID)));
         }
 
         private void AddNewSong(string ID)
@@ -80,6 +82,7 @@ namespace SOVND.Server.Handlers
         public void Subscribe(ChannelHandler channel)
         {
             _channel = channel;
+            chname = _channel.Name + ".";
 
             // ChannelHandler playlists
             On["/" + _channel.Name + "/playlist/{songid}/votes"] = _ =>
@@ -177,9 +180,10 @@ namespace SOVND.Server.Handlers
             Songs.Sort();
         }
 
-        public SortedPlaylistProvider(IMQTTSettings settings)
+        public SortedPlaylistProvider(IMQTTSettings settings, RedisProvider redis)
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
+            _redis = redis.redis;
             Songs = new List<Song>();
         }
     }
