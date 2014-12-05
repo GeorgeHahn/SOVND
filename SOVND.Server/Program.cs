@@ -10,6 +10,8 @@ using SOVND.Server.Settings;
 using System.Threading;
 using System.Linq;
 using SOVND.Server.Handlers;
+using System.IO;
+using SOVND.Lib.Utils;
 
 namespace SOVND.Server
 {
@@ -19,6 +21,8 @@ namespace SOVND.Server
         {
             try
             {
+                LogTo.Debug("===========================================================");
+
                 IKernel kernel = new StandardKernel();
 
                 // Factories
@@ -35,9 +39,11 @@ namespace SOVND.Server
                 var server = kernel.Get<Server>();
                 server.Run();
 
-                if (args.Any(s => s.Equals("-d", StringComparison.CurrentCultureIgnoreCase)))
+                var heartbeat = TimeSpan.FromMinutes(3);
+                while (true)
                 {
-                    Thread.Sleep(Timeout.Infinite);
+                    File.WriteAllText("sovndserver.heartbeat", Time.Timestamp().ToString());
+                    Thread.Sleep(heartbeat);
                 }
             }
             catch (Exception e)
