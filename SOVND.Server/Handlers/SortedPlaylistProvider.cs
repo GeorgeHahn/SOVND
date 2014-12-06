@@ -26,6 +26,16 @@ namespace SOVND.Server.Handlers
             return chname + songID + ".voters";
         }
 
+        private string GetAdderID(string songID)
+        {
+            return chname + songID + ".adder";
+        }
+
+        private string GetAddTimeID(string songID)
+        {
+            return chname + songID + ".addtime";
+        }
+
         public bool AddVote(string songID, string username) // TODO: THIS DOES NOT BELONG IN THIS CLASS
         {
             var song_voters = GetVotersID(songID);
@@ -35,15 +45,24 @@ namespace SOVND.Server.Handlers
             {
                 LogTo.Trace("Vote was valid");
 
+                if (song_votes == "0")
+                {
+                    _redis.StringSet(GetAdderID(songID), username);
+                    _redis.StringSet(GetAddTimeID(songID), Time.Timestamp());
+                }
+
                 _redis.StringIncrement(song_votes);
                 _redis.SetAdd(song_voters, username);
+
+                Publish("/\{_channel.Name}/playlist/\{songID}/votes", _redis.StringGet(song_votes), true);
+                Publish("/\{_channel.Name}/playlist/\{songID}/votetime", Time.Timestamp().ToString(), true);
 
                 // TODO publish voter names
                 return true;
             }
             else
             {
-                LogTo.Error("Vote was invalid: {0} voted for {1}", username, songID);
+                LogTo.Error("[{0}] Vote was invalid: {1} voted for {2}", chname, username, songID);
                 return false;
             }
         }
@@ -103,11 +122,19 @@ namespace SOVND.Server.Handlers
                 {
                     if (!_channel.SongsByID.ContainsKey(_.songid))
                         AddNewSong(_.songid);
-                    Song song = _channel.SongsByID[_.songid];
-                    song.Votes = int.Parse(_.Message);
 
-                    LogTo.Debug("[{0}] Votes for song {1} set to {2}", _channel.Name,
-                        song.track.Loaded ? song.track.Name : song.SongID, song.Votes);
+                    Song song = _channel.SongsByID[_.songid];
+
+                    int songvotes;
+                    if (!int.TryParse(_.Message, out songvotes))
+                    {
+                        LogTo.Debug("[{0}] Invalid votae number, clearing. {1}", _channel.Name, (string) _.Message);
+                        Publish("/" + _channel.Name + "/playlist/\{_.songid}/votes", "0", true);
+                        return;
+                    }
+
+                    song.Votes = songvotes;
+                    LogTo.Debug("[{0}] Votes for song {1} set to {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.Votes);
                 }
             };
 

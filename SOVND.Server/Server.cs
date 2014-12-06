@@ -150,12 +150,7 @@ namespace SOVND.Server
             }
 
             var playlist = channels[channel].Playlist; // TODO Nasty
-
-            if (playlist.AddVote(songid, username))
-            {
-                Publish("/\{channel}/playlist/\{songid}/votes", playlist.GetVotes(songid).ToString(), true);
-                Publish("/\{channel}/playlist/\{songid}/votetime", Time.Timestamp().ToString(), true);
-            }
+            playlist.AddVote(songid, username);
         }
 
         private void RemoveVote(string channel, string songid, string username)
