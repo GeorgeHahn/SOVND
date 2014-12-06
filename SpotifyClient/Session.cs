@@ -280,7 +280,6 @@ namespace SpotifyClient
 
         private static void metadata_updated(IntPtr sessionPtr)
         {
-            LogTo.Trace("Metadata updated");
             Track.Check();
         }
 

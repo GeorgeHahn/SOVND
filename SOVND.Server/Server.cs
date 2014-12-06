@@ -49,8 +49,8 @@ namespace SOVND.Server
             // Dirty hack to get libspotify to load songs
             On["/user/{username}/{channel}/songssearch/"] = _ =>
             {
-                Search search = Spotify.GetSearch(_.Message);
-                LogTo.Debug("SONG LOAD HACK: Searched \{_.Message} and \{(search.IsLoaded ? "is" : "is not")} loaded");
+                //Search search = Spotify.GetSearch(_.Message);
+                //LogTo.Debug("SONG LOAD HACK: Searched \{_.Message} and \{(search.IsLoaded ? "is" : "is not")} loaded");
             };
 
             // Handle user-channel interaction

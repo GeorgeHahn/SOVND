@@ -78,6 +78,7 @@ namespace SpotifyClient
                 try
                 {
                     TrackPtr = libspotify.sp_link_as_track(linkPtr);
+                    libspotify.sp_track_add_ref(TrackPtr);
                     Init();
                 }
                 finally
@@ -94,6 +95,11 @@ namespace SpotifyClient
             this.TrackPtr = trackPtr;
             SongID = Spotify.GetTrackLink(trackPtr);
             Init();
+        }
+
+        ~Track()
+        {
+            libspotify.sp_track_release(TrackPtr);
         }
 
         private static List<Track> ToInitialize = new List<Track>();
