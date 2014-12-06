@@ -11,14 +11,16 @@ using SOVND.Lib.Models;
 using SOVND.Server.Settings;
 using Newtonsoft.Json;
 using SOVND.Lib.Utils;
+using StackExchange.Redis;
 
 namespace SOVND.Server
 {
     public class Server : MqttModule
     {
         private readonly ServerSpotifyAuth _spot;
-        private readonly RedisProvider _redis;
+        private readonly ConnectionMultiplexer _redisconnection;
         private Dictionary<string, ChannelHandler> channels = new Dictionary<string, ChannelHandler>();
+        private IDatabase _redis;
 
         public new void Run()
         {
@@ -36,7 +38,8 @@ namespace SOVND.Server
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
             _spot = spot;
-            _redis = redis;
+            _redisconnection = redis.redis;
+            _redis = _redisconnection.GetDatabase();
             LogTo.Trace("Initializing routes");
 
             //////
@@ -84,10 +87,6 @@ namespace SOVND.Server
             // Handle channel registration
             On["/user/{username}/register/{channel}"] = _ =>
             {
-                // TODO Verify that channel hasn't already been created
-                // TODO Check user permissions
-                // TODO Publish _.username as moderater
-                // TODO Force channel ID to lowercase
                 // TODO Separate channel name from ID
 
                 Channel channel = JsonConvert.DeserializeObject<Channel>(_.Message);
@@ -99,7 +98,32 @@ namespace SOVND.Server
                     return;
                 }
 
-                LogTo.Info("\{_.username} sent channel data for {0}: {1}", (string)_.channel, (string)_.Message);
+                LogTo.Info("[{0}] \{_.username} sent channel data: {1}", (string)_.channel, (string)_.Message);
+
+                if (!_redis.KeyExists(GetChannelNameID(_.channel)))
+                {
+                    // Channel doesn't exist yet
+                    LogTo.Info("[{0}] Setting up new channel for {1}", (string)_.channel, (string)_.username);
+
+                    _redis.StringSet(GetChannelNameID(_.channel), channel.Name);
+                    _redis.StringSet(GetChannelDescriptionID(_.channel), channel.Description);
+                    _redis.SetAdd(GetChannelModeratorID(_.channel), _.username);
+                }
+                else
+                {
+                    // Channel exists
+
+                    if (!_redis.SetContains(GetChannelModeratorID(_.channel), _.username))
+                    {
+                        LogTo.Error("[{0}] User {1} not a moderator of channel", (string)_.channel, (string)_.username);
+                        return;
+                    }
+
+                    LogTo.Info("[{0}] changing existing channel for {1}", (string)_.channel, (string)_.username);
+
+                    _redis.StringSet(GetChannelNameID(_.channel), channel.Name);
+                    _redis.StringSet(GetChannelDescriptionID(_.channel), channel.Description);
+                }
 
                 Publish("/\{_.channel}/info", _.Message, true);
             };
@@ -138,6 +162,21 @@ namespace SOVND.Server
                     StartChannelScheduler(channelHandler);
                 }
             };
+        }
+
+        private RedisKey GetChannelModeratorID(string channelName)
+        {
+            return channelName + ".moderators";
+        }
+
+        private RedisKey GetChannelDescriptionID(string channelName)
+        {
+            return channelName + ".description";
+        }
+
+        private RedisKey GetChannelNameID(string channelName)
+        {
+            return channelName + ".name";
         }
 
         private void AddVote(string channel, string songid, string username)
