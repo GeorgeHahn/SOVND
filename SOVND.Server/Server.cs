@@ -115,7 +115,7 @@ namespace SOVND.Server
 
                     if (!_redis.SetContains(GetChannelModeratorID(_.channel), _.username))
                     {
-                        LogTo.Error("[{0}] User {1} not a moderator of channel", (string)_.channel, (string)_.username);
+                        LogTo.Error("[{0}] Error: User {1} not a moderator of channel", (string)_.channel, (string)_.username);
                         return;
                     }
 
@@ -227,8 +227,12 @@ namespace SOVND.Server
         {
             LogTo.Debug("[{0}] \{username} removed song \{songID}", channel);
 
-            // TODO Verify priveleges
-            
+            if (!_redis.SetContains(GetChannelModeratorID(channel), username))
+            {
+                LogTo.Error("[{0}] Error: User {1} not a moderator of channel", channel, username);
+                return;
+            }
+
             Publish("/\{channel}/playlist/\{songID}/votes", "", true);
             Publish("/\{channel}/playlist/\{songID}/votetime", "", true);
             Publish("/\{channel}/playlist/\{songID}/removed", "true");
@@ -238,8 +242,13 @@ namespace SOVND.Server
         {
             LogTo.Debug("\{username} blocked song \{songID} on \{channel}");
 
-            // TODO Verify priveleges
             // TODO Record block
+
+            if (!_redis.SetContains(GetChannelModeratorID(channel), username))
+            {
+                LogTo.Error("[{0}] Error: User {1} not a moderator of channel", channel, username);
+                return;
+            }
 
             RemoveSong(channel, songID, username);
         }
