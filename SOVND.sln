@@ -15,6 +15,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "libspotifydotnet", "libspot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SOVND.Lib.Tests", "SOVND.Lib.Tests\SOVND.Lib.Tests.csproj", "{9101AAAC-B7FB-428C-9E44-34CF04C90D27}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{9B917CBF-A59E-4923-88CD-90FF54872791}"
+	ProjectSection(SolutionItems) = preProject
+		nuget\NugetPack.ps1 = nuget\NugetPack.ps1
+		nuget\SOVND.Client.nuspec = nuget\SOVND.Client.nuspec
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
