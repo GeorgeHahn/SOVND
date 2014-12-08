@@ -1,3 +1,5 @@
+using System;
+using Anotar.NLog;
 using HipchatApiV2;
 using HipchatApiV2.Enums;
 using HipchatApiV2.Exceptions;
@@ -25,9 +27,13 @@ namespace SOVND.Server.Utils
                 _hipchat.CreateRoom(roomName, false, null, RoomPrivacy.Private);
                 goto retry;
             }
-            catch (HipchatWebException e) if (e.Message.Contains("rate limit"))
+            catch (HipchatWebException e) if (e.Message.Contains("rate"))
             {
                 // Fail silently
+            }
+            catch (Exception e)
+            {
+                LogTo.ErrorException("Hipchat error", e);
             }
         }
     }
