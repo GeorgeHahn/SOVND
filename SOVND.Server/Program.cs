@@ -21,7 +21,7 @@ namespace SOVND.Server
         {
             try
             {
-                LogTo.Debug("===========================================================");
+                LogTo.Debug("======================= STARTING ==========================");
 
                 IKernel kernel = new StandardKernel();
 
@@ -51,6 +51,7 @@ namespace SOVND.Server
                 LogTo.FatalException("Unhandled exception", e);
                 LogTo.Fatal("Exception stacktrace: {0}", e.StackTrace);
             }
+            LogTo.Debug("========================= DEAD ============================");
         }
     }
 }
