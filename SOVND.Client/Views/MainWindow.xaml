@@ -14,9 +14,11 @@
     
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="1*" />
-            <ColumnDefinition Width="2*" />
-            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="200" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="200" />
         </Grid.ColumnDefinitions>
         
         <Grid>
@@ -32,19 +34,26 @@
             <ListBox
                 Grid.Row="1"
                 x:Name="channelbox"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                 SelectionChanged="Channelbox_SelectionChanged">
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type models:Channel}">
                         <StackPanel>
-                            <TextBlock Text="{Binding Path=Name}" />
-                            <TextBlock Text="{Binding Path=Description}" />
+                            <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding Path=Description}" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.Resources>
             </ListBox>
         </Grid>
         
-        <Grid Grid.Column="1">
+	    <GridSplitter Width="3" VerticalContentAlignment="Stretch"
+		          HorizontalAlignment="Center"
+		          ResizeDirection="Columns"
+		          ShowsPreview="True"
+		          Grid.Column="1"/>
+        
+        <Grid Grid.Column="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
@@ -153,7 +162,13 @@
             </ListBox>
         </Grid>
 
-        <Grid Grid.Column="2">
+	    <GridSplitter Width="3" VerticalContentAlignment="Stretch"
+		          HorizontalAlignment="Center"
+		          ResizeDirection="Columns"
+		          ShowsPreview="True"
+		          Grid.Column="3"/>
+        
+        <Grid Grid.Column="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
