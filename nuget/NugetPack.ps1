@@ -11,8 +11,8 @@ If($lastexitcode -eq 0)
 {
 	Write-Host "Nuget package built successfully"
 	nuget push $root\nuget\*.nupkg -Source $nugetServer $apiKey
+	
+	//Squirrel --releasify $root/nuget/SOVND.Client-$env:APPVEYOR_BUILD_VERSION.nupkg
 } else {
 	Write-Host "Nuget packaging error $($lastexitcode)"
 }
-
-ls -R
