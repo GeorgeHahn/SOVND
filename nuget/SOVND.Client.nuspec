@@ -9,11 +9,11 @@
         <description>The SOVND client</description>
     </metadata>
 	<files>
-		<file src="SOVND.Client.exe" target="lib\" />
-		<file src="libspotify.dll" target="lib\" />
-		<file src="Ninject.Extensions.Factory.dll" target="lib\" />
-		<file src="Ninject.Extensions.Conventions.dll" target="lib\" />
-		<file src="Ninject.dll" target="lib\" />
-		<file src="Castle.Core.dll" target="lib\" />
+		<file src="SOVND.Client\bin\Debug\SOVND.Client.exe" target="lib\" />
+		<file src="SOVND.Client\bin\Debug\libspotify.dll" target="lib\" />
+		<file src="SOVND.Client\bin\Debug\Ninject.Extensions.Factory.dll" target="lib\" />
+		<file src="SOVND.Client\bin\Debug\Ninject.Extensions.Conventions.dll" target="lib\" />
+		<file src="SOVND.Client\bin\Debug\Ninject.dll" target="lib\" />
+		<file src="SOVND.Client\bin\Debug\Castle.Core.dll" target="lib\" />
 	</files>
 </package>
