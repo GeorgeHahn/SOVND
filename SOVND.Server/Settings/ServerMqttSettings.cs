@@ -11,12 +11,12 @@ namespace SOVND.Server.Settings
 
         public string Username
         {
-            get { return File.ReadAllText("username.key"); }
+            get { return File.ReadAllText("../username.key"); }
         }
 
         public string Password
         {
-            get { return File.ReadAllText("password.key"); }
+            get { return File.ReadAllText("../password.key"); }
         }
     }
 }

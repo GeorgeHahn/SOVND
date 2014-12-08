@@ -6,12 +6,12 @@ namespace SOVND.Server.Settings
     {
         public string Username
         {
-            get { return File.ReadAllText("spot.username.key"); }
+            get { return File.ReadAllText("../spot.username.key"); }
         }
 
         public string Password
         {
-            get { return File.ReadAllText("spot.password.key"); }
+            get { return File.ReadAllText("../spot.password.key"); }
         }
     }
 }
