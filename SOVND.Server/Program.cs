@@ -11,7 +11,9 @@ using System.Threading;
 using System.Linq;
 using SOVND.Server.Handlers;
 using System.IO;
+using HipchatApiV2.Enums;
 using SOVND.Lib.Utils;
+using SOVND.Server.Utils;
 
 namespace SOVND.Server
 {
@@ -19,6 +21,17 @@ namespace SOVND.Server
     {
         static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.UnhandledException += (_, eventArgs) =>
+            {
+                var exception = eventArgs.ExceptionObject as Exception;
+
+                string message = string.Format("Unhandled exception: {0}: {1} \r\n{2}", exception.GetType().ToString(),
+                    exception.Message, exception.StackTrace);
+
+                LogTo.Fatal(message);
+                HipchatSender.SendNotification("Server errors", message, RoomColors.Random);
+            };
+
             try
             {
                 LogTo.Debug("======================= STARTING ==========================");
@@ -46,12 +59,10 @@ namespace SOVND.Server
                     Thread.Sleep(heartbeat);
                 }
             }
-            catch (Exception e)
+            finally
             {
-                LogTo.FatalException("Unhandled exception", e);
-                LogTo.Fatal("Exception stacktrace: {0}", e.StackTrace);
+                LogTo.Debug("========================= DEAD ============================");
             }
-            LogTo.Debug("========================= DEAD ============================");
         }
     }
 }
