@@ -2,8 +2,8 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
     <metadata>
         <id>SOVND.Client</id>
-        <version></version>
-        <authors>George Hahn</authors>
+        <version>$version$</version>
+        <authors>George  Hahn</authors>
         <projectUrl>http://github.com/georgehahn/SOVND</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>The SOVND client</description>
