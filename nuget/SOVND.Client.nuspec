@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>SOVND.Client</id>
+        <version></version>
+        <authors>George Hahn</authors>
+        <projectUrl>http://github.com/georgehahn/SOVND</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>The SOVND client</description>
+    </metadata>
+	<files>
+		<file src="SOVND.Client.exe" target="lib\" />
+		<file src="libspotify.dll" target="lib\" />
+		<file src="Ninject.Extensions.Factory.dll" target="lib\" />
+		<file src="Ninject.Extensions.Conventions.dll" target="lib\" />
+		<file src="Ninject.dll" target="lib\" />
+		<file src="Castle.Core.dll" target="lib\" />
+	</files>
+</package>
