@@ -8,16 +8,43 @@
         xmlns:spotify="clr-namespace:SpotifyClient;assembly=SpotifyClient"
         xmlns:lib="clr-namespace:SOVND.Lib;assembly=SOVND.Lib"
         xmlns:models="clr-namespace:SOVND.Lib.Models;assembly=SOVND.Lib"
+        xmlns:w="clr-namespace:System.Windows.Workarounds" 
         mc:Ignorable="d"
-        Title="SOVND" Height="450" Width="700">
+        Title="SOVND" Height="550" Width="800">
     
     <Grid>
         <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
             <ColumnDefinition Width="2*" />
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
         
         <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            
+            <Button
+                Grid.Column="0"
+                Click="NewChannel">New Channel</Button>
+            
+            <ListBox
+                Grid.Row="1"
+                x:Name="channelbox"
+                SelectionChanged="Channelbox_SelectionChanged">
+                <ListBox.Resources>
+                    <DataTemplate DataType="{x:Type models:Channel}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Path=Name}" />
+                            <TextBlock Text="{Binding Path=Description}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.Resources>
+            </ListBox>
+        </Grid>
+        
+        <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
@@ -124,31 +151,23 @@
             </ListBox>
         </Grid>
 
-        <Grid Grid.Column="1">
+        <Grid Grid.Column="2">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-                
-                <Button
-                    Grid.Column="0"
-                    Click="NewChannel">New Channel</Button>
-                
-                <Button 
-                    Grid.Column="1"
-                    Click="SwitchChannel">Pick Channel</Button>
-            </Grid>
+            
+            <TextBlock Grid.Row="0"
+                       FontWeight="Medium"
+                       HorizontalAlignment="Center">
+                Chat
+            </TextBlock>
             
             <ListBox 
                 Grid.Row="1"
-                x:Name="chatbox">
+                x:Name="chatbox"
+                w:ListBox.AutoScroll="True">
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type models:ChatMessage}">
                         <TextBlock Text="{Binding Path=Message}" />

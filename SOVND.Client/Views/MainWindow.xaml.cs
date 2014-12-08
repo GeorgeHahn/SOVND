@@ -47,6 +47,8 @@ namespace SOVND.Client
             _playerFactory = playerFactory;
             _auth = _settings.GetAuthSettings();
 
+            channelbox.ItemsSource = channels.channels;
+
             Loaded += (_, __) =>
             {
                 App.WindowHandle = new WindowInteropHelper(this).Handle;
@@ -215,24 +217,6 @@ namespace SOVND.Client
             }
         }
 
-        private void SwitchChannel(object sender, RoutedEventArgs e)
-        {
-            var pickedChannel = new ChannelWindow(_channels);
-            pickedChannel.ShowDialog(); // TODO: Add picker OK button
-
-            {
-                var channel = pickedChannel.SelectedChannel;
-                if (channel != null)
-                {
-                    DropChannel();
-
-                    _player = _playerFactory.CreatePlayer(channel.Name);
-                    _client.SubscribeToChannel(channel.Name);
-                    SetupChannel();
-                }
-            }
-        }
-
         private void Del_Click(object sender, RoutedEventArgs e)
         {
             var item = ((Button)sender).DataContext as Song;
@@ -258,6 +242,19 @@ namespace SOVND.Client
                 return;
 
             _client.ReportSong(item);
+        }
+
+        private void Channelbox_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            var channel = channelbox.SelectedItem as Channel;
+            if (channel != null)
+            {
+                DropChannel();
+
+                _player = _playerFactory.CreatePlayer(channel.Name);
+                _client.SubscribeToChannel(channel.Name);
+                SetupChannel();
+            }
         }
     }
 }
