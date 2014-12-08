@@ -292,7 +292,14 @@ namespace SOVND.Server
                         if(song != null)
                             song.track = new Track(song.SongID);
                         if (song == null)
-                            HipchatSender.SendNotification(channel, "No songs in channel", RoomColors.Red);
+                        {
+                            HipchatSender.SendNotification(channel, "No songs in channel, waiting for a song", RoomColors.Red);
+                            while (playlist.GetTopSong() == null)
+                            {
+                                Thread.Sleep(1000);
+                            }
+                            HipchatSender.SendNotification(channel, "Got a song", RoomColors.Green);
+                        }
                         else
                         {
                             HipchatSender.SendNotification(channel, string.Format("Skipping song: Either no track or no track time for track {0}", song.SongID), RoomColors.Red);
