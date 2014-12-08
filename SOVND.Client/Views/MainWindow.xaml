@@ -59,6 +59,7 @@
             <ListBox
                 Grid.Row="1"
                 x:Name="lbPlaylist"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                 HorizontalContentAlignment="Stretch">
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type models:Song}">
@@ -70,10 +71,11 @@
                                     Margin="3">
                                     IMG
                                 </TextBlock>
-                                <StackPanel DataContext="{Binding Path=track}">
-                                    <TextBlock Text="{Binding Path=Name}" />
-                                    <TextBlock Text="{Binding Path=Album.Name}" />
-                                    <TextBlock Text="{Binding Path=AllArtists}" />
+                                
+                                <StackPanel DataContext="{Binding Path=track}" ClipToBounds="True">
+                                    <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Path=Album.Name}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Path=AllArtists}" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
 
                                 <StackPanel
@@ -132,9 +134,9 @@
                                     IMG
                                 </TextBlock>
                                 <StackPanel>
-                                    <TextBlock Text="{Binding Path=Name}" />
-                                    <TextBlock Text="{Binding Path=Album.Name}" />
-                                    <TextBlock Text="{Binding Path=AllArtists}" />
+                                    <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Path=Album.Name}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Path=AllArtists}" TextTrimming="CharacterEllipsis" />
                                 </StackPanel>
                                 <Button
                                     HorizontalAlignment="Right"
