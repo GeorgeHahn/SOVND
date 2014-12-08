@@ -1,16 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Charlotte;
 using SpotifyClient;
 using Anotar.NLog;
+using HipchatApiV2.Enums;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
 using SOVND.Server.Settings;
 using Newtonsoft.Json;
 using SOVND.Lib.Utils;
+using SOVND.Server.Utils;
 using StackExchange.Redis;
 
 namespace SOVND.Server
@@ -40,6 +43,7 @@ namespace SOVND.Server
             _spot = spot;
             _redisconnection = redis.redis;
             _redis = _redisconnection.GetDatabase();
+
             LogTo.Trace("Initializing routes");
 
             //////
@@ -56,7 +60,6 @@ namespace SOVND.Server
             // Handle user-channel interaction
             On["/user/{username}/{channel}/songs/{songid}"] = msg =>
             {
-
                 if (msg.Message == "vote")
                 {
                     AddVote(msg.channel, msg.songid, msg.username);
@@ -133,11 +136,15 @@ namespace SOVND.Server
             {
                 LogTo.Trace("\{_.channel}-> \{_.username}: \{_.Message}");
                 
-                // TODO [LOW] Log chats
                 // TODO [LOW] Allow moderators to mute users
 
                 if (channels.ContainsKey(_.channel))
-                    Publish("/\{_.channel}/chat", "\{_.username}: \{_.Message}");
+                {
+                    var topic = string.Format("/{0}/chat", _.channel);
+                    var message = string.Format("{0}: {1}", _.username, _.Message);
+                    Publish(topic, message);
+                    HipchatSender.SendNotification(_.channel, message, RoomColors.Gray);
+                }
                 else
                     LogTo.Debug("Chat was for invalid channel");
             };
@@ -150,7 +157,7 @@ namespace SOVND.Server
             // Handle channel info
             On["/{channel}/info"] = _ =>
             {
-                LogTo.Info("[{0}] Got info: \{_.Message}", (string)_.channel);
+                LogTo.Info("[{0}] Got info: {1}", (string)_.channel, (string)_.Message);
 
                 Channel channel = JsonConvert.DeserializeObject<Channel>(_.Message);
 
@@ -285,10 +292,10 @@ namespace SOVND.Server
                         if(song != null)
                             song.track = new Track(song.SongID);
                         if (song == null)
-                            LogTo.Trace("[{0}] No songs in channel", channel);
+                            HipchatSender.SendNotification(channel, "No songs in channel", RoomColors.Red);
                         else
                         {
-                            LogTo.Debug("[{1}] Skipping song: Either no track or no track time for track {0}", song.SongID, channel);
+                            HipchatSender.SendNotification(channel, string.Format("Skipping song: Either no track or no track time for track {0}", song.SongID), RoomColors.Red);
                             ClearSong(channelHandler, song);
                         }
                         Thread.Sleep(1000);
@@ -296,16 +303,10 @@ namespace SOVND.Server
                     }
                     else
                     {
-                        if (song.track?.Name != null)
-                            LogTo.Debug("[{0}] Playing \{song.track.Name}", channel);
-
-                        PlaySong(channelHandler, song.SongID);
+                        PlaySong(channelHandler, song);
 
                         var songtime = song.track.Seconds;
                         Thread.Sleep((int) Math.Ceiling(songtime*1000));
-
-                        if (song.track?.Name != null)
-                            LogTo.Trace("[{0}] Finished playing \{song.track.Name}", channel);
 
                         ClearSong(channelHandler, song);
                         continue;
@@ -314,10 +315,12 @@ namespace SOVND.Server
             });
         }
 
-        private void PlaySong(ChannelHandler channel, string songid)
+        private void PlaySong(ChannelHandler channel, Song song)
         {
+            HipchatSender.SendNotification(channel.Name, "Playing song: " + (song.track.Loaded ? song.track.Name : song.SongID), RoomColors.Green);
+
             Publish("/\{channel.Name}/nowplaying/songid", "");
-            Publish("/\{channel.Name}/nowplaying/songid", songid, true);
+            Publish("/\{channel.Name}/nowplaying/songid", song.SongID, true);
             Publish("/\{channel.Name}/nowplaying/starttime", Time.Timestamp().ToString(), true);
         }
 

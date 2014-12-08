@@ -47,6 +47,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Charlotte.0.1.45\lib\Charlotte.dll</HintPath>
     </Reference>
+    <Reference Include="HipchatApiV2, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>MonoBins\HipchatApiV2.dll</HintPath>
+    </Reference>
     <Reference Include="M2Mqtt, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>MonoBins\M2Mqtt.dll</HintPath>
@@ -81,6 +85,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -95,8 +100,12 @@
     <Compile Include="Settings\RedisProvider.cs" />
     <Compile Include="Settings\ServerMqttSettings.cs" />
     <Compile Include="Settings\ServerSpotifyAuth.cs" />
+    <Compile Include="Utils\HipchatLogger.cs" />
+    <Compile Include="Utils\HipchatSender.cs" />
+    <Compile Include="Utils\LoggerFactory.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.config.sample" />
     <None Include="App.config" />
     <None Include="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

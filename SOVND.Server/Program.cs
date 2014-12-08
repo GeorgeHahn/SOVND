@@ -50,8 +50,6 @@ namespace SOVND.Server
             {
                 LogTo.FatalException("Unhandled exception", e);
                 LogTo.Fatal("Exception stacktrace: {0}", e.StackTrace);
-                Thread.Sleep(5000);
-                throw;
             }
         }
     }
