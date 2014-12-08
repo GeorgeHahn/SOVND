@@ -14,7 +14,7 @@ nuget pack $root\nuget\$proj.nuspec -OutputDirectory $root\nuget\ -Version $vers
 If($lastexitcode -eq 0)
 {
 	Write-Host "Nuget package built successfully"
-	nuget push nuget\*.nupkg -Source $nugetServer $apiKey
+	nuget push $root\nuget\*.nupkg -Source $nugetServer $apiKey
 } else {
 	Write-Host "Nuget packaging error $($lastexitcode)"
 }
