@@ -16,6 +16,7 @@ using System.ComponentModel;
 using SOVND.Lib.Models;
 using SOVND.Client.Modules;
 using System.Collections;
+using System.Windows.Input;
 using SOVND.Lib.Handlers;
 using SOVND.Client.Util;
 
@@ -254,6 +255,14 @@ namespace SOVND.Client
                 _player = _playerFactory.CreatePlayer(channel.Name);
                 _client.SubscribeToChannel(channel.Name);
                 SetupChannel();
+            }
+        }
+
+        private void Chatinput_OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                SendChat(null, null);
             }
         }
     }

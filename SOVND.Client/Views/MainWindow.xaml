@@ -167,10 +167,14 @@
             <ListBox 
                 Grid.Row="1"
                 x:Name="chatbox"
-                w:ListBox.AutoScroll="True">
+                w:ListBox.AutoScroll="True"
+                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                HorizontalContentAlignment="Stretch">
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type models:ChatMessage}">
-                        <TextBlock Text="{Binding Path=Message}" />
+                        <TextBlock
+                            TextWrapping="Wrap"
+                            Text="{Binding Path=Message}" />
                     </DataTemplate>
                 </ListBox.Resources>
             </ListBox>
@@ -184,7 +188,9 @@
                     DockPanel.Dock="Right"
                     Click="SendChat">Send</Button>
                 
-                <TextBox x:Name="chatinput" />
+                <TextBox 
+                    x:Name="chatinput" 
+                    KeyDown="Chatinput_OnKeyDown"/>
             </DockPanel>
         </Grid>
     </Grid>
