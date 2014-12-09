@@ -17,10 +17,13 @@ MQTT Communication spec
 			headerimage
 			moderators
 	/{channel}/playlist/{songid}
-		/votetime # time of the first vote on this song (unix epoch)
-		/votes    # number of votes
-		/voters   # users who have voted for this song (TODO: format. Comma delimited?)
-		/removed
+		JSON with:
+			addtime  # time this track was added (unix time)
+			addedby  # user who added this track
+			votetime # time of the first vote on this song (unix time)
+			votes    # number of votes
+			voters   # users who have voted for this song (JSON array)
+			removed  # boolean - if true, this track has been removed
 	/{channel}/stats
 		/users     # number of active users
 		/usernames # names of nonanonymous users in channel
