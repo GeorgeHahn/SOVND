@@ -192,6 +192,8 @@ namespace SpotifyClient
             return Spotify.GetAlbumArt(GetAlbumArtLink());
         }
 
+        private static object _artlock = new object();
+
         private System.Drawing.Image GetAlbumArt()
         {
             if (!Loaded)
@@ -203,11 +205,14 @@ namespace SpotifyClient
                 {
                     while (_artwork == null)
                     {
-                        var buffer = GetAlbumArtBuffer();
-                        if (buffer != null)
-                            _artwork = System.Drawing.Image.FromStream(new MemoryStream(buffer));
+                        lock (_artlock)
+                        {
+                            var buffer = GetAlbumArtBuffer();
+                            if (buffer != null)
+                                _artwork = System.Drawing.Image.FromStream(new MemoryStream(buffer));
+                        }
                         if (_artwork == null)
-                            Thread.Sleep(10);
+                            Thread.Sleep(50);
                     }
                     RaisePropertyChanged("AlbumArt");
                 });
