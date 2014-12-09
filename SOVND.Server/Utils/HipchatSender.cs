@@ -22,7 +22,7 @@ namespace SOVND.Server.Utils
             {
                 _hipchat.SendNotification(roomName, message, color);
             }
-            catch (HipchatWebException e) if (e.Message.Contains("404"))
+            catch (HipchatWebException e) if (e.Message.Contains("Room not found"))
             {
                 _hipchat.CreateRoom(roomName, false, null, RoomPrivacy.Private);
                 goto retry;
@@ -33,7 +33,7 @@ namespace SOVND.Server.Utils
             }
             catch (Exception e)
             {
-                LogTo.ErrorException("Hipchat error", e);
+                LogTo.Error("Hipchat error: {0}- {1}\r\n{2}", e.GetType().ToString(), e.Message, e.StackTrace);
             }
         }
     }
