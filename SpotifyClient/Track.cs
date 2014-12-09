@@ -35,6 +35,8 @@ using Anotar.NLog;
 
 namespace SpotifyClient
 {
+    // TODO This class should probably get the INPC treatment so WPF will update its view nicely as things load
+
     [DebuggerDisplay("{Name}")]
     public class Track
     {
@@ -177,7 +179,7 @@ namespace SpotifyClient
 
         private string GetAlbumArtLink()
         {
-            return Spotify.GetAlbumArtLink(_albumPtr);
+            return Spotify.GetAlbumArtLink(_albumPtr, libspotify.sp_image_size.SP_IMAGE_SIZE_SMALL);
         }
 
         private byte[] GetAlbumArtBuffer()
@@ -187,6 +189,9 @@ namespace SpotifyClient
 
         private System.Drawing.Image GetAlbumArt()
         {
+            if (!Loaded)
+                return null;
+
             if(_artwork == null)
                 _artwork = System.Drawing.Image.FromStream(new MemoryStream(GetAlbumArtBuffer()));
             return _artwork;

@@ -82,6 +82,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -109,6 +110,7 @@
     <Compile Include="Util\AuthPair.cs" />
     <Compile Include="Util\ChannelDirectory.cs" />
     <Compile Include="Util\CheckSettings.cs" />
+    <Compile Include="Util\ImageConverter.cs" />
     <Compile Include="Util\Logging.cs" />
     <Compile Include="Util\PasswordHelper.cs" />
     <Compile Include="Util\ListboxScrollHelper.cs" />

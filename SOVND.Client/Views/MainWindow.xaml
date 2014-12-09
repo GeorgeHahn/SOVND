@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:toolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"
+        xmlns:med="clr-namespace:System.Windows.Media"
         xmlns:local="clr-namespace:SOVND.Client"
         xmlns:spotify="clr-namespace:SpotifyClient;assembly=SpotifyClient"
         xmlns:lib="clr-namespace:SOVND.Lib;assembly=SOVND.Lib"
@@ -11,7 +12,11 @@
         xmlns:w="clr-namespace:System.Windows.Workarounds"
         xmlns:util="clr-namespace:SOVND.Client.Util"
         mc:Ignorable="d"
-        Title="SOVND" Height="550" Width="800">
+        Title="SOVND" Height="550" Width="900">
+    
+    <Window.Resources>
+        <med:ImageConverter x:Key="imageConverter" />
+    </Window.Resources>
     
     <Grid>
         <Grid.ColumnDefinitions>
@@ -80,11 +85,11 @@
                         <!-- This is a song in the playlist -->
                         <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
                             <DockPanel>
-                                <TextBlock
+                                <Image 
                                     DockPanel.Dock="Left"
-                                    Margin="3">
-                                    IMG
-                                </TextBlock>
+                                    Height="60"
+                                    Margin="3"
+                                    Source="{ Binding Path=track.AlbumArt, Converter={StaticResource imageConverter} }" />
                                 
                                 <StackPanel DataContext="{Binding Path=track}" ClipToBounds="True">
                                     <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
@@ -142,11 +147,12 @@
                         <!-- This is a search result -->
                         <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
                             <DockPanel>
-                                <TextBlock
+                                <Image 
                                     DockPanel.Dock="Left"
-                                    Margin="3">
-                                    IMG
-                                </TextBlock>
+                                    Height="60"
+                                    Margin="3"
+                                    Source="{ Binding Path=AlbumArt, Converter={StaticResource imageConverter} }" />
+                                
                                 <StackPanel>
                                     <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
                                     <TextBlock Text="{Binding Path=Album.Name}" TextTrimming="CharacterEllipsis" />
