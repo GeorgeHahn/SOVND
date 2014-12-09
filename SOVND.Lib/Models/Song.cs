@@ -20,6 +20,7 @@ namespace SOVND.Lib.Models
 
             track = new Track(songID);
             track.onLoad = () => LogTo.Info("Loaded {0}: {1}", track.SongID, track.Name);
+            track.PropertyChanged += (sender, args) => RaisePropertyChanged("track." + args.PropertyName);
         }
 
         public string SongID { get; private set; }
