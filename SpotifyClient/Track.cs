@@ -210,9 +210,9 @@ namespace SpotifyClient
                             var buffer = GetAlbumArtBuffer();
                             if (buffer != null)
                                 _artwork = System.Drawing.Image.FromStream(new MemoryStream(buffer));
+                            if (_artwork == null) // Sleep during lock to give spotify thread a rest
+                                Thread.Sleep(10);
                         }
-                        if (_artwork == null)
-                            Thread.Sleep(50);
                     }
                     RaisePropertyChanged("AlbumArt");
                 });

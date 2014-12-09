@@ -401,7 +401,7 @@ namespace SpotifyClient
                     if (!waitFor(delegate()
                     {
                         return img.IsLoaded;
-                    }, REQUEST_TIMEOUT))
+                    }, 1))
                         return null;
 
                     var err = img.GetLoadError();
