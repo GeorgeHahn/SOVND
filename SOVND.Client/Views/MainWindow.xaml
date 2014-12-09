@@ -121,15 +121,23 @@
                                             </Canvas>
                                             <TextBlock
                                                 Text="{Binding Path=Votes}"
-                                                VerticalAlignment="Bottom"
                                                 HorizontalAlignment="Center"
                                                 Foreground="Black"
-                                                FontSize="16"
-                                                Margin="4"/>
+                                                FontSize="16"/>
                                         </StackPanel>
                                         
                                         <Button.Style>
                                             <Style TargetType="Button">
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Grid Background="{TemplateBinding Background}">
+                                                              <ContentPresenter HorizontalAlignment="Center"
+                                                                        VerticalAlignment="Center"/>
+                                                            </Grid>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
                                                 <Style.Triggers>
                                                     <Trigger Property="IsMouseOver" Value="True">
                                                         <Setter Property="Foreground" Value="#FF000000" />
