@@ -114,6 +114,8 @@
     <Compile Include="Util\ListboxScrollHelper.cs" />
     <Compile Include="Util\SOVNDModule.cs" />
     <Compile Include="Util\StartSpotify.cs" />
+    <Compile Include="Util\WatermarkAdorner.cs" />
+    <Compile Include="Util\WatermarkService.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
     <Compile Include="Views\ChannelWindow.xaml.cs">
       <DependentUpon>ChannelWindow.xaml</DependentUpon>

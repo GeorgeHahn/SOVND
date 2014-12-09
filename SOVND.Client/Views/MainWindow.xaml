@@ -8,7 +8,8 @@
         xmlns:spotify="clr-namespace:SpotifyClient;assembly=SpotifyClient"
         xmlns:lib="clr-namespace:SOVND.Lib;assembly=SOVND.Lib"
         xmlns:models="clr-namespace:SOVND.Lib.Models;assembly=SOVND.Lib"
-        xmlns:w="clr-namespace:System.Windows.Workarounds" 
+        xmlns:w="clr-namespace:System.Windows.Workarounds"
+        xmlns:util="clr-namespace:SOVND.Client.Util"
         mc:Ignorable="d"
         Title="SOVND" Height="550" Width="800">
     
@@ -63,7 +64,11 @@
                 Grid.Row="0"
                 x:Name="tbSearch"
                 ToolTip="Search for a track"
-                TextChanged="TextBox_TextChanged"/>
+                TextChanged="TextBox_TextChanged">
+                    <util:WatermarkService.Watermark>
+                        <TextBlock>Fond a song to add</TextBlock>
+                    </util:WatermarkService.Watermark>
+            </TextBox>
 
             <ListBox
                 Grid.Row="1"
