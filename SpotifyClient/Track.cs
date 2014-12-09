@@ -134,6 +134,9 @@ namespace SpotifyClient
                         remove.Add(track);
                 }
 
+                if(remove.Count == 0)
+                    return;
+                
                 LogTo.Debug("Tracks loaded: {0}", remove.Count);
                 foreach (var removal in remove)
                     ToInitialize.Remove(removal);
