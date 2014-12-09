@@ -289,8 +289,6 @@ namespace SOVND.Server
                     
                     if (song == null || song.track == null || song.track.Seconds == 0)
                     {
-                        if(song != null)
-                            song.track = new Track(song.SongID);
                         if (song == null)
                         {
                             HipchatSender.SendNotification(channel, "No songs in channel, waiting for a song", RoomColors.Red);
@@ -302,8 +300,20 @@ namespace SOVND.Server
                         }
                         else
                         {
-                            HipchatSender.SendNotification(channel, string.Format("Skipping song: Either no track or no track time for track {0}", song.SongID), RoomColors.Red);
-                            ClearSong(channelHandler, song);
+                            if (playlist.Songs.Count == 1)
+                            {
+                                HipchatSender.SendNotification(channel, string.Format("Only one song in channel, waiting for it to load: {0}", song.SongID), RoomColors.Red);
+                                while ((!song.track.Loaded) && playlist.Songs.Count == 1)
+                                {
+                                    Thread.Sleep(1000);
+                                }
+                                HipchatSender.SendNotification(channel, "Song loaded or another was added", RoomColors.Green);
+                            }
+                            else
+                            {
+                                HipchatSender.SendNotification(channel, string.Format("Skipping song: Either no track or no track time for track {0}", song.SongID), RoomColors.Red);
+                                ClearSong(channelHandler, song);
+                            }
                         }
                         Thread.Sleep(1000);
                         continue;
