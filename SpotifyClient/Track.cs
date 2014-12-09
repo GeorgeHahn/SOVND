@@ -26,11 +26,12 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.ComponentModel;
 using libspotifydotnet;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using Anotar.NLog;
 
 namespace SpotifyClient
@@ -38,7 +39,7 @@ namespace SpotifyClient
     // TODO This class should probably get the INPC treatment so WPF will update its view nicely as things load
 
     [DebuggerDisplay("{Name}")]
-    public class Track
+    public class Track : INotifyPropertyChanged
     {
         private List<string> _artists = new List<string>();
 
@@ -77,7 +78,7 @@ namespace SpotifyClient
         {
             if (string.IsNullOrWhiteSpace(link))
                 throw new ArgumentOutOfRangeException("link");
-
+            
             IntPtr linkPtr = Functions.StringToLinkPtr(link);
             if (linkPtr != IntPtr.Zero)
             {
@@ -174,6 +175,7 @@ namespace SpotifyClient
             if (onLoad != null)
                 onLoad();
             this.Loaded = true;
+            RaisePropertyChanged("AlbumArt");
             return true;
         }
 
@@ -192,9 +194,32 @@ namespace SpotifyClient
             if (!Loaded)
                 return null;
 
-            if(_artwork == null)
-                _artwork = System.Drawing.Image.FromStream(new MemoryStream(GetAlbumArtBuffer()));
+            if (_artwork == null)
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    while (_artwork == null)
+                    {
+                        var buffer = GetAlbumArtBuffer();
+                        if (buffer != null)
+                            _artwork = System.Drawing.Image.FromStream(new MemoryStream(buffer));
+                        if (_artwork == null)
+                            Thread.Sleep(10);
+                    }
+                    RaisePropertyChanged("AlbumArt");
+                });
+            }
             return _artwork;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void RaisePropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
         }
     }
 }
