@@ -10,6 +10,7 @@
     </metadata>
 	<files>
 		<file src="..\SOVND.Client\bin\Debug\SOVND.Client.exe" target="lib\" />
+		<file src="..\SOVND.Client\bin\Debug\SOVND.Client.exe.config" target="lib\" />
 		<file src="..\SOVND.Client\bin\Debug\libspotify.dll" target="lib\" />
 		<file src="..\SOVND.Client\bin\Debug\Ninject.Extensions.Factory.dll" target="lib\" />
 		<file src="..\SOVND.Client\bin\Debug\Ninject.Extensions.Conventions.dll" target="lib\" />
