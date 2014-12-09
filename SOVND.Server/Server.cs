@@ -300,6 +300,9 @@ namespace SOVND.Server
                         }
                         else
                         {
+                            if (song.track == null)
+                                song.track = new Track(song.SongID);
+
                             if (playlist.Songs.Count == 1)
                             {
                                 HipchatSender.SendNotification(channel, string.Format("Only one song in channel, waiting for it to load: {0}", song.SongID), RoomColors.Red);
