@@ -65,23 +65,7 @@ namespace SpotifyClient
 
         public string GetAlbumArtLink()
         {
-            IntPtr linkPtr = libspotify.sp_link_create_from_album_cover(this.AlbumPtr, libspotify.sp_image_size.SP_IMAGE_SIZE_LARGE);
-            if (linkPtr == IntPtr.Zero)
-            {
-                Log.Warning(Plugin.LOG_MODULE, "No link could be created for album cover");
-                return null;
-            }
-            try
-            {
-                var s = Functions.LinkPtrToString(linkPtr);
-                //Log.Debug(Plugin.LOG_MODULE, "<< Album.GetAlbumArtLink() link={0}", s);
-                return s;
-            }
-            finally
-            {
-                if (linkPtr != IntPtr.Zero)
-                    libspotify.sp_link_release(linkPtr);
-            }
+            return Spotify.GetAlbumArtLink(AlbumPtr);
         }
 
         #region IDisposable Members

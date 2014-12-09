@@ -33,6 +33,7 @@ using System.Diagnostics;
 using Anotar.NLog;
 using System.Reflection;
 using System.IO;
+using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -408,6 +409,10 @@ namespace SpotifyClient
                         throw new ApplicationException(String.Format("Image failed to load: {0}", err));
                     }
 
+                    //sp_imageformat imageformat = libspotify.sp_image_format(img.ImagePtr);
+                    //imageformat == sp_imageformat.SP_IMAGE_FORMAT_JPEG
+                    // ATM all are JPEG
+
                     int bytes = 0;
                     IntPtr bufferPtr = libspotify.sp_image_data(img.ImagePtr, out bytes);
                     byte[] buffer = new byte[bytes];
@@ -703,6 +708,27 @@ namespace SpotifyClient
             lock (_syncObj)
             {
                 _mainSignal.Set();
+            }
+        }
+
+        public static string GetAlbumArtLink(IntPtr albumPtr)
+        {
+            IntPtr linkPtr = libspotify.sp_link_create_from_album_cover(albumPtr, libspotify.sp_image_size.SP_IMAGE_SIZE_LARGE);
+            if (linkPtr == IntPtr.Zero)
+            {
+                Log.Warning(Plugin.LOG_MODULE, "No link could be created for album cover");
+                return null;
+            }
+            try
+            {
+                var s = Functions.LinkPtrToString(linkPtr);
+                //Log.Debug(Plugin.LOG_MODULE, "<< Album.GetAlbumArtLink() link={0}", s);
+                return s;
+            }
+            finally
+            {
+                if (linkPtr != IntPtr.Zero)
+                    libspotify.sp_link_release(linkPtr);
             }
         }
     }

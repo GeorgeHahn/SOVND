@@ -29,6 +29,7 @@ using System.Collections.Generic;
 
 using libspotifydotnet;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using Anotar.NLog;
 
@@ -39,11 +40,16 @@ namespace SpotifyClient
     {
         private List<string> _artists = new List<string>();
 
+        public System.Drawing.Image _artwork;
+
+
         public IntPtr TrackPtr { get; private set; }
 
         public string Name { get; private set; }
 
         public Album Album { get; private set; }
+        
+        public System.Drawing.Image AlbumArt { get { return GetAlbumArt(); } }
 
         public int TrackNumber { get; private set; }
 
@@ -100,11 +106,14 @@ namespace SpotifyClient
         ~Track()
         {
             libspotify.sp_track_release(TrackPtr);
+
+            _artwork?.Dispose();
         }
 
         private static List<Track> ToInitialize = new List<Track>();
         private static readonly object initlock = new Object();
         private static readonly object toinit = new Object();
+        private IntPtr _albumPtr;
 
         public static void Check()
         {
@@ -149,9 +158,9 @@ namespace SpotifyClient
             this.Name = Functions.PtrToString(libspotify.sp_track_name(this.TrackPtr));
             this.TrackNumber = libspotify.sp_track_index(this.TrackPtr);
             this.Seconds = (decimal) libspotify.sp_track_duration(this.TrackPtr)/1000M;
-            IntPtr albumPtr = libspotify.sp_track_album(this.TrackPtr);
-            if (albumPtr != IntPtr.Zero)
-                this.Album = new Album(albumPtr);
+            this._albumPtr = libspotify.sp_track_album(this.TrackPtr);
+            if (_albumPtr != IntPtr.Zero)
+                this.Album = new Album(_albumPtr);
 
             for (int i = 0; i < libspotify.sp_track_num_artists(this.TrackPtr); i++)
             {
@@ -166,5 +175,21 @@ namespace SpotifyClient
             return true;
         }
 
+        private string GetAlbumArtLink()
+        {
+            return Spotify.GetAlbumArtLink(_albumPtr);
+        }
+
+        private byte[] GetAlbumArtBuffer()
+        {
+            return Spotify.GetAlbumArt(GetAlbumArtLink());
+        }
+
+        private System.Drawing.Image GetAlbumArt()
+        {
+            if(_artwork == null)
+                _artwork = System.Drawing.Image.FromStream(new MemoryStream(GetAlbumArtBuffer()));
+            return _artwork;
+        }
     }
 }
