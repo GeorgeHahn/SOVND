@@ -47,50 +47,141 @@
                 </Trigger>
             </Style.Triggers>
         </Style>
+        
+        <Style x:Key="ExpanderHeaderFocusVisual">
+            <Setter Property="Control.Template">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <Border>
+                            <Rectangle Margin="0" SnapsToDevicePixels="true" Stroke="Black" StrokeThickness="1" StrokeDashArray="1 2"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style x:Key="ExpanderDownHeaderStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border Padding="{TemplateBinding Padding}">
+                            <Grid Background="Transparent" SnapsToDevicePixels="False">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                
+                                <Canvas Width="16" Height="16" HorizontalAlignment="Left">
+                                    <Path x:Name="icon" Width="38" Height="38" Fill="Black" Stretch="Fill" Data="F1 M 57,19L 57,57L 19,57L 19,19L 57,19 Z M 22,54L 54,54L 54,22.0001L 22,22L 22,54 Z M 24,24.0001L 36,24.0001L 36,52L 24,52L 24,24.0001 Z M 38,36L 46.6666,36L 42.9999,31.0001L 46.9999,31L 52,38L 46.9999,45L 42.9999,45L 46.6666,40L 38,40L 38,36 Z ">
+                                        <Path.RenderTransform>
+                                            <ScaleTransform ScaleX="0.5" ScaleY="0.5"/>
+                                        </Path.RenderTransform>
+                                    </Path>
+                                </Canvas>
+                                
+                                <ContentPresenter x:Name="header" Grid.Row="1" HorizontalAlignment="Right" Margin="0,10,0,0" RecognizesAccessKey="True" SnapsToDevicePixels="True" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Visibility" TargetName="header" Value="Collapsed"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Data" TargetName="icon" Value="F1 M 57,19L 57,57L 19,57L 19,19L 57,19 Z M 22,54L 54,54L 54,22.0001L 22,22L 22,54 Z M 24,24.0001L 36,24.0001L 36,52L 24,52L 24,24.0001 Z M 52,36L 43.3334,36L 47,31.0001L 43,31L 38,38L 43,45L 47,45L 43.3334,40L 52,40L 52,36 Z "/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        
+        <Style x:Key="StatusGroupExpander" TargetType="{x:Type Expander}">
+            <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Expander}">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" CornerRadius="3" SnapsToDevicePixels="true">
+                            <DockPanel>
+                                <ToggleButton x:Name="HeaderSite" ContentTemplate="{TemplateBinding HeaderTemplate}" ContentTemplateSelector="{TemplateBinding HeaderTemplateSelector}" Content="{TemplateBinding Header}" DockPanel.Dock="Top" Foreground="{TemplateBinding Foreground}" FontWeight="{TemplateBinding FontWeight}" FocusVisualStyle="{StaticResource ExpanderHeaderFocusVisual}" FontStyle="{TemplateBinding FontStyle}" FontStretch="{TemplateBinding FontStretch}" FontSize="{TemplateBinding FontSize}" FontFamily="{TemplateBinding FontFamily}" HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}" IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" Margin="1" MinWidth="0" MinHeight="0" Padding="{TemplateBinding Padding}" Style="{StaticResource ExpanderDownHeaderStyle}" VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                <ContentPresenter x:Name="ExpandSite" DockPanel.Dock="Bottom" Focusable="false" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="{TemplateBinding Padding}" Visibility="Collapsed" VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </DockPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="true">
+                                <Setter Property="Visibility" TargetName="ExpandSite" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" />
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" MaxWidth="350" />
             <ColumnDefinition />
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="200" />
         </Grid.ColumnDefinitions>
         
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition />
-            </Grid.RowDefinitions>
+        <Expander Grid.Row="0" ExpandDirection="Right"
+                  Style="{StaticResource StatusGroupExpander}"
+                  IsExpanded="False">
+            <Expander.Header>
+                <TextBlock FontSize="16">
+                    Channels
+                    <TextBlock.LayoutTransform>
+                        <RotateTransform Angle="-90"/>
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+            </Expander.Header>
             
-            <Button
-                Grid.Column="0"
-                Click="NewChannel">New Channel</Button>
-            
-            <ListBox
-                Grid.Row="1"
-                x:Name="channelbox"
-                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                SelectionChanged="Channelbox_SelectionChanged">
-                <ListBox.Resources>
-                    <DataTemplate DataType="{x:Type models:Channel}">
-                        <StackPanel>
-                            <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
-                            <TextBlock Text="{Binding Path=Description}" TextTrimming="CharacterEllipsis" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.Resources>
-            </ListBox>
-        </Grid>
+            <Expander.Content>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                    </Grid.ColumnDefinitions>
+
+                    <GridSplitter Grid.Column="1" Grid.RowSpan="3" Width="5" ResizeBehavior="PreviousAndCurrent" ResizeDirection="Columns"/>
+
+                    <ListBox
+                        Grid.Row="1"
+                        x:Name="channelbox"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                        SelectionChanged="Channelbox_SelectionChanged">
+                        <ListBox.Resources>
+                            <DataTemplate DataType="{x:Type models:Channel}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Path=Name}" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Path=Description}" TextTrimming="CharacterEllipsis" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.Resources>
+                    </ListBox>
+
+                    <Button
+                        Grid.Row="2"
+                        Click="NewChannel">New Channel</Button>
+                </Grid>
+            </Expander.Content>
+        </Expander>
         
-	    <GridSplitter Width="3" VerticalContentAlignment="Stretch"
-		          HorizontalAlignment="Center"
-		          ResizeDirection="Columns"
-		          ShowsPreview="True"
-		          Grid.Column="1"/>
-        
-        <Grid Grid.Column="2">
+        <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
@@ -139,8 +230,7 @@
                                         Margin="3">
                                         <StackPanel Height="55">
                                             <Canvas Width="28" Height="32" HorizontalAlignment="Center">
-                                                <Path Width="28" Height="32" Stretch="Fill"
-                                                      Data="F1 M 34,57L 42,57L 42,32.25L 52,42.25L 52,31.75L 38,17.75L 24,31.75L 24,42.25L 34,32.25L 34,57 Z" >
+                                                <Path Width="28" Height="32" Stretch="Fill" Data="F1 M 34,57L 42,57L 42,32.25L 52,42.25L 52,31.75L 38,17.75L 24,31.75L 24,42.25L 34,32.25L 34,57 Z" >
                                                     <Path.RenderTransform>  
                                                         <ScaleTransform ScaleX="0.8" ScaleY="0.8"/>
                                                     </Path.RenderTransform>
@@ -154,34 +244,55 @@
                                         </StackPanel>
                                     </Button>
                               
-                                    <Button
-                                        DockPanel.Dock="Right"
-                                        Click="Del_Click"
-                                        Margin="3">
-                                        DEL
-                                    </Button>
+                                    <Grid DockPanel.Dock="Right" Margin="10,0,0,0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        
+                                        <Button
+                                            Grid.Row="0"
+                                            Style="{StaticResource VectorButtonStyle}"
+                                            Click="Rpt_Click"
+                                            Margin="3">
+                                            <Canvas Width="16" Height="16">
+                                                <Path Canvas.Top="-13" Canvas.Left="-3" Width="28.504" Height="38.0053" Stretch="Fill" Data="F1 M 26.9204,19.0027L 28.504,19.0027C 29.3785,19.0027 30.0875,19.7116 30.0875,20.5862L 30.0875,55.4244C 30.0875,56.299 29.3785,57.008 28.504,57.008L 26.9204,57.008C 26.0459,57.008 25.3369,56.299 25.3369,55.4244L 25.3369,20.5862C 25.3369,19.7116 26.0459,19.0027 26.9204,19.0027 Z M 31.6711,23.7533C 33.2546,22.6976 34.8382,21.6419 37.4775,21.9059C 40.1167,22.1698 43.8117,23.7535 46.7148,23.7535C 49.618,23.7535 51.7294,22.1698 53.8408,20.5862L 53.8408,34.838C 51.7294,36.4216 49.618,38.0052 46.7148,38.0052C 43.8117,38.0052 40.1167,36.4216 37.4775,36.1576C 34.8382,35.8937 33.2546,36.9494 31.6711,38.0051L 31.6711,23.7533 Z ">
+                                                    <Path.RenderTransform>  
+                                                        <ScaleTransform ScaleX="0.42" ScaleY="0.42"/>
+                                                    </Path.RenderTransform>
+                                                </Path>
+                                            </Canvas>
+                                        </Button>
                                     
-                                    <Button
-                                        DockPanel.Dock="Right"
-                                        Click="Blk_Click"
-                                        Margin="3">
-                                        BLK
-                                    </Button>
+                                        <Button
+                                            Grid.Row="1"
+                                            Style="{StaticResource VectorButtonStyle}"
+                                            Click="Del_Click"
+                                            Margin="3">
+                                            <Canvas Width="16" Height="16">
+                                                <Path Width="27.7083" Height="35.625" Canvas.Left="-4" Canvas.Top="-11" Stretch="Fill" Data="F1 M 25.3333,23.75L 50.6667,23.75C 51.5411,23.75 51.8541,27.3125 51.8541,27.3125L 24.1458,27.3125C 24.1458,27.3125 24.4589,23.75 25.3333,23.75 Z M 35.625,19.7917L 40.375,19.7917C 40.8122,19.7917 41.9583,20.9378 41.9583,21.375C 41.9583,21.8122 40.8122,22.9584 40.375,22.9584L 35.625,22.9584C 35.1878,22.9584 34.0416,21.8122 34.0416,21.375C 34.0416,20.9378 35.1878,19.7917 35.625,19.7917 Z M 27.7083,28.5L 48.2916,28.5C 49.1661,28.5 49.875,29.2089 49.875,30.0834L 48.2916,53.8334C 48.2916,54.7078 47.5828,55.4167 46.7083,55.4167L 29.2917,55.4167C 28.4172,55.4167 27.7083,54.7078 27.7083,53.8334L 26.125,30.0834C 26.125,29.2089 26.8339,28.5 27.7083,28.5 Z M 30.0833,31.6667L 30.4792,52.25L 33.25,52.25L 32.8542,31.6667L 30.0833,31.6667 Z M 36.4167,31.6667L 36.4167,52.25L 39.5833,52.25L 39.5833,31.6667L 36.4167,31.6667 Z M 43.1458,31.6667L 42.75,52.25L 45.5208,52.25L 45.9167,31.6667L 43.1458,31.6667 Z ">
+                                                    <Path.RenderTransform>
+                                                        <ScaleTransform ScaleX="0.45" ScaleY="0.45"/>
+                                                    </Path.RenderTransform>
+                                                </Path>
+                                            </Canvas>
+                                        </Button>
                                     
-                                    <Button
-                                        Style="{StaticResource VectorButtonStyle}"
-                                        DockPanel.Dock="Right"
-                                        Click="Rpt_Click"
-                                        Margin="3">
-                                        <Canvas Width="16" Height="16">
-                                            <Path Width="28.504" Height="38.0053" Stretch="Fill"
-                                                  Data="F1 M 26.9204,19.0027L 28.504,19.0027C 29.3785,19.0027 30.0875,19.7116 30.0875,20.5862L 30.0875,55.4244C 30.0875,56.299 29.3785,57.008 28.504,57.008L 26.9204,57.008C 26.0459,57.008 25.3369,56.299 25.3369,55.4244L 25.3369,20.5862C 25.3369,19.7116 26.0459,19.0027 26.9204,19.0027 Z M 31.6711,23.7533C 33.2546,22.6976 34.8382,21.6419 37.4775,21.9059C 40.1167,22.1698 43.8117,23.7535 46.7148,23.7535C 49.618,23.7535 51.7294,22.1698 53.8408,20.5862L 53.8408,34.838C 51.7294,36.4216 49.618,38.0052 46.7148,38.0052C 43.8117,38.0052 40.1167,36.4216 37.4775,36.1576C 34.8382,35.8937 33.2546,36.9494 31.6711,38.0051L 31.6711,23.7533 Z ">
-                                                <Path.RenderTransform>  
-                                                    <ScaleTransform ScaleX="0.5" ScaleY="0.5"/>
-                                                </Path.RenderTransform>
-                                            </Path>
-                                        </Canvas>
-                                    </Button>
+                                        <Button
+                                            Grid.Row="2"
+                                            Style="{StaticResource VectorButtonStyle}"
+                                            Click="Blk_Click"
+                                            Margin="3">
+                                            <Canvas Width="16" Height="16">
+                                                <Path Width="38" Height="38" Canvas.Left="-9" Canvas.Top="-9" Stretch="Fill" Data="F1 M 38,19C 48.4934,19 57,27.5066 57,38C 57,48.4934 48.4934,57 38,57C 27.5066,57 19,48.4934 19,38C 19,27.5066 27.5066,19 38,19 Z M 23.75,34.8334L 23.75,41.1667L 52.25,41.1667L 52.25,34.8334L 23.75,34.8334 Z ">
+                                                    <Path.RenderTransform>  
+                                                        <ScaleTransform ScaleX="0.38" ScaleY="0.38"/>
+                                                    </Path.RenderTransform>
+                                                </Path>
+                                            </Canvas>
+                                        </Button>
+                                    </Grid>
                                 </StackPanel>
                             </DockPanel>
                         </Border>
@@ -217,31 +328,30 @@
             </ListBox>
         </Grid>
 
-	    <GridSplitter Width="3" VerticalContentAlignment="Stretch"
-		          HorizontalAlignment="Center"
-		          ResizeDirection="Columns"
-		          ShowsPreview="True"
-		          Grid.Column="3"/>
+        <GridSplitter Width="3" VerticalContentAlignment="Stretch"
+            HorizontalAlignment="Center"
+            ResizeDirection="Columns"
+            ShowsPreview="True"
+            Grid.Column="2"/>
         
-        <Grid Grid.Column="4">
+        <Grid Grid.Column="3">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            
-            <TextBlock Grid.Row="0"
-                       FontWeight="Medium"
-                       HorizontalAlignment="Center">
+
+             <TextBlock Grid.Row="0" Margin="1"
+                FontWeight="Medium"
+                HorizontalAlignment="Center">
                 Chat
             </TextBlock>
             
-            <ListBox 
-                Grid.Row="1"
-                x:Name="chatbox"
-                w:ListBox.AutoScroll="True"
-                ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                HorizontalContentAlignment="Stretch">
+            <ListBox Grid.Row="1" Grid.Column="1"
+                        x:Name="chatbox"
+                        w:ListBox.AutoScroll="True"
+                        ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                        HorizontalContentAlignment="Stretch">
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type models:ChatMessage}">
                         <TextBlock
@@ -251,15 +361,12 @@
                 </ListBox.Resources>
             </ListBox>
 
-            <DockPanel
-                Grid.Row="2"
-                LastChildFill="True">
-                
+            <DockPanel Grid.Row="2" Grid.Column="1"
+                        LastChildFill="True">
                 <Button 
                     HorizontalAlignment="Right" 
                     DockPanel.Dock="Right"
                     Click="SendChat">Send</Button>
-                
                 <TextBox 
                     x:Name="chatinput" 
                     KeyDown="Chatinput_OnKeyDown"/>
