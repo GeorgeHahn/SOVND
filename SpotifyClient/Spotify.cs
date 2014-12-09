@@ -398,10 +398,11 @@ namespace SpotifyClient
                 IntPtr coverPtr = libspotify.sp_image_create_from_link(Session.SessionPtr, linkPtr);
                 using (Image img = Image.Load(coverPtr))
                 {
-                    waitFor(delegate()
+                    if (!waitFor(delegate()
                     {
                         return img.IsLoaded;
-                    }, REQUEST_TIMEOUT);
+                    }, REQUEST_TIMEOUT))
+                        return null;
 
                     var err = img.GetLoadError();
                     if (err != libspotify.sp_error.OK)
