@@ -12,7 +12,6 @@ namespace SOVND.Client.Modules
     public class NowPlayingHandler : SOVNDModule
     {
         private Track playingTrack;
-        private SpotifyTrackDataPipe streamingaudio;
         private BufferedWaveProvider wave;
         private WaveFormat WaveFormat;
         private CancellationTokenSource songToken;
@@ -75,7 +74,7 @@ namespace SOVND.Client.Modules
                 wave.BufferDuration = TimeSpan.FromSeconds(15);
 
                 player.Init(wave);
-                streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr, wave);
+                var streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr, wave);
                 await streamingaudio.StartStreaming(startTime);
                 player.Play();
 
@@ -93,9 +92,6 @@ namespace SOVND.Client.Modules
         {
             if (songToken != null)
                 songToken.Cancel();
-
-            if (streamingaudio != null)
-                streamingaudio.StopStreaming();
         }
     }
 }
