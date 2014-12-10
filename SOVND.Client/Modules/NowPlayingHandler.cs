@@ -40,7 +40,8 @@ namespace SOVND.Client.Modules
                 }
                 int time = 0;
 
-                PlaySong(song, UnixTimeBase.AddSeconds(time).ToLocalTime());
+                //PlaySong(song, UnixTimeBase.AddSeconds(time).ToLocalTime());
+                PlaySong(song);
             };
 
             Run();
