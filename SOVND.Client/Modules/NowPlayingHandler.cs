@@ -20,6 +20,8 @@ namespace SOVND.Client.Modules
 
         private readonly string _channel;
 
+        private readonly DateTime UnixTimeBase = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+
         public NowPlayingHandler(AuthPair auth, string channelName) : base(auth)
         {
             // TODO Use channel/nowplaying/starttime to seek to correct position
@@ -36,14 +38,20 @@ namespace SOVND.Client.Modules
                     LogTo.Warn("Server asked to play empty song on channel {0}", _channel);
                     return;
                 }
+                int time = 0;
 
-                PlaySong(song);
+                PlaySong(song, UnixTimeBase.AddSeconds(time).ToLocalTime());
             };
 
             Run();
         }
 
         private void PlaySong(string songID)
+        {
+            PlaySong(songID, DateTime.MinValue);
+        }
+
+        private void PlaySong(string songID, DateTime startTime)
         {
             LogTo.Debug("Playing: {0}", songID);
 
@@ -72,6 +80,7 @@ namespace SOVND.Client.Modules
 
                         player.Init(wave);
                         streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr, wave);
+                        streamingaudio.StartStreaming(startTime);
                         player.Play();
 
                         while (!streamingaudio.Complete && !token.IsCancellationRequested)

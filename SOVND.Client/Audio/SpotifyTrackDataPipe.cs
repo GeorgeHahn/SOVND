@@ -30,6 +30,7 @@ using libspotifydotnet;
 using NAudio.Wave;
 using SpotifyClient;
 using System.Threading;
+using Anotar.NLog;
 
 namespace SOVND.Client.Audio
 {
@@ -47,6 +48,7 @@ namespace SOVND.Client.Audio
 
         private BufferedWaveProvider _wave;
 
+
         public SpotifyTrackDataPipe(IntPtr trackPtr, BufferedWaveProvider wave)
         {
             _trackPtr = trackPtr;
@@ -58,12 +60,16 @@ namespace SOVND.Client.Audio
             Session.OnAudioDataArrived += d_OnAudioDataArrived;
             Session.OnAudioStreamComplete += d_OnAudioStreamComplete;
             Session.AudioBufferStats += Session_AudioBufferStats;
-            StartStreaming();
         }
 
         public bool Complete { get { return _complete; } }
 
         public void StartStreaming()
+        {
+            StartStreaming(DateTime.MinValue);
+        }
+
+        public void StartStreaming(DateTime startTime)
         {
             _interrupt = true;
                 
@@ -88,15 +94,23 @@ namespace SOVND.Client.Audio
 
                 if (error != libspotify.sp_error.OK)
                 {
-                    throw new Exception("[Spotify] \{libspotify.sp_error_message(error)}");
+                    throw new Exception("[Spotify] Streaming error: \{libspotify.sp_error_message(error)}");
                 }
 
                 libspotify.sp_availability avail = libspotify.sp_track_get_availability(Session.SessionPtr, _trackPtr);
-            
+
                 if (avail != libspotify.sp_availability.SP_TRACK_AVAILABILITY_AVAILABLE)
-                    throw new Exception("Track is unavailable (\{avail}).");
+                {
+                    LogTo.Warn("Track is unavailable: \{avail}");
+                    return;
+                }
+
+                // TODO if time is in the future, block here
+                // TODO if time is more than a few ms in the future, prefetch song
 
                 Session.Play();
+                if(startTime != DateTime.MinValue)
+                    Session.Seek((int)(DateTime.Now - startTime).TotalMilliseconds);
             }
         }
 
