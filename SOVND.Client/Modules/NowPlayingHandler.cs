@@ -16,7 +16,6 @@ namespace SOVND.Client.Modules
         private BufferedWaveProvider wave;
         private WaveFormat WaveFormat;
         private CancellationTokenSource songToken;
-        private static object soundlock = new object();
 
         private readonly string _channel;
 
