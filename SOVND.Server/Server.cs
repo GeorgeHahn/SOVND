@@ -263,12 +263,12 @@ namespace SOVND.Server
         private Dictionary<ChannelHandler, bool> runningScheduler = new Dictionary<ChannelHandler, bool>();
         private static object schedulerlock = new object();
 
-        // TODO: This should be refactored away from a thread-per-channel design, this won't scale well
-        private void StartChannelScheduler(ChannelHandler channelHandler)
+        private async void StartChannelScheduler(ChannelHandler channelHandler)
         {
             lock (schedulerlock)
             {
-                if (runningScheduler.ContainsKey(channelHandler) && runningScheduler[channelHandler])
+                bool value;
+                if (runningScheduler.TryGetValue(channelHandler, out value) && value)
                 {
                     LogTo.Debug("Already running scheduler for {0}", channelHandler.Name);
                     return;
@@ -277,62 +277,65 @@ namespace SOVND.Server
                     runningScheduler[channelHandler] = true;
             }
 
-            var task = Task.Factory.StartNew(() =>
-            {
-                var channel = channelHandler.Name;
-                var playlist = (ISortedPlaylistProvider)channels[channel].Playlist;
-                LogTo.Debug("[{0}] Starting track scheduler", channel);
-                
-                while (true)
-                {
-                    Song song = playlist.GetTopSong();
-                    
-                    if (song == null || song.track == null || song.track.Seconds == 0)
-                    {
-                        if (song == null)
-                        {
-                            HipchatSender.SendNotification(channel, "No songs in channel, waiting for a song", RoomColors.Red);
-                            while (playlist.GetTopSong() == null)
-                            {
-                                Thread.Sleep(1000);
-                            }
-                            HipchatSender.SendNotification(channel, "Got a song", RoomColors.Green);
-                        }
-                        else
-                        {
-                            if (song.track == null)
-                                song.track = new Track(song.SongID);
+            var channel = channelHandler.Name;
+            var playlist = (ISortedPlaylistProvider) channels[channel].Playlist;
+            LogTo.Debug("[{0}] Starting track scheduler", channel);
 
-                            if (playlist.Songs.Count == 1)
-                            {
-                                HipchatSender.SendNotification(channel, string.Format("Only one song in channel, waiting for it to load: {0}", song.SongID), RoomColors.Red);
-                                while ((!song.track.Loaded) && playlist.Songs.Count == 1)
-                                {
-                                    Thread.Sleep(1000);
-                                }
-                                HipchatSender.SendNotification(channel, "Song loaded or another was added", RoomColors.Green);
-                            }
-                            else
-                            {
-                                HipchatSender.SendNotification(channel, string.Format("Skipping song: Either no track or no track time for track {0}", song.SongID), RoomColors.Red);
-                                ClearSong(channelHandler, song);
-                            }
+            while (true)
+            {
+                Song song = playlist.GetTopSong();
+
+                if (song == null || song.track == null || song.track.Seconds == 0)
+                {
+                    if (song == null)
+                    {
+                        HipchatSender.SendNotification(channel, "No songs in channel, waiting for a song",
+                            RoomColors.Red);
+                        while (playlist.GetTopSong() == null)
+                        {
+                            await Task.Delay(1000);
                         }
-                        Thread.Sleep(1000);
-                        continue;
+                        HipchatSender.SendNotification(channel, "Got a song", RoomColors.Green);
                     }
                     else
                     {
-                        PlaySong(channelHandler, song);
+                        if (song.track == null)
+                            song.track = new Track(song.SongID);
 
-                        var songtime = song.track.Seconds;
-                        Thread.Sleep((int) Math.Ceiling(songtime*1000));
-
-                        ClearSong(channelHandler, song);
-                        continue;
+                        if (playlist.Songs.Count == 1)
+                        {
+                            HipchatSender.SendNotification(channel,
+                                string.Format("Only one song in channel, waiting for it to load: {0}", song.SongID),
+                                RoomColors.Red);
+                            while ((!song.track.Loaded) && playlist.Songs.Count == 1)
+                            {
+                                await Task.Delay(1000);
+                            }
+                            HipchatSender.SendNotification(channel, "Song loaded or another was added", RoomColors.Green);
+                        }
+                        else
+                        {
+                            HipchatSender.SendNotification(channel,
+                                string.Format("Skipping song: Either no track or no track time for track {0}",
+                                    song.SongID), RoomColors.Red);
+                            ClearSong(channelHandler, song);
+                        }
                     }
+                    await Task.Delay(1000);
+                    continue;
                 }
-            });
+                else
+                {
+                    PlaySong(channelHandler, song);
+
+                    var songtime = song.track.Seconds;
+                    await Task.Delay((int) Math.Ceiling(songtime*1000));
+
+                    ClearSong(channelHandler, song);
+                    continue;
+                }
+            }
+
         }
 
         private void PlaySong(ChannelHandler channel, Song song)
