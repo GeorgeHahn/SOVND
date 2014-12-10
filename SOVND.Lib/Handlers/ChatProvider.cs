@@ -21,7 +21,7 @@ namespace SOVND.Lib.Handlers
             // ChannelHandler chats
             On["/" + channel.Name + "/chat"] = _ =>
             {
-                LogTo.Trace("{0} chat - {1}", channel.Name, (string)_.Message);
+                LogTo.Trace("[{0}]: {1}", channel.Name, (string)_.Message);
 
                 Chats.Add(new ChatMessage(_.Message));
             };
