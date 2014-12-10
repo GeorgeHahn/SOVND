@@ -51,3 +51,7 @@ MQTT Communication spec
 		/description
 		/image
 		/moderators
+
+If you're working on a client where MQTT doesn't function well, raise an issue for adding an alternative transport to the server.
+
+At some point, transports may include: MQTT over websockets, AMQP, XMPP, or others.
