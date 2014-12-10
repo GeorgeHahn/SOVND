@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -66,16 +67,16 @@ namespace SOVND.Client
             playlist = (ListCollectionView)(CollectionViewSource.GetDefaultView(observablePlaylist.Songs));
             playlist.CustomSort = new SongComparer();
 
+            // TODO: Is this bad? Seems like it's a recipe for leaking - probably holds a ref to playlist.Songs and handler.Chats
             synchronization.Send((_) =>
             {
                 BindingOperations.EnableCollectionSynchronization(observablePlaylist.Songs, observablePlaylist.Songs);
                 BindingOperations.EnableCollectionSynchronization(_client.SubscribedChannelHandler.Chats, _client.SubscribedChannelHandler.Chats);
             }, null);
 
-            observablePlaylist.PropertyChanged += OnObservablePlaylistOnPropertyChanged;
-
             chatbox.ItemsSource = _client.SubscribedChannelHandler.Chats;
 
+            observablePlaylist.PropertyChanged += OnObservablePlaylistOnPropertyChanged;
             BindToPlaylist();
         }
 

@@ -19,7 +19,7 @@ namespace SOVND.Client
         {
             try
             {
-                LogTo.Trace("Starting client version TODO");
+                LogTo.Trace("Starting client (version TODO)");
 
                 IKernel kernel = new StandardKernel();
                 kernel.Bind<IMQTTSettings>().To<SovndMqttSettings>();

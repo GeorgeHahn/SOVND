@@ -113,8 +113,7 @@ namespace SOVND.Server.Handlers
                     {
                         Song song = _channel.SongsByID[_.songid];
                         RemoveSong(song);
-                        LogTo.Debug("[{0}] Removed song {1}", _channel.Name,
-                            song.track.Loaded ? song.track.Name : song.SongID);
+                        LogTo.Debug("[{0}] Removed song {1}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID);
                         _channel.SongsByID.Remove(_.songid);
                     }
                 }

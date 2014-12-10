@@ -62,24 +62,25 @@ namespace SOVND.Client.Modules
             songToken = new CancellationTokenSource();
             var token = songToken.Token;
 
-            using (var player = new WaveOut(App.WindowHandle))
+            playingTrack = new Track(songID);
+
+            WaveOut player = null;
+
+            await streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr, provider =>
             {
-                playingTrack = new Track(songID);
+                player = new WaveOut(App.WindowHandle);
+                player.Init(provider);
+                player.Play();
+            });
 
-                await streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr, provider =>
-                {
-                    player.Init(provider);
-                    player.Play();
-                });
-
-                while (!streamingaudio.Complete && !token.IsCancellationRequested)
-                {
-                    await Task.Delay(50, token);
-                }
-
-                streamingaudio.StopStreaming();
-                player.Pause();
+            while (!streamingaudio.Complete && !token.IsCancellationRequested)
+            {
+                await Task.Delay(50, token);
             }
+
+            streamingaudio.StopStreaming();
+            player.Pause();
+            player.Dispose();
         }
 
         protected override void OnStop()
