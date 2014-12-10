@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Specialized;
+using System.Threading;
 using System.Windows.Data;
 
 // From https://social.msdn.microsoft.com/Forums/vstudio/en-US/0f524459-b14e-4f9a-8264-267953418a2d/trivial-listboxlistview-autoscroll
@@ -46,7 +47,7 @@ namespace System.Windows.Workarounds
                 new PropertyChangedCallback(ItemsSourcePropertyChanged)));
 
         private Controls.ListBox Target;
-
+        
         public AutoScrollHandler(Controls.ListBox target)
         {
             Target = target;
@@ -85,7 +86,8 @@ namespace System.Windows.Workarounds
         {
             if (e.Action != NotifyCollectionChangedAction.Add || e.NewItems == null || e.NewItems.Count < 1)
                 return;
-            Target.ScrollIntoView(e.NewItems[e.NewItems.Count - 1]);
+
+            this.Dispatcher.Invoke(() => Target.ScrollIntoView(e.NewItems[e.NewItems.Count - 1]));
         }
 
     }
