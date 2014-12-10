@@ -28,9 +28,6 @@ namespace SOVND.Client
                 kernel.Bind<IFileLocationProvider>().To<AppDataLocationProvider>();
                 kernel.Bind<IAppName>().To<AppName>();
 
-                // TODO Refactor this out
-                kernel.Bind<SyncHolder>().ToSelf().InSingletonScope();
-
                 // Singleton classes
                 kernel.Bind<ChannelDirectory>().ToSelf().InSingletonScope();
                 kernel.Bind<SovndClient>().ToSelf().InSingletonScope();

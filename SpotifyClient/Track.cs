@@ -50,8 +50,11 @@ namespace SpotifyClient
         public string Name { get; private set; }
 
         public Album Album { get; private set; }
-        
-        public System.Drawing.Image AlbumArt { get { return GetAlbumArtAsync().Result; } }
+
+        public System.Drawing.Image AlbumArt
+        {
+            get { return _artwork; }
+        }
 
         public int TrackNumber { get; private set; }
 
@@ -87,7 +90,7 @@ namespace SpotifyClient
                 {
                     TrackPtr = sp_link_as_track(linkPtr);
                     sp_track_add_ref(TrackPtr);
-                    Init();
+                    InitAsync();
                 }
                 finally
                 {
@@ -102,7 +105,7 @@ namespace SpotifyClient
         {
             this.TrackPtr = trackPtr;
             SongID = Spotify.GetTrackLink(trackPtr);
-            Init();
+            InitAsync();
         }
 
         private Track()
@@ -124,71 +127,28 @@ namespace SpotifyClient
         }
 
         private static List<Track> ToInitialize = new List<Track>();
-        private static readonly object toinit = new Object();
         private IntPtr _albumPtr;
 
-        public static void Check()
+        public async static Task Check()
         {
             if (ToInitialize.Count == 0)
                 return;
 
             var remove = new List<Track>();
 
-            lock (toinit)
+            foreach (var track in ToInitialize)
             {
-                foreach (var track in ToInitialize)
-                {
-                    track.Init();
-                    if (track.Loaded)
-                        remove.Add(track);
-                }
+                await track.InitAsync();
+                if (track.Loaded)
+                    remove.Add(track);
+            }
 
-                if(remove.Count == 0)
-                    return;
+            if(remove.Count == 0)
+                return;
                 
-                LogTo.Debug("Tracks loaded: {0}", remove.Count);
-                foreach (var removal in remove)
-                    ToInitialize.Remove(removal);
-            }
-        }
-
-        public bool Init()
-        {
-            if (Loaded)
-                return true;
-
-            if (!sp_track_is_loaded(this.TrackPtr))
-            {
-                // Queue this track to get initted by spotify thread
-                if (!ToInitialize.Contains(this))
-                {
-                    lock (toinit)
-                    {
-                        ToInitialize.Add(this);
-                    }
-                }
-                return false;
-            }
-
-            this.Name = Functions.PtrToString(sp_track_name(this.TrackPtr));
-            this.TrackNumber = sp_track_index(this.TrackPtr);
-            this.Seconds = (decimal)sp_track_duration(this.TrackPtr) / 1000M;
-            this._albumPtr = sp_track_album(this.TrackPtr);
-            if (_albumPtr != IntPtr.Zero)
-                this.Album = new Album(_albumPtr);
-
-            for (int i = 0; i < sp_track_num_artists(this.TrackPtr); i++)
-            {
-                IntPtr artistPtr = sp_track_artist(this.TrackPtr, i);
-                if (artistPtr != IntPtr.Zero)
-                    _artists.Add(Functions.PtrToString(sp_artist_name(artistPtr)));
-            }
-
-            if (onLoad != null)
-                onLoad();
-            this.Loaded = true;
-            RaisePropertyChanged("AlbumArt");
-            return true;
+            LogTo.Debug("Tracks loaded: {0}", remove.Count);
+            foreach (var removal in remove)
+                ToInitialize.Remove(removal);
         }
 
         public async Task<bool> InitAsync()
@@ -200,12 +160,7 @@ namespace SpotifyClient
             {
                 // Queue this track to get initted by spotify thread
                 if (!ToInitialize.Contains(this))
-                {
-                    lock (toinit)
-                    {
-                        ToInitialize.Add(this);
-                    }
-                }
+                    ToInitialize.Add(this);
                 return false;
             }
 
@@ -222,21 +177,17 @@ namespace SpotifyClient
                 if (artistPtr != IntPtr.Zero)
                     _artists.Add(Functions.PtrToString(sp_artist_name(artistPtr)));
             }
-
+            
             await GetAlbumArtAsync();
 
             if (onLoad != null)
                 onLoad();
             this.Loaded = true;
-            RaisePropertyChanged("AlbumArt");
             return true;
         }
 
         private async Task<System.Drawing.Image> GetAlbumArtAsync()
         {
-            if (!Loaded)
-                return null;
-
             if (_artwork != null)
                 return _artwork;
 

@@ -25,33 +25,25 @@ namespace SOVND.Client
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly ISettingsProvider _settings;
-        private readonly IAppName _appname;
         private readonly SovndClient _client;
-        private readonly ChannelDirectory _channels;
-        private readonly SyncHolder _sync;
         private readonly IPlayerFactory _playerFactory;
-        private SettingsModel _auth;
         private NowPlayingHandler _player;
+        private SynchronizationContext synchronization;
 
-        public MainWindow(ISettingsProvider settings, IAppName appname, SovndClient client, ChannelDirectory channels, SyncHolder sync, IPlayerFactory playerFactory)
+        public MainWindow(SovndClient client, ChannelDirectory channels, IPlayerFactory playerFactory)
         {
             InitializeComponent();
 
-            _settings = settings;
-            _appname = appname;
             _client = client;
-            _channels = channels;
-            _sync = sync;
             _playerFactory = playerFactory;
-            _auth = _settings.GetAuthSettings();
 
             channelbox.ItemsSource = channels.channels;
-
+            
             Loaded += (_, __) =>
             {
+                BindingOperations.EnableCollectionSynchronization(channels.channels, channels.channels);
                 App.WindowHandle = new WindowInteropHelper(this).Handle;
-                _sync.sync = SynchronizationContext.Current;
+                synchronization = SynchronizationContext.Current;
 
                 _client.Run();
 
@@ -74,6 +66,12 @@ namespace SOVND.Client
             playlist = (ListCollectionView)(CollectionViewSource.GetDefaultView(observablePlaylist.Songs));
             playlist.CustomSort = new SongComparer();
 
+            synchronization.Send((_) =>
+            {
+                BindingOperations.EnableCollectionSynchronization(observablePlaylist.Songs, observablePlaylist.Songs);
+                BindingOperations.EnableCollectionSynchronization(_client.SubscribedChannelHandler.Chats, _client.SubscribedChannelHandler.Chats);
+            }, null);
+
             observablePlaylist.PropertyChanged += OnObservablePlaylistOnPropertyChanged;
 
             chatbox.ItemsSource = _client.SubscribedChannelHandler.Chats;
@@ -84,8 +82,7 @@ namespace SOVND.Client
         private void DropChannel()
         {
             _player?.Disconnect();
-
-            _sync.sync.Send((x) => lbPlaylist.ItemsSource = null, null);
+            lbPlaylist.ItemsSource = null;
 
             if (_client?.SubscribedChannelHandler?.Playlist != null)
             {
@@ -101,7 +98,7 @@ namespace SOVND.Client
 
         private void OnObservablePlaylistOnPropertyChanged(object _, PropertyChangedEventArgs __)
         {
-            _sync.sync.Send((x) => playlist.Refresh(), null);
+            synchronization.Send(x => playlist.Refresh(), null);
         }
 
         private void Refresh() => OnObservablePlaylistOnPropertyChanged(null, null);
@@ -128,7 +125,7 @@ namespace SOVND.Client
             if (playlist == null)
                 return;
 
-            _sync.sync.Send((x) => lbPlaylist.ItemsSource = playlist, null);
+            lbPlaylist.ItemsSource = playlist;
             Refresh();
         }
 

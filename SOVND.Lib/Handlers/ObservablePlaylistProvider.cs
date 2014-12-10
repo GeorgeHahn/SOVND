@@ -8,7 +8,6 @@ namespace SOVND.Lib.Handlers
 {
     public class ObservablePlaylistProvider : PlaylistProviderBase, IObservablePlaylistProvider
     {
-        private readonly SyncHolder _sync;
         private readonly ObservableCollection<Song> _songs;
 
         public ObservableCollection<Song> Songs
@@ -18,11 +17,7 @@ namespace SOVND.Lib.Handlers
 
         internal override void AddSong(Song song)
         {
-            if (_sync.sync != null)
-                _sync.sync.Send((x) => _songs.Add(song), null); // TODO Bad bad bad bad
-            else
-                _songs.Add(song);
-
+            _songs.Add(song);
             song.PropertyChanged += Song_PropertyChanged;
 
             RaisePropertyChanged("Songs");
@@ -30,11 +25,7 @@ namespace SOVND.Lib.Handlers
 
         internal override void RemoveSong(Song song)
         {
-            if (_sync.sync != null)
-                _sync.sync.Send((x) => _songs.Remove(song), null); // TODO Bad bad bad bad
-            else
-                _songs.Remove(song);
-
+            _songs.Remove(song);
             song.PropertyChanged -= Song_PropertyChanged;
 
             RaisePropertyChanged("Songs");
@@ -59,10 +50,9 @@ namespace SOVND.Lib.Handlers
             }
         }
 
-        public ObservablePlaylistProvider(IMQTTSettings settings, SyncHolder sync)
+        public ObservablePlaylistProvider(IMQTTSettings settings)
             : base(settings)
         {
-            _sync = sync;
             _songs = new ObservableCollection<Song>();
         }
 

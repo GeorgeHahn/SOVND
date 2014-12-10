@@ -15,7 +15,7 @@ namespace SOVND.Lib.Handlers
             Chats = null;
         }
 
-        public ChatProvider(IMQTTSettings settings, SyncHolder sync, Channel channel)
+        public ChatProvider(IMQTTSettings settings, Channel channel)
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
             // ChannelHandler chats
@@ -23,10 +23,7 @@ namespace SOVND.Lib.Handlers
             {
                 LogTo.Trace("{0} chat - {1}", channel.Name, (string)_.Message);
 
-                if (sync.sync != null)
-                    sync.sync.Send((x) => Chats.Add(new ChatMessage(_.Message)), null);
-                else
-                    Chats.Add(new ChatMessage(_.Message));
+                Chats.Add(new ChatMessage(_.Message));
             };
 
             Run();
