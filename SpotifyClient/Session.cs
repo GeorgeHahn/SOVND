@@ -160,6 +160,11 @@ namespace SpotifyClient
             libspotify.sp_session_player_play(_sessionPtr, true);
         }
 
+        public static void Seek(int ms)
+        {
+            libspotify.sp_session_player_seek(_sessionPtr, ms);
+        }
+
         public static void Pause()
         {
             libspotify.sp_session_player_play(_sessionPtr, false);

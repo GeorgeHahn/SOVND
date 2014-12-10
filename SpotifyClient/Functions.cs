@@ -165,6 +165,10 @@ namespace SpotifyClient
                 IntPtr linkPtr = libspotify.sp_link_create_from_string(hStr);
                 return linkPtr;
             }
+            catch (AccessViolationException) // libspotify is unhappy
+            {
+                return IntPtr.Zero;
+            }
             finally
             {
                 if (hStr != IntPtr.Zero)
