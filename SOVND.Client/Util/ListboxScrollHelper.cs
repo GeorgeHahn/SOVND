@@ -1,6 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Windows.Data;
 
@@ -13,18 +11,18 @@ namespace System.Windows.Workarounds
     {
 
         public static readonly DependencyProperty AutoScrollProperty =
-            DependencyProperty.RegisterAttached("AutoScroll", typeof(bool), typeof(System.Windows.Controls.ListBox),
+            DependencyProperty.RegisterAttached("AutoScroll", typeof(bool), typeof(Controls.ListBox),
             new PropertyMetadata(false));
 
         public static readonly DependencyProperty AutoScrollHandlerProperty =
-            DependencyProperty.RegisterAttached("AutoScrollHandler", typeof(AutoScrollHandler), typeof(System.Windows.Controls.ListBox));
+            DependencyProperty.RegisterAttached("AutoScrollHandler", typeof(AutoScrollHandler), typeof(Controls.ListBox));
 
-        public static bool GetAutoScroll(System.Windows.Controls.ListBox instance)
+        public static bool GetAutoScroll(Controls.ListBox instance)
         {
             return (bool)instance.GetValue(AutoScrollProperty);
         }
 
-        public static void SetAutoScroll(System.Windows.Controls.ListBox instance, bool value)
+        public static void SetAutoScroll(Controls.ListBox instance, bool value)
         {
             AutoScrollHandler OldHandler = (AutoScrollHandler)instance.GetValue(AutoScrollHandlerProperty);
             if (OldHandler != null)
@@ -47,9 +45,9 @@ namespace System.Windows.Workarounds
             typeof(AutoScrollHandler), new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.None,
                 new PropertyChangedCallback(ItemsSourcePropertyChanged)));
 
-        private System.Windows.Controls.ListBox Target;
+        private Controls.ListBox Target;
 
-        public AutoScrollHandler(System.Windows.Controls.ListBox target)
+        public AutoScrollHandler(Controls.ListBox target)
         {
             Target = target;
             Binding B = new Binding("ItemsSource");

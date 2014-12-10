@@ -130,7 +130,7 @@ namespace SpotifyClient
             if (ptr == IntPtr.Zero)
                 return String.Empty;
 
-            System.Collections.Generic.List<byte> l = new System.Collections.Generic.List<byte>();
+            List<byte> l = new List<byte>();
             byte read = 0;
             do
             {
@@ -140,7 +140,7 @@ namespace SpotifyClient
             while (read != 0);
 
             if (l.Count > 0)
-                return System.Text.Encoding.UTF8.GetString(l.ToArray(), 0, l.Count - 1);
+                return Encoding.UTF8.GetString(l.ToArray(), 0, l.Count - 1);
             else
                 return string.Empty;
         }
@@ -192,7 +192,7 @@ namespace SpotifyClient
 
                 Marshal.Copy(bufferPtr, buffer, 0, buffer.Length);
 
-                return System.Text.Encoding.UTF8.GetString(buffer, 0, i);
+                return Encoding.UTF8.GetString(buffer, 0, i);
             }
             finally
             {

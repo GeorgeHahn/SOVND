@@ -1,24 +1,22 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using SpotifyClient;
-using System.IO;
-using System.Threading;
+using System.Windows.Input;
 using System.Windows.Interop;
-using System.Diagnostics;
-using SOVND.Lib.Settings;
+using SOVND.Client.Modules;
+using SOVND.Client.Util;
 using SOVND.Client.ViewModels;
 using SOVND.Client.Views;
-using System.ComponentModel;
-using SOVND.Lib.Models;
-using SOVND.Client.Modules;
-using System.Collections;
-using System.Windows.Input;
 using SOVND.Lib.Handlers;
-using SOVND.Client.Util;
+using SOVND.Lib.Models;
+using SOVND.Lib.Settings;
+using SpotifyClient;
 
 namespace SOVND.Client
 {

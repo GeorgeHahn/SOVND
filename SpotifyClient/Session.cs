@@ -25,12 +25,11 @@
  */
 
 using System;
+using System.Environment;
 using System.IO;
 using System.Runtime.InteropServices;
-
-using libspotifydotnet;
-using libspotifydotnet.libspotify;
 using Anotar.NLog;
+using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -38,7 +37,7 @@ namespace SpotifyClient
     {
         private static IntPtr _sessionPtr;
 
-        private delegate void connection_error_delegate(IntPtr sessionPtr, libspotify.sp_error error);
+        private delegate void connection_error_delegate(IntPtr sessionPtr, sp_error error);
 
         private delegate void end_of_track_delegate(IntPtr sessionPtr);
 
@@ -47,7 +46,7 @@ namespace SpotifyClient
 
         private delegate void log_message_delegate(IntPtr sessionPtr, string message);
 
-        private delegate void logged_in_delegate(IntPtr sessionPtr, libspotify.sp_error error);
+        private delegate void logged_in_delegate(IntPtr sessionPtr, sp_error error);
 
         private delegate void logged_out_delegate(IntPtr sessionPtr);
 
@@ -67,7 +66,7 @@ namespace SpotifyClient
 
         private delegate void stop_playback_delegate(IntPtr sessionPtr);
 
-        private delegate void streaming_error_delegate(IntPtr sessionPtr, libspotify.sp_error error);
+        private delegate void streaming_error_delegate(IntPtr sessionPtr, sp_error error);
 
         private delegate void userinfo_updated_delegate(IntPtr sessionPtr);
 
@@ -89,7 +88,7 @@ namespace SpotifyClient
         private static userinfo_updated_delegate fn_userinfo_updated_delegate = new userinfo_updated_delegate(userinfo_updated);
 
         private static byte[] appkey = null;
-        private static libspotify.sp_error _loginError = libspotify.sp_error.OK;
+        private static sp_error _loginError = sp_error.OK;
         private static bool _isLoggedIn = false;
 
         public static event Action<IntPtr> OnNotifyMainThread;
@@ -107,7 +106,7 @@ namespace SpotifyClient
             get { return _sessionPtr; }
         }
 
-        public static libspotify.sp_error LoginError
+        public static sp_error LoginError
         {
             get { return _loginError; }
         }
@@ -119,18 +118,18 @@ namespace SpotifyClient
 
         public static void Login(object[] args)
         {
-            Session.appkey = (byte[])args[0];
+            appkey = (byte[])args[0];
 
             if (_sessionPtr == IntPtr.Zero)
                 _loginError = initSession((string)args[3]);
 
-            if (_loginError != libspotify.sp_error.OK)
-                throw new ApplicationException(Functions.PtrToString(libspotify.sp_error_message(_loginError)));
+            if (_loginError != sp_error.OK)
+                throw new ApplicationException(Functions.PtrToString(sp_error_message(_loginError)));
 
             if (_sessionPtr == IntPtr.Zero)
                 throw new InvalidOperationException("Session initialization failed, session pointer is null.");
 
-            libspotify.sp_session_login(_sessionPtr, args[1].ToString(), args[2].ToString(), false, null);
+            sp_session_login(_sessionPtr, args[1].ToString(), args[2].ToString(), false, null);
         }
 
         public static void Logout()
@@ -138,7 +137,7 @@ namespace SpotifyClient
             if (_sessionPtr == IntPtr.Zero)
                 return;
 
-            libspotify.sp_session_logout(_sessionPtr);
+            sp_session_logout(_sessionPtr);
             _sessionPtr = IntPtr.Zero;
         }
 
@@ -147,37 +146,37 @@ namespace SpotifyClient
             if (_sessionPtr == IntPtr.Zero)
                 throw new InvalidOperationException("No session.");
 
-            return libspotify.sp_session_user_country(_sessionPtr);
+            return sp_session_user_country(_sessionPtr);
         }
 
-        public static libspotify.sp_error LoadPlayer(IntPtr trackPtr)
+        public static sp_error LoadPlayer(IntPtr trackPtr)
         {
-            return libspotify.sp_session_player_load(_sessionPtr, trackPtr);
+            return sp_session_player_load(_sessionPtr, trackPtr);
         }
 
         public static void Play()
         {
-            libspotify.sp_session_player_play(_sessionPtr, true);
+            sp_session_player_play(_sessionPtr, true);
         }
 
         public static void Seek(int ms)
         {
-            libspotify.sp_session_player_seek(_sessionPtr, ms);
+            sp_session_player_seek(_sessionPtr, ms);
         }
 
         public static void Pause()
         {
-            libspotify.sp_session_player_play(_sessionPtr, false);
+            sp_session_player_play(_sessionPtr, false);
         }
 
         public static void UnloadPlayer()
         {
-            libspotify.sp_session_player_unload(_sessionPtr);
+            sp_session_player_unload(_sessionPtr);
         }
 
-        private static libspotify.sp_error initSession(string appname)
+        private static sp_error initSession(string appname)
         {
-            libspotify.sp_session_callbacks callbacks = new libspotify.sp_session_callbacks();
+            sp_session_callbacks callbacks = new sp_session_callbacks();
             callbacks.connection_error = Marshal.GetFunctionPointerForDelegate(fn_connection_error_delegate);
             callbacks.end_of_track = Marshal.GetFunctionPointerForDelegate(fn_end_of_track_delegate);
             callbacks.get_audio_buffer_stats = Marshal.GetFunctionPointerForDelegate(fn_get_audio_buffer_stats_delegate);
@@ -198,13 +197,13 @@ namespace SpotifyClient
             IntPtr callbacksPtr = Marshal.AllocHGlobal(Marshal.SizeOf(callbacks));
             Marshal.StructureToPtr(callbacks, callbacksPtr, true);
 
-            libspotify.sp_session_config config = new libspotify.sp_session_config();
-            config.api_version = libspotify.SPOTIFY_API_VERSION;
+            sp_session_config config = new sp_session_config();
+            config.api_version = SPOTIFY_API_VERSION;
             config.user_agent = appname;
             config.application_key_size = appkey.Length;
             config.application_key = Marshal.AllocHGlobal(appkey.Length);
-            config.cache_location = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appname, "spotifycache");
-            config.settings_location = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appname, "spotifysettings");
+            config.cache_location = Path.Combine(GetFolderPath(SpecialFolder.ApplicationData), appname, "spotifycache");
+            config.settings_location = Path.Combine(GetFolderPath(SpecialFolder.ApplicationData), appname, "spotifysettings");
             config.callbacks = callbacksPtr;
             config.compress_playlists = true;
             config.dont_save_metadata_for_playlists = false;
@@ -218,16 +217,16 @@ namespace SpotifyClient
             Marshal.Copy(appkey, 0, config.application_key, appkey.Length);
 
             IntPtr sessionPtr;
-            libspotify.sp_error err = libspotify.sp_session_create(ref config, out sessionPtr);
+            sp_error err = sp_session_create(ref config, out sessionPtr);
 
-            if (err == libspotify.sp_error.OK)
+            if (err == sp_error.OK)
             {
                 _sessionPtr = sessionPtr;
-                libspotify.sp_session_set_connection_type(sessionPtr, libspotify.sp_connection_type.SP_CONNECTION_TYPE_WIRED);
+                sp_session_set_connection_type(sessionPtr, sp_connection_type.SP_CONNECTION_TYPE_WIRED);
             }
 
-            libspotify.sp_error test = libspotify.sp_session_preferred_bitrate(sessionPtr, libspotify.sp_bitrate.BITRATE_320k);
-            if (test != libspotify.sp_error.OK)
+            sp_error test = sp_session_preferred_bitrate(sessionPtr, sp_bitrate.BITRATE_320k);
+            if (test != sp_error.OK)
                 Log.Warning(Plugin.LOG_MODULE, "sp_session_preferred_bitrate() failed: {0}", test);
             else
                 Log.Debug(Plugin.LOG_MODULE, "sp_session_preferred_bitrate() succeeded!");
@@ -235,15 +234,15 @@ namespace SpotifyClient
             return err;
         }
 
-        private static void connection_error(IntPtr sessionPtr, libspotify.sp_error error)
+        private static void connection_error(IntPtr sessionPtr, sp_error error)
         {
-            Log.Error(Plugin.LOG_MODULE, "Connection error: {0}", libspotify.sp_error_message(error));
+            Log.Error(Plugin.LOG_MODULE, "Connection error: {0}", sp_error_message(error));
         }
 
         private static void end_of_track(IntPtr sessionPtr)
         {
-            if (Session.OnAudioStreamComplete != null)
-                Session.OnAudioStreamComplete(null);
+            if (OnAudioStreamComplete != null)
+                OnAudioStreamComplete(null);
         }
 
         private static void get_audio_buffer_stats(IntPtr sessionPtr, ref sp_audio_buffer_stats statsPtr)
@@ -260,17 +259,17 @@ namespace SpotifyClient
             Log.Debug("libspotify", "> " + message);
         }
 
-        private static void logged_in(IntPtr sessionPtr, libspotify.sp_error error)
+        private static void logged_in(IntPtr sessionPtr, sp_error error)
         {
-            if (error == libspotify.sp_error.OK)
+            if (error == sp_error.OK)
             {
                 _isLoggedIn = true;
             }
 
             _loginError = error;
 
-            if (Session.OnLoggedIn != null)
-                Session.OnLoggedIn(sessionPtr);
+            if (OnLoggedIn != null)
+                OnLoggedIn(sessionPtr);
         }
 
         private static void logged_out(IntPtr sessionPtr)
@@ -300,12 +299,12 @@ namespace SpotifyClient
             if (num_frame == 0)
                 return 0;
 
-            libspotify.sp_audioformat format = (libspotify.sp_audioformat)Marshal.PtrToStructure(formatPtr, typeof(libspotify.sp_audioformat));
+            sp_audioformat format = (sp_audioformat)Marshal.PtrToStructure(formatPtr, typeof(sp_audioformat));
             byte[] buffer = new byte[num_frame * sizeof(Int16) * format.channels];
             Marshal.Copy(framesPtr, buffer, 0, buffer.Length);
 
-            if (Session.OnAudioDataArrived != null)
-                Session.OnAudioDataArrived(buffer);
+            if (OnAudioDataArrived != null)
+                OnAudioDataArrived(buffer);
 
             return num_frame;
         }
@@ -336,9 +335,9 @@ namespace SpotifyClient
             Log.Debug(Plugin.LOG_MODULE, "stop_playback");
         }
 
-        private static void streaming_error(IntPtr sessionPtr, libspotify.sp_error error)
+        private static void streaming_error(IntPtr sessionPtr, sp_error error)
         {
-            Log.Error(Plugin.LOG_MODULE, "Streaming error: {0}", libspotify.sp_error_message(error));
+            Log.Error(Plugin.LOG_MODULE, "Streaming error: {0}", sp_error_message(error));
         }
 
         private static void userinfo_updated(IntPtr sessionPtr)

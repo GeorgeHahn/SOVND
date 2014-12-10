@@ -27,8 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using libspotifydotnet;
+using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -58,7 +57,7 @@ namespace SpotifyClient
             public IntPtr ContainerPtr;
             public IntPtr Pointer;
             public ulong FolderID;
-            public libspotify.sp_playlist_type PlaylistType;
+            public sp_playlist_type PlaylistType;
             public string Name;
             public PlaylistInfo Parent;
             public List<PlaylistInfo> Children = new List<PlaylistInfo>();
@@ -107,7 +106,7 @@ namespace SpotifyClient
                 if (Session.SessionPtr == IntPtr.Zero)
                     throw new InvalidOperationException("No valid session.");
 
-                _sessionContainer = new PlaylistContainer(libspotify.sp_session_playlistcontainer(Session.SessionPtr));
+                _sessionContainer = new PlaylistContainer(sp_session_playlistcontainer(Session.SessionPtr));
             }
 
             return _sessionContainer;
@@ -125,7 +124,7 @@ namespace SpotifyClient
             this.fn_playlist_moved_delegate = new playlist_moved_delegate(this.playlist_moved);
             this.fn_playlist_removed_delegate = new playlist_removed_delegate(this.playlist_removed);
 
-            libspotify.sp_playlistcontainer_callbacks callbacks = new libspotify.sp_playlistcontainer_callbacks();
+            sp_playlistcontainer_callbacks callbacks = new sp_playlistcontainer_callbacks();
             callbacks.container_loaded = Marshal.GetFunctionPointerForDelegate(this.fn_container_loaded_delegate);
             callbacks.playlist_added = Marshal.GetFunctionPointerForDelegate(this.fn_playlist_added_delegate);
             callbacks.playlist_moved = Marshal.GetFunctionPointerForDelegate(this.fn_playlist_moved_delegate);
@@ -134,7 +133,7 @@ namespace SpotifyClient
             _callbacksPtr = Marshal.AllocHGlobal(Marshal.SizeOf(callbacks));
             Marshal.StructureToPtr(callbacks, _callbacksPtr, true);
 
-            libspotify.sp_playlistcontainer_add_callbacks(_containerPtr, _callbacksPtr, IntPtr.Zero);
+            sp_playlistcontainer_add_callbacks(_containerPtr, _callbacksPtr, IntPtr.Zero);
 
             return;
         }
@@ -143,7 +142,7 @@ namespace SpotifyClient
         {
             get
             {
-                return libspotify.sp_playlistcontainer_is_loaded(_containerPtr);
+                return sp_playlistcontainer_is_loaded(_containerPtr);
             }
         }
 
@@ -154,13 +153,13 @@ namespace SpotifyClient
                 if (!this.IsLoaded)
                     return false;
 
-                int count = libspotify.sp_playlistcontainer_num_playlists(_containerPtr);
+                int count = sp_playlistcontainer_num_playlists(_containerPtr);
 
                 for (int i = 0; i < count; i++)
                 {
-                    if (libspotify.sp_playlistcontainer_playlist_type(_containerPtr, i) == libspotify.sp_playlist_type.SP_PLAYLIST_TYPE_PLAYLIST)
+                    if (sp_playlistcontainer_playlist_type(_containerPtr, i) == sp_playlist_type.SP_PLAYLIST_TYPE_PLAYLIST)
                     {
-                        using (Playlist p = new Playlist(libspotify.sp_playlistcontainer_playlist(_containerPtr, i)))
+                        using (Playlist p = new Playlist(sp_playlistcontainer_playlist(_containerPtr, i)))
                         {
                             if (!p.IsLoaded)
                                 return false;
@@ -179,18 +178,18 @@ namespace SpotifyClient
 
             List<PlaylistInfo> playlists = new List<PlaylistInfo>();
 
-            for (int i = 0; i < libspotify.sp_playlistcontainer_num_playlists(_containerPtr); i++)
+            for (int i = 0; i < sp_playlistcontainer_num_playlists(_containerPtr); i++)
             {
-                if (libspotify.sp_playlistcontainer_playlist_type(_containerPtr, i) == libspotify.sp_playlist_type.SP_PLAYLIST_TYPE_PLAYLIST)
+                if (sp_playlistcontainer_playlist_type(_containerPtr, i) == sp_playlist_type.SP_PLAYLIST_TYPE_PLAYLIST)
                 {
-                    IntPtr playlistPtr = libspotify.sp_playlistcontainer_playlist(_containerPtr, i);
+                    IntPtr playlistPtr = sp_playlistcontainer_playlist(_containerPtr, i);
 
                     playlists.Add(new PlaylistInfo()
                     {
                         Pointer = playlistPtr,
-                        PlaylistType = libspotify.sp_playlist_type.SP_PLAYLIST_TYPE_PLAYLIST,
+                        PlaylistType = sp_playlist_type.SP_PLAYLIST_TYPE_PLAYLIST,
                         ContainerPtr = _containerPtr,
-                        Name = Functions.PtrToString(libspotify.sp_playlist_name(playlistPtr))
+                        Name = Functions.PtrToString(sp_playlist_name(playlistPtr))
                     });
                 }
             }
@@ -208,7 +207,7 @@ namespace SpotifyClient
                 if (_callbacksPtr == IntPtr.Zero)
                     return;
 
-                libspotify.sp_playlistcontainer_remove_callbacks(_containerPtr, _callbacksPtr, IntPtr.Zero);
+                sp_playlistcontainer_remove_callbacks(_containerPtr, _callbacksPtr, IntPtr.Zero);
             }
             catch { }
         }
@@ -242,7 +241,7 @@ namespace SpotifyClient
 
             foreach (PlaylistInfo playlist in tree.Children)
             {
-                if (playlist.PlaylistType == libspotify.sp_playlist_type.SP_PLAYLIST_TYPE_START_FOLDER)
+                if (playlist.PlaylistType == sp_playlist_type.SP_PLAYLIST_TYPE_START_FOLDER)
                 {
                     if (playlist.FolderID == folderID)
                         return playlist;
@@ -262,19 +261,19 @@ namespace SpotifyClient
             PlaylistInfo current = new PlaylistInfo();
             current.FolderID = ulong.MaxValue; //root
 
-            for (int i = 0; i < libspotify.sp_playlistcontainer_num_playlists(_containerPtr); i++)
+            for (int i = 0; i < sp_playlistcontainer_num_playlists(_containerPtr); i++)
             {
                 PlaylistInfo playlist = new PlaylistInfo()
                 {
-                    PlaylistType = libspotify.sp_playlistcontainer_playlist_type(_containerPtr, i),
+                    PlaylistType = sp_playlistcontainer_playlist_type(_containerPtr, i),
                     ContainerPtr = _containerPtr
                 };
 
                 switch (playlist.PlaylistType)
                 {
-                    case libspotify.sp_playlist_type.SP_PLAYLIST_TYPE_START_FOLDER:
+                    case sp_playlist_type.SP_PLAYLIST_TYPE_START_FOLDER:
 
-                        playlist.FolderID = libspotify.sp_playlistcontainer_playlist_folder_id(_containerPtr, i);
+                        playlist.FolderID = sp_playlistcontainer_playlist_folder_id(_containerPtr, i);
                         playlist.Name = GetFolderName(_containerPtr, i);
                         playlist.Parent = current;
                         current.Children.Add(playlist);
@@ -282,14 +281,14 @@ namespace SpotifyClient
 
                         break;
 
-                    case libspotify.sp_playlist_type.SP_PLAYLIST_TYPE_END_FOLDER:
+                    case sp_playlist_type.SP_PLAYLIST_TYPE_END_FOLDER:
 
                         current = current.Parent;
                         break;
 
-                    case libspotify.sp_playlist_type.SP_PLAYLIST_TYPE_PLAYLIST:
+                    case sp_playlist_type.SP_PLAYLIST_TYPE_PLAYLIST:
 
-                        playlist.Pointer = libspotify.sp_playlistcontainer_playlist(_containerPtr, i);
+                        playlist.Pointer = sp_playlistcontainer_playlist(_containerPtr, i);
                         playlist.Parent = current;
                         current.Children.Add(playlist);
 
@@ -311,7 +310,7 @@ namespace SpotifyClient
 
             try
             {
-                libspotify.sp_error error = libspotify.sp_playlistcontainer_playlist_folder_name(containerPtr, index, namePtr, 128);
+                sp_error error = sp_playlistcontainer_playlist_folder_name(containerPtr, index, namePtr, 128);
 
                 return Functions.PtrToString(namePtr);
             }

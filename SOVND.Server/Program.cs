@@ -1,18 +1,15 @@
-﻿using Anotar.NLog;
+﻿using System;
+using System.IO;
+using System.Threading;
+using Anotar.NLog;
+using HipchatApiV2.Enums;
 using Ninject;
 using Ninject.Extensions.Factory;
-using SOVND.Lib;
-using System;
-using System.Text;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
-using SOVND.Server.Settings;
-using System.Threading;
-using System.Linq;
-using SOVND.Server.Handlers;
-using System.IO;
-using HipchatApiV2.Enums;
 using SOVND.Lib.Utils;
+using SOVND.Server.Handlers;
+using SOVND.Server.Settings;
 using SOVND.Server.Utils;
 
 namespace SOVND.Server

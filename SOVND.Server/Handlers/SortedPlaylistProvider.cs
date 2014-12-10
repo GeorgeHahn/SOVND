@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Anotar.NLog;
+using Charlotte;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
 using SOVND.Lib.Utils;
-using Charlotte;
 using SOVND.Server.Settings;
 using StackExchange.Redis;
 

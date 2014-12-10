@@ -27,8 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-
-using libspotifydotnet;
+using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -47,7 +46,7 @@ namespace SpotifyClient
 
         public List<IntPtr> Ptrs { get; private set; }
 
-        public libspotify.sp_toplisttype ToplistType { get; private set; }
+        public sp_toplisttype ToplistType { get; private set; }
 
         #region IDisposable Members
 
@@ -77,7 +76,7 @@ namespace SpotifyClient
 
         #endregion IDisposable Members
 
-        public static TopList BeginBrowse(libspotify.sp_toplisttype type, int region)
+        public static TopList BeginBrowse(sp_toplisttype type, int region)
         {
             try
             {
@@ -85,7 +84,7 @@ namespace SpotifyClient
                 t.ToplistType = type;
                 t._d = new toplistbrowse_complete_cb_delegate(t.toplistbrowse_complete);
                 t._callbackPtr = Marshal.GetFunctionPointerForDelegate(t._d);
-                t._browsePtr = libspotify.sp_toplistbrowse_create(Session.SessionPtr, type, region, IntPtr.Zero, t._callbackPtr, IntPtr.Zero);
+                t._browsePtr = sp_toplistbrowse_create(Session.SessionPtr, type, region, IntPtr.Zero, t._callbackPtr, IntPtr.Zero);
                 return t;
             }
             catch (Exception ex)
@@ -95,9 +94,9 @@ namespace SpotifyClient
             }
         }
 
-        public libspotify.sp_error GetBrowseError()
+        public sp_error GetBrowseError()
         {
-            return libspotify.sp_toplistbrowse_error(_browsePtr);
+            return sp_toplistbrowse_error(_browsePtr);
         }
 
         private void toplistbrowse_complete(IntPtr result, IntPtr userDataPtr)
@@ -105,11 +104,11 @@ namespace SpotifyClient
             if (_browsePtr == IntPtr.Zero)
                 throw new ApplicationException("Toplist browse is null");
 
-            libspotify.sp_error error = libspotify.sp_toplistbrowse_error(_browsePtr);
+            sp_error error = sp_toplistbrowse_error(_browsePtr);
 
-            if (error != libspotify.sp_error.OK)
+            if (error != sp_error.OK)
             {
-                Log.Warning(Plugin.LOG_MODULE, "ERROR: Toplist browse failed: {0}", Functions.PtrToString(libspotify.sp_error_message(error)));
+                Log.Warning(Plugin.LOG_MODULE, "ERROR: Toplist browse failed: {0}", Functions.PtrToString(sp_error_message(error)));
                 this.IsLoaded = true;
                 return;
             }
@@ -117,7 +116,7 @@ namespace SpotifyClient
             if (_browsePtr == IntPtr.Zero)
                 throw new ApplicationException("Toplist browse is null");
 
-            int count = this.ToplistType == libspotify.sp_toplisttype.SP_TOPLIST_TYPE_ALBUMS ? libspotify.sp_toplistbrowse_num_albums(_browsePtr) : this.ToplistType == libspotify.sp_toplisttype.SP_TOPLIST_TYPE_ARTISTS ? libspotify.sp_toplistbrowse_num_artists(_browsePtr) : libspotify.sp_toplistbrowse_num_tracks(_browsePtr);
+            int count = this.ToplistType == sp_toplisttype.SP_TOPLIST_TYPE_ALBUMS ? sp_toplistbrowse_num_albums(_browsePtr) : this.ToplistType == sp_toplisttype.SP_TOPLIST_TYPE_ARTISTS ? sp_toplistbrowse_num_artists(_browsePtr) : sp_toplistbrowse_num_tracks(_browsePtr);
 
             List<IntPtr> ptrs = new List<IntPtr>();
 
@@ -125,20 +124,20 @@ namespace SpotifyClient
 
             for (int i = 0; i < count; i++)
             {
-                if (this.ToplistType == libspotify.sp_toplisttype.SP_TOPLIST_TYPE_ALBUMS)
+                if (this.ToplistType == sp_toplisttype.SP_TOPLIST_TYPE_ALBUMS)
                 {
-                    tmp = libspotify.sp_toplistbrowse_album(_browsePtr, i);
-                    if (libspotify.sp_album_is_available(tmp))
+                    tmp = sp_toplistbrowse_album(_browsePtr, i);
+                    if (sp_album_is_available(tmp))
                         ptrs.Add(tmp);
                 }
-                else if (this.ToplistType == libspotify.sp_toplisttype.SP_TOPLIST_TYPE_ARTISTS)
+                else if (this.ToplistType == sp_toplisttype.SP_TOPLIST_TYPE_ARTISTS)
                 {
-                    tmp = libspotify.sp_toplistbrowse_artist(_browsePtr, i);
+                    tmp = sp_toplistbrowse_artist(_browsePtr, i);
                     ptrs.Add(tmp);
                 }
                 else
                 {
-                    tmp = libspotify.sp_toplistbrowse_track(_browsePtr, i);
+                    tmp = sp_toplistbrowse_track(_browsePtr, i);
                     ptrs.Add(tmp);
                 }
             }
@@ -152,8 +151,8 @@ namespace SpotifyClient
             {
                 try
                 {
-                    var err = libspotify.sp_toplistbrowse_release(_browsePtr);
-                    if (err == libspotify.sp_error.OK)
+                    var err = sp_toplistbrowse_release(_browsePtr);
+                    if (err == sp_error.OK)
                     {
                         Log.Trace(LOG_MODULE, "Toplist browse was released successfully");
                     }

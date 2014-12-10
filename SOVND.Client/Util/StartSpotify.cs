@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Threading;
 using SOVND.Lib.Settings;
 using SpotifyClient;

@@ -27,8 +27,8 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 using libspotifydotnet;
+using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -102,7 +102,7 @@ namespace SpotifyClient
                 Search search = new Search();
                 search._d = new search_complete_cb_delegate(search.search_complete);
                 search._callbackPtr = Marshal.GetFunctionPointerForDelegate(search._d);
-                search._searchPtr = libspotify.sp_search_create(Session.SessionPtr, Functions.StringToPtr(keywords), 0, 50, 0, 50, 0, 50, 0, 50, sp_search_type.SP_SEARCH_STANDARD, search._callbackPtr, IntPtr.Zero);
+                search._searchPtr = sp_search_create(Session.SessionPtr, Functions.StringToPtr(keywords), 0, 50, 0, 50, 0, 50, 0, 50, sp_search_type.SP_SEARCH_STANDARD, search._callbackPtr, IntPtr.Zero);
                 return search;
             }
             catch (Exception ex)
@@ -112,9 +112,9 @@ namespace SpotifyClient
             }
         }
 
-        public libspotify.sp_error GetSearchError()
+        public sp_error GetSearchError()
         {
-            return libspotify.sp_search_error(_searchPtr);
+            return sp_search_error(_searchPtr);
         }
 
         private void search_complete(IntPtr result, IntPtr userDataPtr)
@@ -122,40 +122,40 @@ namespace SpotifyClient
             if (_searchPtr == IntPtr.Zero)
                 throw new ApplicationException("Search pointer is null");
 
-            libspotify.sp_error error = libspotify.sp_search_error(_searchPtr);
+            sp_error error = sp_search_error(_searchPtr);
 
-            if (error != libspotify.sp_error.OK)
+            if (error != sp_error.OK)
             {
-                Log.Warning(Plugin.LOG_MODULE, "ERROR: Search failed: {0}", Functions.PtrToString(libspotify.sp_error_message(error)));
+                Log.Warning(Plugin.LOG_MODULE, "ERROR: Search failed: {0}", Functions.PtrToString(sp_error_message(error)));
                 this.IsLoaded = true;
                 return;
             }
 
             this.TrackPtrs = new List<IntPtr>();
-            for (int i = 0; i < libspotify.sp_search_num_tracks(_searchPtr); i++)
+            for (int i = 0; i < sp_search_num_tracks(_searchPtr); i++)
             {
-                this.TrackPtrs.Add(libspotify.sp_search_track(_searchPtr, i));
+                this.TrackPtrs.Add(sp_search_track(_searchPtr, i));
             }
 
             this.ArtistPtrs = new List<IntPtr>();
-            for (int i = 0; i < libspotify.sp_search_num_artists(_searchPtr); i++)
+            for (int i = 0; i < sp_search_num_artists(_searchPtr); i++)
             {
-                this.ArtistPtrs.Add(libspotify.sp_search_artist(_searchPtr, i));
+                this.ArtistPtrs.Add(sp_search_artist(_searchPtr, i));
             }
 
             this.AlbumPtrs = new List<IntPtr>();
-            for (int i = 0; i < libspotify.sp_search_num_albums(_searchPtr); i++)
+            for (int i = 0; i < sp_search_num_albums(_searchPtr); i++)
             {
-                this.AlbumPtrs.Add(libspotify.sp_search_album(_searchPtr, i));
+                this.AlbumPtrs.Add(sp_search_album(_searchPtr, i));
             }
 
             this.PlaylistResults = new List<PlaylistSearchResult>();
-            for (int i = 0; i < libspotify.sp_search_num_playlists(_searchPtr); i++)
+            for (int i = 0; i < sp_search_num_playlists(_searchPtr); i++)
             {                
                 this.PlaylistResults.Add(new PlaylistSearchResult()
                 {
-                    Link = Functions.PtrToString(libspotify.sp_search_playlist_uri(_searchPtr, i)),
-                    Name = Functions.PtrToString(libspotify.sp_search_playlist_name(_searchPtr, i)),                    
+                    Link = Functions.PtrToString(sp_search_playlist_uri(_searchPtr, i)),
+                    Name = Functions.PtrToString(sp_search_playlist_name(_searchPtr, i)),                    
                 });
             }
 
@@ -168,8 +168,8 @@ namespace SpotifyClient
             {
                 try
                 {
-                    var err = libspotify.sp_search_release(_searchPtr);
-                    if (err == libspotify.sp_error.OK)
+                    var err = sp_search_release(_searchPtr);
+                    if (err == sp_error.OK)
                     {
                         Log.Trace(LOG_MODULE, "Search was released successfully");
                     }

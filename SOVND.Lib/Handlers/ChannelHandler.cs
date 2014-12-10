@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
 using SOVND.Lib.Models;
 
 namespace SOVND.Lib.Handlers

@@ -1,15 +1,16 @@
-﻿using System;
+﻿using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Windows.Data;
+using System.Windows.Media.Imaging;
 
 namespace System.Windows.Media
 {
     /// <summary>
     /// One-way converter from System.Drawing.Image to System.Windows.Media.ImageSource
     /// </summary>
-    [ValueConversion(typeof(System.Drawing.Image), typeof(System.Windows.Media.ImageSource))]
+    [ValueConversion(typeof(Image), typeof(ImageSource))]
     public class ImageConverter : IValueConverter
     {
         public object Convert(object value, Type targetType,
@@ -18,15 +19,15 @@ namespace System.Windows.Media
             // empty images are empty...
             if (value == null) { return null; }
 
-            var image = (System.Drawing.Image)value;
+            var image = (Image)value;
             // Winforms Image we want to get the WPF Image from...
-            var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+            var bitmap = new BitmapImage();
             bitmap.BeginInit();
             MemoryStream memoryStream = new MemoryStream();
             // Save to a memory stream...
             image.Save(memoryStream, ImageFormat.Bmp);
             // Rewind the stream...
-            memoryStream.Seek(0, System.IO.SeekOrigin.Begin);
+            memoryStream.Seek(0, SeekOrigin.Begin);
             bitmap.StreamSource = memoryStream;
             bitmap.EndInit();
             return bitmap;

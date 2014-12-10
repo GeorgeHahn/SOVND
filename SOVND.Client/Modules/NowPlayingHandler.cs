@@ -20,7 +20,7 @@ namespace SOVND.Client.Modules
 
         private readonly string _channel;
 
-        private readonly DateTime UnixTimeBase = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+        private readonly DateTime UnixTimeBase = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
 
         public NowPlayingHandler(AuthPair auth, string channelName) : base(auth)
         {

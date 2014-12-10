@@ -1,13 +1,5 @@
-﻿using System.Windows;
-using System.Threading;
-using Ninject;
-using Ninject.Extensions.Factory;
-using SOVND.Client.Modules;
-using SOVND.Client.Settings;
-using SOVND.Lib.Settings;
-using SOVND.Lib.Handlers;
-using SOVND.Lib.Models;
-using System;
+﻿using System;
+using System.Windows;
 
 namespace SOVND.Client
 {

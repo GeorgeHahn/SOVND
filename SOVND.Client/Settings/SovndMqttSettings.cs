@@ -1,5 +1,4 @@
-﻿using SOVND.Lib;
-using SOVND.Lib.Models;
+﻿using SOVND.Lib.Models;
 using SOVND.Lib.Settings;
 
 namespace SOVND.Client.Settings

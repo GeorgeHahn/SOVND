@@ -1,19 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Anotar.NLog;
 using Ninject;
 using Ninject.Extensions.Factory;
+using SOVND.Client.Modules;
 using SOVND.Client.Settings;
+using SOVND.Client.Util;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
 using SOVND.Lib.Settings;
-using SOVND.Client.Modules;
-using SOVND.Client.Util;
-using SpotifyClient;
 
 namespace SOVND.Client
 {

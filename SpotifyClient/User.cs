@@ -25,7 +25,6 @@
  */
 
 using System;
-
 using libspotifydotnet;
 
 namespace SpotifyClient

@@ -27,12 +27,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using libspotifydotnet;
 using System.Diagnostics;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Anotar.NLog;
+using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -86,14 +85,14 @@ namespace SpotifyClient
 
                 try
                 {
-                    TrackPtr = libspotify.sp_link_as_track(linkPtr);
-                    libspotify.sp_track_add_ref(TrackPtr);
+                    TrackPtr = sp_link_as_track(linkPtr);
+                    sp_track_add_ref(TrackPtr);
                     Init();
                 }
                 finally
                 {
                     if (linkPtr != IntPtr.Zero)
-                        libspotify.sp_link_release(linkPtr);
+                        sp_link_release(linkPtr);
                 }
             }
 
@@ -119,7 +118,7 @@ namespace SpotifyClient
 
         ~Track()
         {
-            libspotify.sp_track_release(TrackPtr);
+            sp_track_release(TrackPtr);
 
             _artwork?.Dispose();
         }
@@ -158,7 +157,7 @@ namespace SpotifyClient
             if (Loaded)
                 return true;
 
-            if (!libspotify.sp_track_is_loaded(this.TrackPtr))
+            if (!sp_track_is_loaded(this.TrackPtr))
             {
                 // Queue this track to get initted by spotify thread
                 if (!ToInitialize.Contains(this))
@@ -171,18 +170,18 @@ namespace SpotifyClient
                 return false;
             }
 
-            this.Name = Functions.PtrToString(libspotify.sp_track_name(this.TrackPtr));
-            this.TrackNumber = libspotify.sp_track_index(this.TrackPtr);
-            this.Seconds = (decimal)libspotify.sp_track_duration(this.TrackPtr) / 1000M;
-            this._albumPtr = libspotify.sp_track_album(this.TrackPtr);
+            this.Name = Functions.PtrToString(sp_track_name(this.TrackPtr));
+            this.TrackNumber = sp_track_index(this.TrackPtr);
+            this.Seconds = (decimal)sp_track_duration(this.TrackPtr) / 1000M;
+            this._albumPtr = sp_track_album(this.TrackPtr);
             if (_albumPtr != IntPtr.Zero)
                 this.Album = new Album(_albumPtr);
 
-            for (int i = 0; i < libspotify.sp_track_num_artists(this.TrackPtr); i++)
+            for (int i = 0; i < sp_track_num_artists(this.TrackPtr); i++)
             {
-                IntPtr artistPtr = libspotify.sp_track_artist(this.TrackPtr, i);
+                IntPtr artistPtr = sp_track_artist(this.TrackPtr, i);
                 if (artistPtr != IntPtr.Zero)
-                    _artists.Add(Functions.PtrToString(libspotify.sp_artist_name(artistPtr)));
+                    _artists.Add(Functions.PtrToString(sp_artist_name(artistPtr)));
             }
 
             if (onLoad != null)
@@ -197,7 +196,7 @@ namespace SpotifyClient
             if (Loaded)
                 return true;
 
-            if (!libspotify.sp_track_is_loaded(this.TrackPtr))
+            if (!sp_track_is_loaded(this.TrackPtr))
             {
                 // Queue this track to get initted by spotify thread
                 if (!ToInitialize.Contains(this))
@@ -210,18 +209,18 @@ namespace SpotifyClient
                 return false;
             }
 
-            this.Name = Functions.PtrToString(libspotify.sp_track_name(this.TrackPtr));
-            this.TrackNumber = libspotify.sp_track_index(this.TrackPtr);
-            this.Seconds = (decimal)libspotify.sp_track_duration(this.TrackPtr) / 1000M;
-            this._albumPtr = libspotify.sp_track_album(this.TrackPtr);
+            this.Name = Functions.PtrToString(sp_track_name(this.TrackPtr));
+            this.TrackNumber = sp_track_index(this.TrackPtr);
+            this.Seconds = (decimal)sp_track_duration(this.TrackPtr) / 1000M;
+            this._albumPtr = sp_track_album(this.TrackPtr);
             if (_albumPtr != IntPtr.Zero)
                 this.Album = new Album(_albumPtr);
 
-            for (int i = 0; i < libspotify.sp_track_num_artists(this.TrackPtr); i++)
+            for (int i = 0; i < sp_track_num_artists(this.TrackPtr); i++)
             {
-                IntPtr artistPtr = libspotify.sp_track_artist(this.TrackPtr, i);
+                IntPtr artistPtr = sp_track_artist(this.TrackPtr, i);
                 if (artistPtr != IntPtr.Zero)
-                    _artists.Add(Functions.PtrToString(libspotify.sp_artist_name(artistPtr)));
+                    _artists.Add(Functions.PtrToString(sp_artist_name(artistPtr)));
             }
 
             await GetAlbumArtAsync();
@@ -255,7 +254,7 @@ namespace SpotifyClient
 
         private string GetAlbumArtLink()
         {
-            return Spotify.GetAlbumArtLink(_albumPtr, libspotify.sp_image_size.SP_IMAGE_SIZE_SMALL);
+            return Spotify.GetAlbumArtLink(_albumPtr, sp_image_size.SP_IMAGE_SIZE_SMALL);
         }
 
         private byte[] GetAlbumArtBuffer()

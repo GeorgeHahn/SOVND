@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel;
-using SpotifyClient;
 using Anotar.NLog;
+using SpotifyClient;
 
 namespace SOVND.Lib.Models
 {

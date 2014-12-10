@@ -1,19 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Charlotte;
-using SpotifyClient;
 using Anotar.NLog;
+using Charlotte;
 using HipchatApiV2.Enums;
+using Newtonsoft.Json;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
-using SOVND.Server.Settings;
-using Newtonsoft.Json;
 using SOVND.Lib.Utils;
+using SOVND.Server.Settings;
 using SOVND.Server.Utils;
+using SpotifyClient;
 using StackExchange.Redis;
 
 namespace SOVND.Server
