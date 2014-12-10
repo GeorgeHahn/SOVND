@@ -87,7 +87,7 @@ namespace SOVND.Client.Audio
 
             if (error != sp_error.OK)
             {
-                throw new Exception("[Spotify] Streaming error: \{libspotify.sp_error_message(error)}");
+                throw new Exception("[Spotify] Streaming error: \{sp_error_message(error)}");
             }
 
             sp_availability avail = sp_track_get_availability(Session.SessionPtr, _trackPtr);
