@@ -36,47 +36,29 @@ namespace SOVND.Client.Audio
 {
     public class SpotifyTrackDataPipe
     {
-        private IntPtr _trackPtr;
-        private Action<byte[]> d_OnAudioDataArrived = null;
-        private Action<object> d_OnAudioStreamComplete = null;
-        private Queue<byte[]> _q = new Queue<byte[]>();
         private bool _complete;
-
-        private static bool _interrupt;
         private static bool _loaded;
-
         private BufferedWaveProvider _wave;
-
-
-        public SpotifyTrackDataPipe(IntPtr trackPtr, BufferedWaveProvider wave)
-        {
-            _trackPtr = trackPtr;
-            _wave = wave;
-
-            d_OnAudioDataArrived = new Action<byte[]>(Session_OnAudioDataArrived);
-            d_OnAudioStreamComplete = new Action<object>(Session_OnAudioStreamComplete);
-
-            Session.OnAudioDataArrived += d_OnAudioDataArrived;
-            Session.OnAudioStreamComplete += d_OnAudioStreamComplete;
-            Session.AudioBufferStats += Session_AudioBufferStats;
-        }
+        private bool logonce;
+        private WaveFormat waveFormat;
+        private Action<BufferedWaveProvider> _init;
 
         public bool Complete { get { return _complete; } }
 
-        public async Task StartStreaming()
+        public async Task StartStreaming(IntPtr _trackPtr, Action<BufferedWaveProvider> init)
         {
-            await StartStreaming(DateTime.MinValue);
+            await StartStreaming(DateTime.MinValue, _trackPtr, init);
         }
 
-        public async Task StartStreaming(DateTime startTime)
+        public async Task StartStreaming(DateTime startTime, IntPtr _trackPtr, Action<BufferedWaveProvider> init)
         {
             if (_loaded)
             {
-                Session.UnloadPlayer();
+                StopStreaming();
                 _loaded = false;
             }
+            logonce = false;
 
-            _loaded = true;
             var error = Session.LoadPlayer(_trackPtr);
 
             while (error == sp_error.IS_LOADING)
@@ -90,11 +72,18 @@ namespace SOVND.Client.Audio
                 throw new Exception("[Spotify] Streaming error: \{sp_error_message(error)}");
             }
 
+            _loaded = true;
+            _init = init;
+
+            Session.OnAudioDataArrived += Session_OnAudioDataArrived;
+            Session.OnAudioStreamComplete += Session_OnAudioStreamComplete;
+            Session.AudioBufferStats += Session_AudioBufferStats;
+
             sp_availability avail = sp_track_get_availability(Session.SessionPtr, _trackPtr);
 
             if (avail != sp_availability.SP_TRACK_AVAILABILITY_AVAILABLE)
             {
-                LogTo.Warn("Track is unavailable: \{avail}");
+                LogTo.Warn("Track is unavailable: {0}", avail);
                 return;
             }
 
@@ -110,8 +99,8 @@ namespace SOVND.Client.Audio
         {
             if (_loaded)
             {
-                Session.OnAudioDataArrived -= d_OnAudioDataArrived;
-                Session.OnAudioStreamComplete -= d_OnAudioStreamComplete;
+                Session.OnAudioDataArrived -= Session_OnAudioDataArrived;
+                Session.OnAudioStreamComplete -= Session_OnAudioStreamComplete;
                 Session.AudioBufferStats -= Session_AudioBufferStats;
 
                 Session.UnloadPlayer();
@@ -119,10 +108,13 @@ namespace SOVND.Client.Audio
             }
         }
 
-        private int jitter = 0;
+        private int jitter;
 
         private void Session_AudioBufferStats(ref sp_audio_buffer_stats obj)
         {
+            if (_wave == null)
+                return;
+
             obj.samples = _wave.BufferedBytes / 2;
             obj.stutter = jitter;
             jitter = 0;
@@ -133,9 +125,14 @@ namespace SOVND.Client.Audio
             _complete = true;
         }
 
-        private void Session_OnAudioDataArrived(byte[] buffer)
+        private void Session_OnAudioDataArrived(byte[] buffer, sp_audioformat format)
         {
-            if (!_interrupt && !_complete)
+            if ((waveFormat == null) || (format.channels != waveFormat.Channels) || (format.sample_rate != waveFormat.SampleRate))
+            {
+                SetAudioFormat(format);
+            }
+
+            if (!_complete && _loaded)
             {
                 // Try to keep buffer mostly full
                 if (_wave.BufferedBytes < _wave.BufferLength - 40000)
@@ -143,6 +140,16 @@ namespace SOVND.Client.Audio
 
                 _wave.AddSamples(buffer, 0, buffer.Length);
             }
+        }
+
+        private void SetAudioFormat(sp_audioformat format)
+        {
+            waveFormat = new WaveFormat(format.sample_rate, 16, format.channels);
+
+            _wave = new BufferedWaveProvider(waveFormat);
+            _wave.BufferDuration = TimeSpan.FromSeconds(15);
+
+            _init(_wave);
         }
     }
 }

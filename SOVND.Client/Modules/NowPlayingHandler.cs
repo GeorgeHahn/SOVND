@@ -12,10 +12,8 @@ namespace SOVND.Client.Modules
     public class NowPlayingHandler : SOVNDModule
     {
         private Track playingTrack;
-        private BufferedWaveProvider wave;
-        private WaveFormat WaveFormat;
         private CancellationTokenSource songToken;
-
+        private SpotifyTrackDataPipe streamingaudio;
         private readonly string _channel;
 
         private readonly DateTime UnixTimeBase = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
@@ -26,6 +24,7 @@ namespace SOVND.Client.Modules
             // TODO Convert nowplaying to a JSON object so songid and playtime come in at the same time?
 
             _channel = channelName;
+            streamingaudio = new SpotifyTrackDataPipe();
 
             On["/" + channelName + "/nowplaying/songid"] = _ =>
             {
@@ -57,9 +56,6 @@ namespace SOVND.Client.Modules
             if (playingTrack?.SongID == songID)
                 return;
 
-            if (WaveFormat == null) // TODO Get song format from Spotify
-                WaveFormat = new WaveFormat(44100, 16, 2);
-
             if (songToken != null)
                 songToken.Cancel();
 
@@ -70,13 +66,11 @@ namespace SOVND.Client.Modules
             {
                 playingTrack = new Track(songID);
 
-                wave = new BufferedWaveProvider(WaveFormat);
-                wave.BufferDuration = TimeSpan.FromSeconds(15);
-
-                player.Init(wave);
-                var streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr, wave);
-                await streamingaudio.StartStreaming(startTime);
-                player.Play();
+                await streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr, provider =>
+                {
+                    player.Init(provider);
+                    player.Play();
+                });
 
                 while (!streamingaudio.Complete && !token.IsCancellationRequested)
                 {
@@ -90,6 +84,8 @@ namespace SOVND.Client.Modules
 
         protected override void OnStop()
         {
+            streamingaudio.StopStreaming();
+
             if (songToken != null)
                 songToken.Cancel();
         }
