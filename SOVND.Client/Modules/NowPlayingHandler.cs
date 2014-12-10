@@ -47,12 +47,12 @@ namespace SOVND.Client.Modules
             Run();
         }
 
-        private void PlaySong(string songID)
+        private async Task PlaySong(string songID)
         {
-            PlaySong(songID, DateTime.MinValue);
+            await PlaySong(songID, DateTime.MinValue);
         }
 
-        private void PlaySong(string songID, DateTime startTime)
+        private async Task PlaySong(string songID, DateTime startTime)
         {
             LogTo.Debug("Playing: {0}", songID);
 
@@ -68,32 +68,26 @@ namespace SOVND.Client.Modules
             songToken = new CancellationTokenSource();
             var token = songToken.Token;
 
-            Task.Factory.StartNew(() =>
+            using (var player = new WaveOut(App.WindowHandle))
             {
-                lock (soundlock)
+                playingTrack = new Track(songID);
+
+                wave = new BufferedWaveProvider(WaveFormat);
+                wave.BufferDuration = TimeSpan.FromSeconds(15);
+
+                player.Init(wave);
+                streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr, wave);
+                await streamingaudio.StartStreaming(startTime);
+                player.Play();
+
+                while (!streamingaudio.Complete && !token.IsCancellationRequested)
                 {
-                    using (var player = new WaveOut(App.WindowHandle))
-                    {
-                        playingTrack = new Track(songID);
-
-                        wave = new BufferedWaveProvider(WaveFormat);
-                        wave.BufferDuration = TimeSpan.FromSeconds(15);
-
-                        player.Init(wave);
-                        streamingaudio = new SpotifyTrackDataPipe(playingTrack.TrackPtr, wave);
-                        streamingaudio.StartStreaming(startTime);
-                        player.Play();
-
-                        while (!streamingaudio.Complete && !token.IsCancellationRequested)
-                        {
-                            Thread.Sleep(15);
-                        }
-
-                        streamingaudio.StopStreaming();
-                        player.Pause();
-                    }
+                    await Task.Delay(50, token);
                 }
-            }, token);
+
+                streamingaudio.StopStreaming();
+                player.Pause();
+            }
         }
 
         protected override void OnStop()

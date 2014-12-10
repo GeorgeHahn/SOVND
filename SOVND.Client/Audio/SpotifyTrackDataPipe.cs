@@ -30,6 +30,7 @@ using libspotifydotnet;
 using NAudio.Wave;
 using SpotifyClient;
 using System.Threading;
+using System.Threading.Tasks;
 using Anotar.NLog;
 
 namespace SOVND.Client.Audio
@@ -44,7 +45,6 @@ namespace SOVND.Client.Audio
 
         private static bool _interrupt;
         private static bool _loaded;
-        private static object _syncObj = new object();
 
         private BufferedWaveProvider _wave;
 
@@ -64,54 +64,47 @@ namespace SOVND.Client.Audio
 
         public bool Complete { get { return _complete; } }
 
-        public void StartStreaming()
+        public async Task StartStreaming()
         {
-            StartStreaming(DateTime.MinValue);
+            await StartStreaming(DateTime.MinValue);
         }
 
-        public void StartStreaming(DateTime startTime)
+        public async Task StartStreaming(DateTime startTime)
         {
-            _interrupt = true;
-                
-            lock (_syncObj)
+            if (_loaded)
             {
-                _interrupt = false;
-
-                if (_loaded)
-                {
-                    Session.UnloadPlayer();
-                    _loaded = false;
-                }
-
-                _loaded = true;
-                var error = Session.LoadPlayer(_trackPtr);
-
-                while (error == libspotify.sp_error.IS_LOADING)
-                {
-                    Thread.Sleep(10);
-                    error = Session.LoadPlayer(_trackPtr);
-                }
-
-                if (error != libspotify.sp_error.OK)
-                {
-                    throw new Exception("[Spotify] Streaming error: \{libspotify.sp_error_message(error)}");
-                }
-
-                libspotify.sp_availability avail = libspotify.sp_track_get_availability(Session.SessionPtr, _trackPtr);
-
-                if (avail != libspotify.sp_availability.SP_TRACK_AVAILABILITY_AVAILABLE)
-                {
-                    LogTo.Warn("Track is unavailable: \{avail}");
-                    return;
-                }
-
-                // TODO if time is in the future, block here
-                // TODO if time is more than a few ms in the future, prefetch song
-
-                Session.Play();
-                if(startTime != DateTime.MinValue)
-                    Session.Seek((int)(DateTime.Now - startTime).TotalMilliseconds);
+                Session.UnloadPlayer();
+                _loaded = false;
             }
+
+            _loaded = true;
+            var error = Session.LoadPlayer(_trackPtr);
+
+            while (error == libspotify.sp_error.IS_LOADING)
+            {
+                await Task.Delay(50);
+                error = Session.LoadPlayer(_trackPtr);
+            }
+
+            if (error != libspotify.sp_error.OK)
+            {
+                throw new Exception("[Spotify] Streaming error: \{libspotify.sp_error_message(error)}");
+            }
+
+            libspotify.sp_availability avail = libspotify.sp_track_get_availability(Session.SessionPtr, _trackPtr);
+
+            if (avail != libspotify.sp_availability.SP_TRACK_AVAILABILITY_AVAILABLE)
+            {
+                LogTo.Warn("Track is unavailable: \{avail}");
+                return;
+            }
+
+            // TODO if time is in the future, block here
+            // TODO if time is more than a few ms in the future, prefetch song
+
+            Session.Play();
+            if (startTime != DateTime.MinValue)
+                Session.Seek((int) (DateTime.Now - startTime).TotalMilliseconds);
         }
 
         public void StopStreaming()

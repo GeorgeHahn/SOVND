@@ -52,7 +52,7 @@ namespace SpotifyClient
 
         public Album Album { get; private set; }
         
-        public System.Drawing.Image AlbumArt { get { return GetAlbumArt(); } }
+        public System.Drawing.Image AlbumArt { get { return GetAlbumArtAsync().Result; } }
 
         public int TrackNumber { get; private set; }
 
@@ -106,6 +106,17 @@ namespace SpotifyClient
             Init();
         }
 
+        private Track()
+        {
+            
+        }
+        public static async Task<Track> CreateTrackAsync(IntPtr trackPtr)
+        {
+            var t = new Track {TrackPtr = trackPtr, SongID = Spotify.GetTrackLink(trackPtr)};
+            await t.InitAsync();
+            return t;
+        }
+
         ~Track()
         {
             libspotify.sp_track_release(TrackPtr);
@@ -114,7 +125,6 @@ namespace SpotifyClient
         }
 
         private static List<Track> ToInitialize = new List<Track>();
-        private static readonly object initlock = new Object();
         private static readonly object toinit = new Object();
         private IntPtr _albumPtr;
 
@@ -163,7 +173,7 @@ namespace SpotifyClient
 
             this.Name = Functions.PtrToString(libspotify.sp_track_name(this.TrackPtr));
             this.TrackNumber = libspotify.sp_track_index(this.TrackPtr);
-            this.Seconds = (decimal) libspotify.sp_track_duration(this.TrackPtr)/1000M;
+            this.Seconds = (decimal)libspotify.sp_track_duration(this.TrackPtr) / 1000M;
             this._albumPtr = libspotify.sp_track_album(this.TrackPtr);
             if (_albumPtr != IntPtr.Zero)
                 this.Album = new Album(_albumPtr);
@@ -182,6 +192,67 @@ namespace SpotifyClient
             return true;
         }
 
+        public async Task<bool> InitAsync()
+        {
+            if (Loaded)
+                return true;
+
+            if (!libspotify.sp_track_is_loaded(this.TrackPtr))
+            {
+                // Queue this track to get initted by spotify thread
+                if (!ToInitialize.Contains(this))
+                {
+                    lock (toinit)
+                    {
+                        ToInitialize.Add(this);
+                    }
+                }
+                return false;
+            }
+
+            this.Name = Functions.PtrToString(libspotify.sp_track_name(this.TrackPtr));
+            this.TrackNumber = libspotify.sp_track_index(this.TrackPtr);
+            this.Seconds = (decimal)libspotify.sp_track_duration(this.TrackPtr) / 1000M;
+            this._albumPtr = libspotify.sp_track_album(this.TrackPtr);
+            if (_albumPtr != IntPtr.Zero)
+                this.Album = new Album(_albumPtr);
+
+            for (int i = 0; i < libspotify.sp_track_num_artists(this.TrackPtr); i++)
+            {
+                IntPtr artistPtr = libspotify.sp_track_artist(this.TrackPtr, i);
+                if (artistPtr != IntPtr.Zero)
+                    _artists.Add(Functions.PtrToString(libspotify.sp_artist_name(artistPtr)));
+            }
+
+            await GetAlbumArtAsync();
+
+            if (onLoad != null)
+                onLoad();
+            this.Loaded = true;
+            RaisePropertyChanged("AlbumArt");
+            return true;
+        }
+
+        private async Task<System.Drawing.Image> GetAlbumArtAsync()
+        {
+            if (!Loaded)
+                return null;
+
+            if (_artwork != null)
+                return _artwork;
+
+            while (_artwork == null)
+            {
+                var buffer = GetAlbumArtBuffer();
+                if (buffer != null)
+                    _artwork = System.Drawing.Image.FromStream(new MemoryStream(buffer));
+                if (_artwork == null) // Sleep during lock to give spotify thread a rest
+                    await Task.Delay(25);
+            }
+            RaisePropertyChanged("AlbumArt");
+            return _artwork;
+        }
+
         private string GetAlbumArtLink()
         {
             return Spotify.GetAlbumArtLink(_albumPtr, libspotify.sp_image_size.SP_IMAGE_SIZE_SMALL);
@@ -190,34 +261,6 @@ namespace SpotifyClient
         private byte[] GetAlbumArtBuffer()
         {
             return Spotify.GetAlbumArt(GetAlbumArtLink());
-        }
-
-        private static object _artlock = new object();
-
-        private System.Drawing.Image GetAlbumArt()
-        {
-            if (!Loaded)
-                return null;
-
-            if (_artwork == null)
-            {
-                Task.Factory.StartNew(() =>
-                {
-                    while (_artwork == null)
-                    {
-                        lock (_artlock)
-                        {
-                            var buffer = GetAlbumArtBuffer();
-                            if (buffer != null)
-                                _artwork = System.Drawing.Image.FromStream(new MemoryStream(buffer));
-                            if (_artwork == null) // Sleep during lock to give spotify thread a rest
-                                Thread.Sleep(10);
-                        }
-                    }
-                    RaisePropertyChanged("AlbumArt");
-                });
-            }
-            return _artwork;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
