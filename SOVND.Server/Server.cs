@@ -277,7 +277,7 @@ namespace SOVND.Server
                     runningScheduler[channelHandler] = true;
             }
 
-            var task = Task.Factory.StartNew(() =>
+            Task.Run(async () =>
             {
                 var channel = channelHandler.Name;
                 var playlist = (ISortedPlaylistProvider)channels[channel].Playlist;
@@ -287,50 +287,54 @@ namespace SOVND.Server
                 {
                     Song song = playlist.GetTopSong();
 
-                    if (song == null || song.track == null || song.track.Seconds == 0)
+                    if (song == null)
                     {
-                        if (song == null)
-                        {
-                            HipchatSender.SendNotification(channel, "No songs in channel, waiting for a song", RoomColors.Red);
-                            while (playlist.GetTopSong() == null)
-                            {
-                                Thread.Sleep(1000);
-                            }
-                            HipchatSender.SendNotification(channel, "Got a song", RoomColors.Green);
-                        }
-                        else
-                        {
-                            if (song.track == null)
-                                song.track = new Track(song.SongID);
+                        LogTo.Debug("[{0}] No songs in channel, waiting for a song", channel);
+                        HipchatSender.SendNotification(channel, "No songs in channel, waiting for a song", RoomColors.Red);
 
-                            if (playlist.Songs.Count == 1)
-                            {
-                                HipchatSender.SendNotification(channel, string.Format("Only one song in channel, waiting for it to load: {0}", song.SongID), RoomColors.Red);
-                                while ((!song.track.Loaded) && playlist.Songs.Count == 1)
-                                {
-                                    Thread.Sleep(1000);
-                                }
-                                HipchatSender.SendNotification(channel, "Song loaded or another was added", RoomColors.Green);
-                            }
-                            else
-                            {
-                                HipchatSender.SendNotification(channel, string.Format("Skipping song: Either no track or no track time for track {0}", song.SongID), RoomColors.Red);
-                                ClearSong(channelHandler, song);
-                            }
-                        }
-                        Thread.Sleep(1000);
+                        while (playlist.GetTopSong() == null)
+                            await Task.Delay(1000);
+
+                        LogTo.Debug("[{0}] Got a song", channel);
                         continue;
                     }
-                    else
+
+                    // TODO this should never happen?
+                    if (song.track == null)
                     {
-                        PlaySong(channelHandler, song);
+                        LogTo.Debug("[{0}] Track was null");
+                        HipchatSender.SendNotification(channel, "Track was null, making another", RoomColors.Red);
+                        song.track = new Track(song.SongID);
+                        await Task.Delay(1000);
+                        continue;
+                    }
 
-                        var songtime = song.track.Seconds;
-                        Thread.Sleep((int)Math.Ceiling(songtime * 1000));
+                    if (!song.track.Loaded)
+                    {
+                        if (playlist.Songs.Count == 1)
+                        {
+                            LogTo.Debug("[{0}] Only one song in channel, waiting for it to load: {1}", channel, song.SongID);
+                            while ((!song.track.Loaded) && playlist.Songs.Count == 1)
+                            {
+                                await Task.Delay(1000);
+                            }
+                            LogTo.Debug("[{0}] Song loaded or another was added", channel);
+                            continue;
+                        }
 
+                        LogTo.Warn("[{0}] Skipping song: Either no track or no track time for track {1}", channel, song.SongID);
                         ClearSong(channelHandler, song);
+                        await Task.Delay(1000);
                         continue;
                     }
+
+                    LogTo.Debug("[{0}] Playing song {1}", channel, song.track.Name);
+                    PlaySong(channelHandler, song);
+                    var songtime = song.track.Seconds;
+                    await Task.Delay((int)Math.Ceiling(songtime * 1000));
+
+                    ClearSong(channelHandler, song);
+                    continue;
                 }
             });
         }
