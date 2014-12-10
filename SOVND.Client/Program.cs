@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Anotar.NLog;
 using Ninject;
 using Ninject.Extensions.Factory;
 using SOVND.Client.Settings;
@@ -11,6 +13,7 @@ using SOVND.Lib.Models;
 using SOVND.Lib.Settings;
 using SOVND.Client.Modules;
 using SOVND.Client.Util;
+using SpotifyClient;
 
 namespace SOVND.Client
 {
@@ -19,35 +22,51 @@ namespace SOVND.Client
         [STAThread]
         public static void Main()
         {
-            IKernel kernel = new StandardKernel();
-            kernel.Bind<IMQTTSettings>().To<SovndMqttSettings>();
-            kernel.Bind<IPlaylistProvider>().To<ObservablePlaylistProvider>();
-            kernel.Bind<ISettingsProvider>().To<FilesystemSettingsProvider>();
-            kernel.Bind<IFileLocationProvider>().To<AppDataLocationProvider>();
-            kernel.Bind<IAppName>().To<AppName>();
+            try
+            {
+                LogTo.Trace("Starting client version TODO");
 
-            // TODO Refactor this out
-            kernel.Bind<SyncHolder>().ToSelf().InSingletonScope();
+                IKernel kernel = new StandardKernel();
+                kernel.Bind<IMQTTSettings>().To<SovndMqttSettings>();
+                kernel.Bind<IPlaylistProvider>().To<ObservablePlaylistProvider>();
+                kernel.Bind<ISettingsProvider>().To<FilesystemSettingsProvider>();
+                kernel.Bind<IFileLocationProvider>().To<AppDataLocationProvider>();
+                kernel.Bind<IAppName>().To<AppName>();
 
-            // Singleton classes
-            kernel.Bind<ChannelDirectory>().ToSelf().InSingletonScope();
-            kernel.Bind<SovndClient>().ToSelf().InSingletonScope();
+                // TODO Refactor this out
+                kernel.Bind<SyncHolder>().ToSelf().InSingletonScope();
 
-            // Factories
-            kernel.Bind<IChannelHandlerFactory>().ToFactory();
-            kernel.Bind<IChatProviderFactory>().ToFactory();
-            kernel.Bind<IPlayerFactory>().ToFactory();
+                // Singleton classes
+                kernel.Bind<ChannelDirectory>().ToSelf().InSingletonScope();
+                kernel.Bind<SovndClient>().ToSelf().InSingletonScope();
 
-            // Instantiating this class checks settings and shows UI if they're not set
-            kernel.Get<CheckSettings>();
+                // Factories
+                kernel.Bind<IChannelHandlerFactory>().ToFactory();
+                kernel.Bind<IChatProviderFactory>().ToFactory();
+                kernel.Bind<IPlayerFactory>().ToFactory();
 
-            // Instantiating this initializes Spotify
-            kernel.Get<StartSpotify>();
+                LogTo.Trace("All libraries bound, checking settings");
 
-            var window = kernel.Get<MainWindow>();
+                // Instantiating this class checks settings and shows UI if they're not set
+                kernel.Get<CheckSettings>();
 
-            var app = kernel.Get<App>();
-            app.Run(window);
+                LogTo.Trace("Settings checked, starting libspotify");
+
+                // Instantiating this initializes Spotify
+                kernel.Get<StartSpotify>();
+
+                LogTo.Trace("Instantiating main window");
+                var window = kernel.Get<MainWindow>();
+
+                LogTo.Trace("Running");
+                var app = kernel.Get<App>();
+                app.Run(window);
+            }
+            catch (Exception e)
+            {
+                File.WriteAllText("ERROR.log", e.GetType() + Environment.NewLine + e.Message + Environment.NewLine + e.StackTrace);
+                throw;
+            }
         }
     }
 }
