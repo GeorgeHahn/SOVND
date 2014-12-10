@@ -1,6 +1,7 @@
 ﻿using NLog;
 using NLog.Config;
 using NLog.Slack;
+using NLog.Targets.Wrappers;
 
 namespace SOVND.Client.Util
 {
@@ -23,12 +24,13 @@ namespace SOVND.Client.Util
                 Compact = true
             };
 
-            if(config.FindTargetByName("slack") != null)
+            if (config.FindTargetByName("slack") != null)
                 config.RemoveTarget("slack");
 
-            config.AddTarget("slack", slackTarget);
+            AsyncTargetWrapper asyncWrapper = new AsyncTargetWrapper(slackTarget);
+            config.AddTarget("async", asyncWrapper);
 
-            var slackTargetRules = new LoggingRule("*", LogLevel.Trace, slackTarget);
+            var slackTargetRules = new LoggingRule("*", LogLevel.Trace, asyncWrapper);
             config.LoggingRules.Add(slackTargetRules);
 
             LogManager.Configuration = config;
