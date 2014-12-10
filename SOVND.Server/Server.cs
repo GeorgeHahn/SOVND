@@ -1,17 +1,19 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Anotar.NLog;
 using Charlotte;
+using SpotifyClient;
+using Anotar.NLog;
 using HipchatApiV2.Enums;
-using Newtonsoft.Json;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
-using SOVND.Lib.Utils;
 using SOVND.Server.Settings;
+using Newtonsoft.Json;
+using SOVND.Lib.Utils;
 using SOVND.Server.Utils;
-using SpotifyClient;
 using StackExchange.Redis;
 
 namespace SOVND.Server
@@ -92,7 +94,7 @@ namespace SOVND.Server
 
                 Channel channel = JsonConvert.DeserializeObject<Channel>(_.Message);
 
-                if (channel == null || 
+                if (channel == null ||
                     string.IsNullOrWhiteSpace(channel.Name))
                 {
                     LogTo.Warn("Rejected invalid channel JSON from {0} for channel {1}: {2}", (string)_.username, (string)_.channel, (string)_.Message);
@@ -133,7 +135,7 @@ namespace SOVND.Server
             On["/user/{username}/{channel}/chat"] = _ =>
             {
                 LogTo.Trace("\{_.channel}-> \{_.username}: \{_.Message}");
-                
+
                 // TODO [LOW] Allow moderators to mute users
 
                 if (channels.ContainsKey(_.channel))
@@ -261,12 +263,12 @@ namespace SOVND.Server
         private Dictionary<ChannelHandler, bool> runningScheduler = new Dictionary<ChannelHandler, bool>();
         private static object schedulerlock = new object();
 
-        private async void StartChannelScheduler(ChannelHandler channelHandler)
+        // TODO: This should be refactored away from a thread-per-channel design, this won't scale well
+        private void StartChannelScheduler(ChannelHandler channelHandler)
         {
             lock (schedulerlock)
             {
-                bool value;
-                if (runningScheduler.TryGetValue(channelHandler, out value) && value)
+                if (runningScheduler.ContainsKey(channelHandler) && runningScheduler[channelHandler])
                 {
                     LogTo.Debug("Already running scheduler for {0}", channelHandler.Name);
                     return;
@@ -275,65 +277,62 @@ namespace SOVND.Server
                     runningScheduler[channelHandler] = true;
             }
 
-            var channel = channelHandler.Name;
-            var playlist = (ISortedPlaylistProvider) channels[channel].Playlist;
-            LogTo.Debug("[{0}] Starting track scheduler", channel);
-
-            while (true)
+            var task = Task.Factory.StartNew(() =>
             {
-                Song song = playlist.GetTopSong();
+                var channel = channelHandler.Name;
+                var playlist = (ISortedPlaylistProvider)channels[channel].Playlist;
+                LogTo.Debug("[{0}] Starting track scheduler", channel);
 
-                if (song == null || song.track == null || song.track.Seconds == 0)
+                while (true)
                 {
-                    if (song == null)
-                    {
-                        HipchatSender.SendNotification(channel, "No songs in channel, waiting for a song",
-                            RoomColors.Red);
-                        while (playlist.GetTopSong() == null)
-                        {
-                            await Task.Delay(1000);
-                        }
-                        HipchatSender.SendNotification(channel, "Got a song", RoomColors.Green);
-                    }
-                    else
-                    {
-                        if (song.track == null)
-                            song.track = new Track(song.SongID);
+                    Song song = playlist.GetTopSong();
 
-                        if (playlist.Songs.Count == 1)
+                    if (song == null || song.track == null || song.track.Seconds == 0)
+                    {
+                        if (song == null)
                         {
-                            HipchatSender.SendNotification(channel,
-                                string.Format("Only one song in channel, waiting for it to load: {0}", song.SongID),
-                                RoomColors.Red);
-                            while ((!song.track.Loaded) && playlist.Songs.Count == 1)
+                            HipchatSender.SendNotification(channel, "No songs in channel, waiting for a song", RoomColors.Red);
+                            while (playlist.GetTopSong() == null)
                             {
-                                await Task.Delay(1000);
+                                Thread.Sleep(1000);
                             }
-                            HipchatSender.SendNotification(channel, "Song loaded or another was added", RoomColors.Green);
+                            HipchatSender.SendNotification(channel, "Got a song", RoomColors.Green);
                         }
                         else
                         {
-                            HipchatSender.SendNotification(channel,
-                                string.Format("Skipping song: Either no track or no track time for track {0}",
-                                    song.SongID), RoomColors.Red);
-                            ClearSong(channelHandler, song);
+                            if (song.track == null)
+                                song.track = new Track(song.SongID);
+
+                            if (playlist.Songs.Count == 1)
+                            {
+                                HipchatSender.SendNotification(channel, string.Format("Only one song in channel, waiting for it to load: {0}", song.SongID), RoomColors.Red);
+                                while ((!song.track.Loaded) && playlist.Songs.Count == 1)
+                                {
+                                    Thread.Sleep(1000);
+                                }
+                                HipchatSender.SendNotification(channel, "Song loaded or another was added", RoomColors.Green);
+                            }
+                            else
+                            {
+                                HipchatSender.SendNotification(channel, string.Format("Skipping song: Either no track or no track time for track {0}", song.SongID), RoomColors.Red);
+                                ClearSong(channelHandler, song);
+                            }
                         }
+                        Thread.Sleep(1000);
+                        continue;
                     }
-                    await Task.Delay(1000);
-                    continue;
+                    else
+                    {
+                        PlaySong(channelHandler, song);
+
+                        var songtime = song.track.Seconds;
+                        Thread.Sleep((int)Math.Ceiling(songtime * 1000));
+
+                        ClearSong(channelHandler, song);
+                        continue;
+                    }
                 }
-                else
-                {
-                    PlaySong(channelHandler, song);
-
-                    var songtime = song.track.Seconds;
-                    await Task.Delay((int) Math.Ceiling(songtime*1000));
-
-                    ClearSong(channelHandler, song);
-                    continue;
-                }
-            }
-
+            });
         }
 
         private void PlaySong(ChannelHandler channel, Song song)
