@@ -134,7 +134,7 @@ namespace SOVND.Server
             // Handle user chat messages
             On["/user/{username}/{channel}/chat"] = _ =>
             {
-                LogTo.Trace("\{_.channel}-> \{_.username}: \{_.Message}");
+                LogTo.Trace("\{_.username}->\{_.channel}: \{_.Message}");
 
                 // TODO [LOW] Allow moderators to mute users
 
@@ -290,7 +290,6 @@ namespace SOVND.Server
                     if (song == null)
                     {
                         LogTo.Debug("[{0}] No songs in channel, waiting for a song", channel);
-                        HipchatSender.SendNotification(channel, "No songs in channel, waiting for a song", RoomColors.Red);
 
                         while (playlist.GetTopSong() == null)
                             await Task.Delay(1000);
@@ -303,7 +302,6 @@ namespace SOVND.Server
                     if (song.track == null)
                     {
                         LogTo.Debug("[{0}] Track was null");
-                        HipchatSender.SendNotification(channel, "Track was null, making another", RoomColors.Red);
                         song.track = new Track(song.SongID);
                         await Task.Delay(1000);
                         continue;
@@ -313,7 +311,8 @@ namespace SOVND.Server
                     {
                         if (playlist.Songs.Count == 1)
                         {
-                            LogTo.Debug("[{0}] Only one song in channel, waiting for it to load: {1}", channel, song.SongID);
+                            LogTo.Warn("[{0}] Only one song in channel, waiting for it to load: {1}", channel, song.SongID);
+                            song.track.onLoad = () => { LogTo.Debug("Got it!"); };
                             while ((!song.track.Loaded) && playlist.Songs.Count == 1)
                             {
                                 await Task.Delay(1000);
@@ -322,13 +321,13 @@ namespace SOVND.Server
                             continue;
                         }
 
-                        LogTo.Warn("[{0}] Skipping song: Either no track or no track time for track {1}", channel, song.SongID);
+                        LogTo.Warn("[{0}] Skipping song: track not loaded {1}", channel, song.SongID);
                         ClearSong(channelHandler, song);
                         await Task.Delay(1000);
                         continue;
                     }
 
-                    LogTo.Debug("[{0}] Playing song {1}", channel, song.track.Name);
+                    LogTo.Info("[{0}] Playing song {1}", channel, song.track.Name);
                     PlaySong(channelHandler, song);
                     var songtime = song.track.Seconds;
                     await Task.Delay((int)Math.Ceiling(songtime * 1000));
