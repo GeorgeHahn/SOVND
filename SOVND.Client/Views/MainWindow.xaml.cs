@@ -140,7 +140,10 @@ namespace SOVND.Client
                 var candidates = new List<Track>();
 
                 if (searchToken != null)
+                {
                     searchToken.Cancel();
+                    // TODO accessviolation from libspotify if we continue and a track's albumart happens to be in the process of fetching
+                }
 
                 searchToken = new CancellationTokenSource();
                 var token = searchToken.Token;
@@ -149,18 +152,24 @@ namespace SOVND.Client
 
                 if (search != null)
                 {
-                    await Task.Run(() =>
+                    try
                     {
-                        foreach (var trackPtr in search?.TrackPtrs)
+                        await Task.Factory.StartNew(() =>
                         {
-                            if (token.IsCancellationRequested)
-                                return;
+                            foreach (var trackPtr in search?.TrackPtrs)
+                            {
+                                if (token.IsCancellationRequested)
+                                    return;
 
-                            var track = new Track(trackPtr);
-                            candidates.Add(track);
-                        }
-                    }, token);
-                    lbPlaylist.ItemsSource = candidates;
+                                var track = new Track(trackPtr);
+                                candidates.Add(track);
+                            }
+                        }, token);
+                        lbPlaylist.ItemsSource = candidates;
+                    }
+                    catch (TaskCanceledException)
+                    {
+                    }
                 }
             }
             else

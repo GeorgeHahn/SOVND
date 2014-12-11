@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using BugSense;
+using NLog;
 using NLog.Config;
 using NLog.Slack;
 using NLog.Targets.Wrappers;
@@ -34,6 +35,8 @@ namespace SOVND.Client.Util
             config.LoggingRules.Add(slackTargetRules);
 
             LogManager.Configuration = config;
+
+            BugSenseHandler.Instance.UserIdentifier = username;
         }
     }
 }
