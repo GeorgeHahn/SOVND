@@ -13,8 +13,8 @@
 		<file src="..\SOVND.Client\bin\Debug\SOVND.Client.exe.config" target="lib\" />
 		<file src="..\SOVND.Client\bin\Debug\libspotify.dll" target="lib\" />
 		<file src="..\SOVND.Client\bin\Debug\Ninject.Extensions.Factory.dll" target="lib\" />
-		<file src="..\SOVND.Client\bin\Debug\Ninject.Extensions.Conventions.dll" target="lib\" />
 		<file src="..\SOVND.Client\bin\Debug\Ninject.dll" target="lib\" />
-		<file src="..\SOVND.Client\bin\Debug\Castle.Core.dll" target="lib\" />
-	</files>
+    <file src="..\SOVND.Client\bin\Debug\Castle.Core.dll" target="lib\" />
+    <file src="..\SOVND.Client\bin\Debug\NLog.config" target="lib\" />
+  </files>
 </package>
