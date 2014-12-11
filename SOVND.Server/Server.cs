@@ -277,11 +277,11 @@ namespace SOVND.Server
             Task.Run(() =>
             {
                 while (true)
-                    OneLoop(channelHandler, playlist, channel).RunSynchronously();
+                    OneLoop(channelHandler, playlist, channel);
             });
         }
 
-        private async Task OneLoop(ChannelHandler channelHandler, ISortedPlaylistProvider playlist, string channel)
+        private void OneLoop(ChannelHandler channelHandler, ISortedPlaylistProvider playlist, string channel)
         {
             Song song = playlist.GetTopSong();
 
@@ -290,7 +290,7 @@ namespace SOVND.Server
                 LogTo.Debug("[{0}] No songs in channel, waiting for a song", channel);
 
                 while (playlist.GetTopSong() == null)
-                    await Task.Delay(1000).X();
+                    Thread.Sleep(1000);
 
                 LogTo.Debug("[{0}] Got a song", channel);
                 return;
@@ -304,7 +304,7 @@ namespace SOVND.Server
                     song.track.onLoad = () => { LogTo.Debug("Got it!"); };
                     while ((!song.track.Loaded) && playlist.Songs.Count == 1)
                     {
-                        await Task.Delay(1000);
+                        Thread.Sleep(1000);
                     }
                     LogTo.Debug("[{0}] Song loaded or another was added", channel);
                     return;
@@ -312,7 +312,7 @@ namespace SOVND.Server
 
                 LogTo.Warn("[{0}] Skipping song: track not loaded {1}", channel, song.SongID);
                 ClearSong(channelHandler, song);
-                await Task.Delay(1000).X();
+                Thread.Sleep(1000);
                 return;
             }
 
@@ -321,7 +321,7 @@ namespace SOVND.Server
 
             var songtime = song.track.Seconds;
             PlaySong(channelHandler, song);
-            await Task.Delay((int) Math.Ceiling(songtime*1000), token.Token).X();
+            Thread.Sleep((int) Math.Ceiling(songtime*1000));
             tokens.Remove(song.SongID);
             ClearSong(channelHandler, song);
             token.Dispose();
