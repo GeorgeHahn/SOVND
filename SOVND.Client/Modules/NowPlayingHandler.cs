@@ -37,7 +37,7 @@ namespace SOVND.Client.Modules
                     return;
                 }
 
-                Task.Run(() => PlaySong(song.songID, UnixTimeBase.AddMilliseconds(song.votetime).ToLocalTime()));
+                Task.Run(() => PlaySong(song.songID, UnixTimeBase.AddMilliseconds(song.votetime)));
             };
 
             Run();

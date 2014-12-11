@@ -94,7 +94,7 @@ namespace SOVND.Client.Audio
 
             Session.Play();
             if (startTime != DateTime.MinValue)
-                Session.Seek((int) (DateTime.Now - startTime).TotalMilliseconds);
+                Session.Seek((int) (DateTime.UtcNow - startTime).TotalMilliseconds);
         }
 
         public void StopStreaming()
