@@ -331,8 +331,9 @@ namespace SOVND.Server
         {
             LogTo.Debug("[{0}] Playing song {1}", channel.Name, song.track.Name);
 
-            Publish("/\{channel.Name}/nowplaying/songid", song.SongID, true);
-            Publish("/\{channel.Name}/nowplaying/starttime", Time.Timestamp().ToString(), true);
+            var nowplaying = new NowPlaying {songID = song.SongID, votetime = Time.Timestamp()};
+            
+            Publish("/\{channel.Name}/nowplaying", JsonConvert.SerializeObject(nowplaying), true);
         }
 
         private void ClearSong(ChannelHandler channel, Song song)

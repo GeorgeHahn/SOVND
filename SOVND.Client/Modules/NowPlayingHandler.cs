@@ -3,8 +3,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Anotar.NLog;
 using NAudio.Wave;
+using Newtonsoft.Json;
 using SOVND.Client.Audio;
 using SOVND.Client.Util;
+using SOVND.Lib.Models;
 using SpotifyClient;
 
 namespace SOVND.Client.Modules
@@ -20,27 +22,22 @@ namespace SOVND.Client.Modules
 
         public NowPlayingHandler(AuthPair auth, string channelName) : base(auth)
         {
-            // TODO Use channel/nowplaying/starttime to seek to correct position
-            // TODO Convert nowplaying to a JSON object so songid and playtime come in at the same time?
-
             _channel = channelName;
             
-            On["/" + channelName + "/nowplaying/songid"] = _ =>
+            On["/" + channelName + "/nowplaying"] = _ =>
             {
-                string song = _.Message;
+                NowPlaying song = JsonConvert.DeserializeObject<NowPlaying>(_.Message);
+
                 StopStreaming();
 
-                if (string.IsNullOrWhiteSpace(song))
+                if (string.IsNullOrWhiteSpace(song.songID))
                 {
                     playingTrack = null;
                     LogTo.Warn("Server asked to play empty song on channel {0}", _channel);
                     return;
                 }
 
-                int time = 0;
-
-                //PlaySong(song, UnixTimeBase.AddSeconds(time).ToLocalTime());
-                Task.Run(() => PlaySong(song));
+                Task.Run(() => PlaySong(song.songID, UnixTimeBase.AddSeconds(song.votetime).ToLocalTime()));
             };
 
             Run();

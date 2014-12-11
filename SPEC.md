@@ -6,8 +6,10 @@ Remember Soundrop.fm?
 MQTT Communication spec
 
 	Server published messages
-	/{channel}/nowplaying/songid # ID of currently playing song
-	/{channel}/nowplaying/starttime # ID of currently playing song
+	/{channel}/nowplaying/
+		JSON with:
+			songid		# ID of currently playing song
+			starttime 	# start time of this track (unix time)
 
 	/{channel}/info
 		JSON with:
