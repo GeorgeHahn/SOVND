@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Weavers>
-  <Anotar.NLog/>
+  <Anotar.NLog />
   <Costura>
     <ExcludeAssemblies>
       Castle.Core
@@ -12,4 +12,5 @@
       libspotify
     </Unmanaged32Assemblies>
   </Costura>
+  <Stamp />
 </Weavers>
