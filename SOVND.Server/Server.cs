@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Charlotte;
@@ -50,40 +51,31 @@ namespace SOVND.Server
             // User messages
             //////
             /// 
-            // Dirty hack to get libspotify to load songs
-            On["/user/{username}/{channel}/songssearch/"] = _ =>
-            {
-                //Search search = Spotify.GetSearch(_.Message);
-                //LogTo.Debug("SONG LOAD HACK: Searched \{_.Message} and \{(search.IsLoaded ? "is" : "is not")} loaded");
-            };
-
+            
             // Handle user-channel interaction
             On["/user/{username}/{channel}/songs/{songid}"] = msg =>
             {
-                if (msg.Message == "vote")
+                switch ((string)msg.Message)
                 {
+                case "vote":
                     AddVote(msg.channel, msg.songid, msg.username);
-                }
-                else if (msg.Message == "unvote")
-                {
+                    break;
+                case "unvote":
                     RemoveVote(msg.channel, msg.songid, msg.username);
-                }
-                else if (msg.Message == "report")
-                {
+                    break;
+                case "report":
                     ReportSong(msg.channel, msg.songid, msg.username);
-                }
-                else if (msg.Message == "remove")
-                {
+                    break;
+                case "remove":
                     RemoveSong(msg.channel, msg.songid, msg.username);
-                }
-                else if (msg.Message == "block")
-                {
+                    break;
+                case "block":
                     BlockSong(msg.channel, msg.songid, msg.username);
-                }
-                else
-                {
+                    break;
+
+                default:
                     LogTo.Warn("[{0}] Invalid command: {1}: {2}, by {3}", (string)msg.channel, (string)msg.Topic, (string)msg.Message, (string)msg.username);
-                    return;
+                    break;
                 }
             };
 
@@ -262,6 +254,7 @@ namespace SOVND.Server
 
         private Dictionary<ChannelHandler, bool> runningScheduler = new Dictionary<ChannelHandler, bool>();
         private static object schedulerlock = new object();
+        private Dictionary<string, CancellationTokenSource> tokens = new Dictionary<string, CancellationTokenSource>(); 
 
         // TODO: This should be refactored away from a thread-per-channel design, this won't scale well
         private void StartChannelScheduler(ChannelHandler channelHandler)
@@ -277,84 +270,104 @@ namespace SOVND.Server
                     runningScheduler[channelHandler] = true;
             }
 
+            var channel = channelHandler.Name;
+            var playlist = (ISortedPlaylistProvider)channels[channel].Playlist;
+            LogTo.Debug("[{0}] Starting track scheduler", channel);
+
             Task.Run(async () =>
             {
-                var channel = channelHandler.Name;
-                var playlist = (ISortedPlaylistProvider)channels[channel].Playlist;
-                LogTo.Debug("[{0}] Starting track scheduler", channel);
-
                 while (true)
-                {
-                    Song song = playlist.GetTopSong();
-
-                    if (song == null)
-                    {
-                        LogTo.Debug("[{0}] No songs in channel, waiting for a song", channel);
-
-                        while (playlist.GetTopSong() == null)
-                            await Task.Delay(1000);
-
-                        LogTo.Debug("[{0}] Got a song", channel);
-                        continue;
-                    }
-
-                    // TODO this should never happen?
-                    if (song.track == null)
-                    {
-                        LogTo.Debug("[{0}] Track was null");
-                        song.track = new Track(song.SongID);
-                        await Task.Delay(1000);
-                        continue;
-                    }
-
-                    if (!song.track.Loaded)
-                    {
-                        if (playlist.Songs.Count == 1)
-                        {
-                            LogTo.Warn("[{0}] Only one song in channel, waiting for it to load: {1}", channel, song.SongID);
-                            song.track.onLoad = () => { LogTo.Debug("Got it!"); };
-                            while ((!song.track.Loaded) && playlist.Songs.Count == 1)
-                            {
-                                await Task.Delay(1000);
-                            }
-                            LogTo.Debug("[{0}] Song loaded or another was added", channel);
-                            continue;
-                        }
-
-                        LogTo.Warn("[{0}] Skipping song: track not loaded {1}", channel, song.SongID);
-                        ClearSong(channelHandler, song);
-                        await Task.Delay(1000);
-                        continue;
-                    }
-
-                    LogTo.Info("[{0}] Playing song {1}", channel, song.track.Name);
-                    PlaySong(channelHandler, song);
-                    var songtime = song.track.Seconds;
-                    await Task.Delay((int)Math.Ceiling(songtime * 1000));
-
-                    ClearSong(channelHandler, song);
-                    continue;
-                }
+                    await OneLoop(channelHandler, playlist, channel).X();
             });
         }
 
-        private void PlaySong(ChannelHandler channel, Song song)
+        private async Task OneLoop(ChannelHandler channelHandler, ISortedPlaylistProvider playlist, string channel)
         {
-            HipchatSender.SendNotification(channel.Name, "Playing song: " + (song.track.Loaded ? song.track.Name : song.SongID), RoomColors.Green);
+            Song song = playlist.GetTopSong();
 
-            Publish("/\{channel.Name}/nowplaying/songid", "");
-            Publish("/\{channel.Name}/nowplaying/songid", song.SongID, true);
-            Publish("/\{channel.Name}/nowplaying/starttime", Time.Timestamp().ToString(), true);
+            if (song == null)
+            {
+                LogTo.Debug("[{0}] No songs in channel, waiting for a song", channel);
+
+                while (playlist.GetTopSong() == null)
+                    await Task.Delay(1000).X();
+
+                LogTo.Debug("[{0}] Got a song", channel);
+                return;
+            }
+
+            if (!song.track.Loaded)
+            {
+                if (playlist.Songs.Count == 1)
+                {
+                    LogTo.Warn("[{0}] Only one song in channel, waiting for it to load: {1}", channel, song.SongID);
+                    song.track.onLoad = () => { LogTo.Debug("Got it!"); };
+                    while ((!song.track.Loaded) && playlist.Songs.Count == 1)
+                    {
+                        await Task.Delay(1000);
+                    }
+                    LogTo.Debug("[{0}] Song loaded or another was added", channel);
+                    return;
+                }
+
+                LogTo.Warn("[{0}] Skipping song: track not loaded {1}", channel, song.SongID);
+                await ClearSong(channelHandler, song).X();
+                await Task.Delay(1000).X();
+                return;
+            }
+
+            CancellationTokenSource token = new CancellationTokenSource();
+            tokens[song.SongID] = token;
+
+            var songtime = song.track.Seconds;
+            await PlaySong(channelHandler, song).X();
+            await Task.Delay((int) Math.Ceiling(songtime*1000), token.Token).X();
+            tokens.Remove(song.SongID);
+            await ClearSong(channelHandler, song).X();
+            token.Dispose();
         }
 
-        private void ClearSong(ChannelHandler channel, Song song)
+        private async Task PlaySong(ChannelHandler channel, Song song)
         {
-            // Set prev song to 0 votes, 0 vote time
-            channel.ClearVotes(song.SongID);
+            LogTo.Debug("[{0}] Playing song {1}", channel.Name, song.track.Name);
 
-            Publish("/\{channel.Name}/playlist/\{song.SongID}/votes", "0", true);
-            Publish("/\{channel.Name}/playlist/\{song.SongID}/votetime", Time.Timestamp().ToString(), true);
-            Publish("/\{channel.Name}/playlist/\{song.SongID}/voters", "", true);
+            await Task.Run(() =>
+            {
+                Publish("/\{channel.Name}/nowplaying/songid", "");
+                Publish("/\{channel.Name}/nowplaying/songid", song.SongID, true);
+                Publish("/\{channel.Name}/nowplaying/starttime", Time.Timestamp().ToString(), true);
+            });
+        }
+
+        private async Task ClearSong(ChannelHandler channel, Song song)
+        {
+            LogTo.Debug("[{0}] Clearing song {1}", channel.Name, song.track.Name);
+
+            CancellationTokenSource value;
+            if (tokens.TryGetValue(song.SongID, out value))
+            {
+                LogTo.Debug("[{0}] Cancelled token {1}", channel.Name, song.track.Name);
+                value.Cancel();
+                tokens.Remove(song.SongID);
+            }
+
+            // Set prev song to 0 votes, 0 vote time
+            await Task.Run(() =>
+            {
+                channel.ClearVotes(song.SongID);
+
+                Publish("/\{channel.Name}/playlist/\{song.SongID}/votes", "0", true);
+                Publish("/\{channel.Name}/playlist/\{song.SongID}/votetime", Time.Timestamp().ToString(), true);
+                Publish("/\{channel.Name}/playlist/\{song.SongID}/voters", "", true);
+            });
+        }
+    }
+
+    public static class TaskX
+    {
+        public static ConfiguredTaskAwaitable X(this Task task)
+        {
+            return task.ConfigureAwait(false);
         }
     }
 }
