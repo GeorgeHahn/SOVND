@@ -85,7 +85,7 @@ namespace SOVND.Server.Handlers
 
         private void AddNewSong(string ID)
         {
-            var song = new Song(ID);
+            var song = new Song(ID, false);
 
             // This means the song ID wasn't valid
             // TODO cleaner way
@@ -106,35 +106,34 @@ namespace SOVND.Server.Handlers
             // ChannelHandler playlists
             On["/" + _channel.Name + "/playlist/{songid}/votes"] = _ =>
             {
-                if (_.Message == "")
+                if (_.Message == "") // Delete song
                 {
-                    // Remove song
                     if (_channel.SongsByID.ContainsKey(_.songid))
                     {
-                        Song song = _channel.SongsByID[_.songid];
-                        RemoveSong(song);
-                        LogTo.Debug("[{0}] Removed song {1}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID);
+                        Song songToRemove = _channel.SongsByID[_.songid];
+                        RemoveSong(songToRemove);
+                        LogTo.Debug("[{0}] Removed song {1}", _channel.Name,
+                            songToRemove.track.Loaded ? songToRemove.track.Name : songToRemove.SongID);
                         _channel.SongsByID.Remove(_.songid);
                     }
+                    return;
                 }
-                else
+
+                if (!_channel.SongsByID.ContainsKey(_.songid))
+                    AddNewSong(_.songid);
+
+                Song song = _channel.SongsByID[_.songid];
+
+                int songvotes;
+                if (!int.TryParse(_.Message, out songvotes))
                 {
-                    if (!_channel.SongsByID.ContainsKey(_.songid))
-                        AddNewSong(_.songid);
-
-                    Song song = _channel.SongsByID[_.songid];
-
-                    int songvotes;
-                    if (!int.TryParse(_.Message, out songvotes))
-                    {
-                        LogTo.Debug("[{0}] Invalid votae number, clearing. {1}", _channel.Name, (string) _.Message);
-                        Publish("/" + _channel.Name + "/playlist/\{_.songid}/votes", "0", true);
-                        return;
-                    }
-
-                    song.Votes = songvotes;
-                    LogTo.Debug("[{0}] Votes for song {1} set to {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.Votes);
+                    LogTo.Debug("[{0}] Invalid vote number, clearing. {1}", _channel.Name, (string) _.Message);
+                    Publish("/" + _channel.Name + "/playlist/\{_.songid}/votes", "0", true);
+                    return;
                 }
+
+                song.Votes = songvotes;
+                LogTo.Debug("[{0}] Votes for song {1} set to {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.Votes);
             };
 
             On["/" + _channel.Name + "/playlist/{songid}/votetime"] = _ =>
