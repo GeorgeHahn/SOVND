@@ -43,6 +43,8 @@ namespace SOVND.Client.Modules
             Run();
         }
 
+        private WaveOut player;
+
         private void PlaySong(string songID)
         {
             PlaySong(songID, DateTime.MinValue);
@@ -54,36 +56,26 @@ namespace SOVND.Client.Modules
             if (playingTrack?.SongID == songID)
                 return;
 
-            if (streamingaudio != null)
-                streamingaudio.DoComplete();
+            streamingaudio?.StopStreaming();
+            player?.Stop();
 
             streamingaudio = new SpotifyTrackDataPipe();
+            player = new WaveOut(App.WindowHandle);
+
             playingTrack = new Track(songID);
-            WaveOut player = new WaveOut(App.WindowHandle);
 
             LogTo.Trace("Streaming");
 
-            streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr, provider =>
-            {
-                player.Init(provider);
-                player.Play();
-            });
-
-            streamingaudio.OnComplete = () =>
-            {
-                LogTo.Trace("Done streaming");
-
-                streamingaudio.StopStreaming();
-                player.Pause();
-                player.Dispose();
-            };
+            streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr,
+                player.Play,
+                provider => player.Init(provider),
+                player.Stop);
         }
 
         public void StopStreaming()
         {
-            if (streamingaudio != null)
-                streamingaudio.DoComplete();
-            streamingaudio = null;
+            player?.Stop();
+            streamingaudio?.StopStreaming();
         }
 
         protected override void OnStop()

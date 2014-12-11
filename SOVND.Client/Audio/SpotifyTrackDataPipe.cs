@@ -41,24 +41,24 @@ namespace SOVND.Client.Audio
         private BufferedWaveProvider _wave;
         private bool logonce;
         private WaveFormat waveFormat;
-        private Action<BufferedWaveProvider> _init;
 
-        public Action OnComplete;
+
+        private int jitter;
+        private bool formatSet;
+
+        private Action _stop;
+        private Action<BufferedWaveProvider> _newFormat;
+        private Action _init;
 
         public bool Complete { get { return _complete; } }
 
-        public void StartStreaming(IntPtr _trackPtr, Action<BufferedWaveProvider> init)
+        public void StartStreaming(IntPtr _trackPtr, Action init, Action<BufferedWaveProvider> newFormat, Action stop)
         {
-            StartStreaming(DateTime.MinValue, _trackPtr, init);
+            StartStreaming(DateTime.MinValue, _trackPtr, init, newFormat, stop);
         }
 
-        public void StartStreaming(DateTime startTime, IntPtr _trackPtr, Action<BufferedWaveProvider> init)
+        public void StartStreaming(DateTime startTime, IntPtr _trackPtr, Action init, Action<BufferedWaveProvider> newFormat, Action stop)
         {
-            if (_loaded)
-            {
-                StopStreaming();
-                _loaded = false;
-            }
             logonce = false;
 
             var error = Session.LoadPlayer(_trackPtr);
@@ -76,6 +76,8 @@ namespace SOVND.Client.Audio
 
             _loaded = true;
             _init = init;
+            _stop = stop;
+            _newFormat = newFormat;
 
             Session.OnAudioDataArrived += Session_OnAudioDataArrived;
             Session.OnAudioStreamComplete += Session_OnAudioStreamComplete;
@@ -91,7 +93,7 @@ namespace SOVND.Client.Audio
 
             // TODO if time is in the future, block here
             // TODO if time is more than a few ms in the future, prefetch song
-
+            
             Session.Play();
             if (startTime != DateTime.MinValue)
                 Session.Seek((int) (DateTime.UtcNow - startTime).TotalMilliseconds);
@@ -107,10 +109,9 @@ namespace SOVND.Client.Audio
 
                 Session.UnloadPlayer();
                 _loaded = false;
+                formatSet = false;
             }
         }
-
-        private int jitter;
 
         private void Session_AudioBufferStats(ref sp_audio_buffer_stats obj)
         {
@@ -124,14 +125,8 @@ namespace SOVND.Client.Audio
 
         private void Session_OnAudioStreamComplete(object obj)
         {
-            DoComplete();
-        }
-
-        public void DoComplete()
-        {
-            _complete = true;
-            if (OnComplete != null)
-                OnComplete();
+            StopStreaming();
+            _stop();
         }
 
         private void Session_OnAudioDataArrived(byte[] buffer, sp_audioformat format)
@@ -154,11 +149,11 @@ namespace SOVND.Client.Audio
         private void SetAudioFormat(sp_audioformat format)
         {
             waveFormat = new WaveFormat(format.sample_rate, 16, format.channels);
-
             _wave = new BufferedWaveProvider(waveFormat);
             _wave.BufferDuration = TimeSpan.FromSeconds(15);
 
-            _init(_wave);
+            _newFormat(_wave);
+            _init();
         }
     }
 }
