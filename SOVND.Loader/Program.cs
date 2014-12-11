@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using NuGet;
 
 // SOVND.Loader: The simplest possible autoupdater
@@ -24,12 +25,17 @@ namespace SOVND.Loader
             var package = repo.FindPackagesById(packageID)
                               .FirstOrDefault(x => x.IsLatestVersion);
 
-            PackageManager packageManager = new PackageManager(repo, installpath);
+            var fullinstallpath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), installpath);
+            PackageManager packageManager = new PackageManager(repo, fullinstallpath);
 
-            packageManager.UpdatePackage(package, true, true);
+            var exeFile = Path.Combine(fullinstallpath, packageID + "." + package.Version, "lib", executable);
+            if (!File.Exists(exeFile))
+                packageManager.UpdatePackage(package, true, true);
 
-            var exe = Path.Combine(installpath, packageID + "." + package.Version.ToString(), "lib", executable);
-            Process.Start(exe);
+            var process = new Process();
+            process.StartInfo.FileName = Path.GetFullPath(exeFile);
+            process.StartInfo.WorkingDirectory = Path.GetFullPath(Path.GetDirectoryName(exeFile));
+            process.Start();
         }
     }
 }

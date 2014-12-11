@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Product Id="*" Name="SOVND" Language="1033" Version="0.3.0.0" Manufacturer="@George_Hahn" UpgradeCode="667fd594-0631-4508-bd29-4f2cdad70369">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perUser" />
+
+		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+		<MediaTemplate />
+
+		<Feature Id="ProductFeature" Title="SOVND.Loader.Setup" Level="1">
+			<ComponentGroupRef Id="ProductComponents" />
+		</Feature>
+	</Product>
+
+	<Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="LocalAppDataFolder" Name="AppData">
+        <Directory Id="INSTALLFOLDER" Name="SOVND" />
+      </Directory>
+
+      <Directory Id="DesktopFolder" SourceName="Desktop" />
+
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ApplicationProgramsFolder" Name="WixSingleSetup">
+          <Component Id="ProgramMenuDir" Guid="99673a3e-c122-41b1-aebf-e8aa9067f9a2">
+            <RemoveFolder Id="ProgramMenuDir" On="uninstall"/>
+            <RegistryValue Root="HKCU" Key="Software\GeorgeHahn\SOVND"
+                           Type="integer" Value="1" Name="Shortcut" KeyPath="yes" />
+          </Component>
+        </Directory>
+      </Directory>
+      
+    </Directory>
+	</Fragment>
+
+	<Fragment>
+		<ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="C.Loader" Guid="7a61079a-6fa0-4cd0-9d97-91c82880bb45">
+        <CreateFolder />
+        <RemoveFolder Id="RemoveMyAppDirectory" On="uninstall" />
+        <RegistryKey Root="HKCU" Key="Software\GeorgeHahn\SOVND">
+          <RegistryValue Name="Installed" Value="1" KeyPath="yes" Type="integer" />
+        </RegistryKey>
+        
+        <File Id="Fi.MyExe" Name="$(var.SOVND.Loader.TargetFileName)"
+            Source="$(var.SOVND.Loader.TargetPath)" DiskId="1" Checksum="yes">
+          
+          <Shortcut
+            Id="DesktopShortcut"
+            Directory="DesktopFolder"
+            Name="SOVND"
+            WorkingDirectory="MergeRedirectFolder" />
+          
+          <Shortcut
+            Id="StartmenuShortcut"
+            Directory="ProgramMenuFolder"
+            Name="SOVND"
+            WorkingDirectory="MergeRedirectFolder" />
+        </File>
+      </Component>
+
+      <ComponentRef Id="ProgramMenuDir"/>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <Bundle Name="SOVND Installer" Version="1.0.0.0" Manufacturer="@George_Hahn" UpgradeCode="5e5f0f1e-58e0-42e5-8306-37533d677535">
+
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.HyperlinkLicense">
+      <bal:WixStandardBootstrapperApplication
+        LicenseUrl=""
+        xmlns:bal="http://schemas.microsoft.com/wix/BalExtension" />
+    </BootstrapperApplicationRef>
+    
+    <Variable Name="InstallFolder" Type="string" Value="[APPDATA]LocalAppDataFolder\SOVND"/>
+
+    <Chain>
+      <PackageGroupRef Id="NetFx45Web" />
+      
+      <MsiPackage
+        Id="Setup"
+        Compressed="yes"
+        SourceFile="$(var.SOVND.Loader.Setup.TargetPath)"
+        Vital="yes">
+        <MsiProperty Name="INSTALLLOCATION" Value="[InstallFolder]" />
+      </MsiPackage>
+    </Chain>
+  </Bundle>
+</Wix>
