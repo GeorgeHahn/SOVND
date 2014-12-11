@@ -274,10 +274,10 @@ namespace SOVND.Server
             var playlist = (ISortedPlaylistProvider)channels[channel].Playlist;
             LogTo.Debug("[{0}] Starting track scheduler", channel);
 
-            Task.Run(async () =>
+            Task.Run(() =>
             {
                 while (true)
-                    await OneLoop(channelHandler, playlist, channel).X();
+                    OneLoop(channelHandler, playlist, channel).RunSynchronously();
             });
         }
 
@@ -311,7 +311,7 @@ namespace SOVND.Server
                 }
 
                 LogTo.Warn("[{0}] Skipping song: track not loaded {1}", channel, song.SongID);
-                await ClearSong(channelHandler, song).X();
+                ClearSong(channelHandler, song);
                 await Task.Delay(1000).X();
                 return;
             }
@@ -320,26 +320,22 @@ namespace SOVND.Server
             tokens[song.SongID] = token;
 
             var songtime = song.track.Seconds;
-            await PlaySong(channelHandler, song).X();
+            PlaySong(channelHandler, song);
             await Task.Delay((int) Math.Ceiling(songtime*1000), token.Token).X();
             tokens.Remove(song.SongID);
-            await ClearSong(channelHandler, song).X();
+            ClearSong(channelHandler, song);
             token.Dispose();
         }
 
-        private async Task PlaySong(ChannelHandler channel, Song song)
+        private void PlaySong(ChannelHandler channel, Song song)
         {
             LogTo.Debug("[{0}] Playing song {1}", channel.Name, song.track.Name);
 
-            await Task.Run(() =>
-            {
-                Publish("/\{channel.Name}/nowplaying/songid", "");
-                Publish("/\{channel.Name}/nowplaying/songid", song.SongID, true);
-                Publish("/\{channel.Name}/nowplaying/starttime", Time.Timestamp().ToString(), true);
-            });
+            Publish("/\{channel.Name}/nowplaying/songid", song.SongID, true);
+            Publish("/\{channel.Name}/nowplaying/starttime", Time.Timestamp().ToString(), true);
         }
 
-        private async Task ClearSong(ChannelHandler channel, Song song)
+        private void ClearSong(ChannelHandler channel, Song song)
         {
             LogTo.Debug("[{0}] Clearing song {1}", channel.Name, song.track.Name);
 
@@ -352,14 +348,11 @@ namespace SOVND.Server
             }
 
             // Set prev song to 0 votes, 0 vote time
-            await Task.Run(() =>
-            {
-                channel.ClearVotes(song.SongID);
+            channel.ClearVotes(song.SongID);
 
-                Publish("/\{channel.Name}/playlist/\{song.SongID}/votes", "0", true);
-                Publish("/\{channel.Name}/playlist/\{song.SongID}/votetime", Time.Timestamp().ToString(), true);
-                Publish("/\{channel.Name}/playlist/\{song.SongID}/voters", "", true);
-            });
+            Publish("/\{channel.Name}/playlist/\{song.SongID}/votes", "0", true);
+            Publish("/\{channel.Name}/playlist/\{song.SongID}/votetime", Time.Timestamp().ToString(), true);
+            Publish("/\{channel.Name}/playlist/\{song.SongID}/voters", "", true);
         }
     }
 
