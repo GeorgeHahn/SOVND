@@ -149,14 +149,17 @@ namespace SOVND.Client
 
                 if (search != null)
                 {
-                    foreach (var trackPtr in search?.TrackPtrs)
+                    await Task.Run(() =>
                     {
-                        if (token.IsCancellationRequested)
-                            return;
+                        foreach (var trackPtr in search?.TrackPtrs)
+                        {
+                            if (token.IsCancellationRequested)
+                                return;
 
-                        var track = await Track.CreateTrackAsync(trackPtr);
-                        candidates.Add(track);
-                    }
+                            var track = new Track(trackPtr);
+                            candidates.Add(track);
+                        }
+                    }, token);
                     lbPlaylist.ItemsSource = candidates;
                 }
             }
