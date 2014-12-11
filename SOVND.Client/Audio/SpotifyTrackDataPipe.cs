@@ -47,12 +47,12 @@ namespace SOVND.Client.Audio
 
         public bool Complete { get { return _complete; } }
 
-        public async Task StartStreaming(IntPtr _trackPtr, Action<BufferedWaveProvider> init)
+        public void StartStreaming(IntPtr _trackPtr, Action<BufferedWaveProvider> init)
         {
-            await StartStreaming(DateTime.MinValue, _trackPtr, init);
+            StartStreaming(DateTime.MinValue, _trackPtr, init);
         }
 
-        public async Task StartStreaming(DateTime startTime, IntPtr _trackPtr, Action<BufferedWaveProvider> init)
+        public void StartStreaming(DateTime startTime, IntPtr _trackPtr, Action<BufferedWaveProvider> init)
         {
             if (_loaded)
             {
@@ -65,7 +65,7 @@ namespace SOVND.Client.Audio
 
             while (error == sp_error.IS_LOADING)
             {
-                await Task.Delay(50);
+                Task.Delay(50);
                 error = Session.LoadPlayer(_trackPtr);
             }
 
@@ -124,8 +124,13 @@ namespace SOVND.Client.Audio
 
         private void Session_OnAudioStreamComplete(object obj)
         {
+            DoComplete();
+        }
+
+        public void DoComplete()
+        {
             _complete = true;
-            if(OnComplete != null)
+            if (OnComplete != null)
                 OnComplete();
         }
 

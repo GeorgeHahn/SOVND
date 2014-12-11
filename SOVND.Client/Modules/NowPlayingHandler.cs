@@ -33,12 +33,13 @@ namespace SOVND.Client.Modules
                 {
                     playingTrack = null;
                     LogTo.Warn("Server asked to play empty song on channel {0}", _channel);
+                    OnStop(); // TODO Danger danger
                     return;
                 }
                 int time = 0;
 
                 //PlaySong(song, UnixTimeBase.AddSeconds(time).ToLocalTime());
-                PlaySong(song);
+                Task.Run(() => PlaySong(song));
             };
 
             Run();
@@ -56,39 +57,39 @@ namespace SOVND.Client.Modules
             if (playingTrack?.SongID == songID)
                 return;
 
-            if (songToken != null)
-                songToken.Cancel();
-
-            songToken = new CancellationTokenSource();
-            var token = songToken.Token;
+            if (streamingaudio != null)
+            {
+                streamingaudio.DoComplete();
+                streamingaudio = new SpotifyTrackDataPipe();
+            }
 
             playingTrack = new Track(songID);
 
-            WaveOut player = null;
+            WaveOut player = new WaveOut(App.WindowHandle);
 
-            await streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr, provider =>
+            LogTo.Trace("Streaming");
+
+            streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr, provider =>
             {
-                player = new WaveOut(App.WindowHandle);
                 player.Init(provider);
                 player.Play();
             });
 
-            while (!streamingaudio.Complete && !token.IsCancellationRequested)
+            streamingaudio.OnComplete = () =>
             {
-                await Task.Delay(50, token);
-            }
+                LogTo.Trace("Done streaming");
 
-            streamingaudio.StopStreaming();
-            player.Pause();
-            player.Dispose();
+                streamingaudio.StopStreaming();
+                player.Pause();
+                player.Dispose();
+            };
         }
 
         protected override void OnStop()
         {
-            streamingaudio.StopStreaming();
-
-            if (songToken != null)
-                songToken.Cancel();
+            if (streamingaudio != null)
+                streamingaudio.DoComplete();
+            streamingaudio = null;
         }
     }
 }
