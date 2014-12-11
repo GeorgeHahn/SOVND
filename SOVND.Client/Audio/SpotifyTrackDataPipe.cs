@@ -43,6 +43,8 @@ namespace SOVND.Client.Audio
         private WaveFormat waveFormat;
         private Action<BufferedWaveProvider> _init;
 
+        public Action OnComplete;
+
         public bool Complete { get { return _complete; } }
 
         public async Task StartStreaming(IntPtr _trackPtr, Action<BufferedWaveProvider> init)
@@ -123,6 +125,8 @@ namespace SOVND.Client.Audio
         private void Session_OnAudioStreamComplete(object obj)
         {
             _complete = true;
+            if(OnComplete != null)
+                OnComplete();
         }
 
         private void Session_OnAudioDataArrived(byte[] buffer, sp_audioformat format)
