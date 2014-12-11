@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Anotar.NLog;
 using libspotifydotnet.libspotify;
@@ -76,7 +77,13 @@ namespace SpotifyClient
 
         public Action onLoad { get; set; }
 
+        private bool fetchArt;
+
         public Track(string link)
+            : this(link, true)
+        { }
+
+        public Track(string link, bool fetchAlbumArt)
         {
             if (string.IsNullOrWhiteSpace(link))
                 throw new ArgumentOutOfRangeException("link");
@@ -85,7 +92,7 @@ namespace SpotifyClient
             if (linkPtr != IntPtr.Zero)
             {
                 SongID = link;
-
+                fetchArt = fetchAlbumArt;
                 try
                 {
                     TrackPtr = sp_link_as_track(linkPtr);
@@ -102,19 +109,22 @@ namespace SpotifyClient
         }
 
         public Track(IntPtr trackPtr)
+            :this(trackPtr, true)
+        { }
+
+        public Track(IntPtr trackPtr, bool fetchAlbumArt)
         {
             this.TrackPtr = trackPtr;
+            fetchArt = fetchAlbumArt;
             SongID = Spotify.GetTrackLink(trackPtr);
+            sp_track_add_ref(TrackPtr);
             InitAsync();
         }
 
-        private Track()
-        {
-            
-        }
         public static async Task<Track> CreateTrackAsync(IntPtr trackPtr)
         {
-            var t = new Track {TrackPtr = trackPtr, SongID = Spotify.GetTrackLink(trackPtr)};
+            var t = new Track(trackPtr);
+            t.SongID = Spotify.GetTrackLink(trackPtr);
             await t.InitAsync();
             return t;
         }
@@ -122,7 +132,6 @@ namespace SpotifyClient
         ~Track()
         {
             sp_track_release(TrackPtr);
-
             _artwork?.Dispose();
         }
 
@@ -178,7 +187,8 @@ namespace SpotifyClient
                     _artists.Add(Functions.PtrToString(sp_artist_name(artistPtr)));
             }
             
-            await GetAlbumArtAsync();
+            if(fetchArt)
+                await GetAlbumArtAsync();
 
             if (onLoad != null)
                 onLoad();
