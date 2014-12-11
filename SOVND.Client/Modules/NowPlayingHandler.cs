@@ -24,18 +24,19 @@ namespace SOVND.Client.Modules
             // TODO Convert nowplaying to a JSON object so songid and playtime come in at the same time?
 
             _channel = channelName;
-            streamingaudio = new SpotifyTrackDataPipe();
-
+            
             On["/" + channelName + "/nowplaying/songid"] = _ =>
             {
                 string song = _.Message;
+                StopStreaming();
+
                 if (string.IsNullOrWhiteSpace(song))
                 {
                     playingTrack = null;
                     LogTo.Warn("Server asked to play empty song on channel {0}", _channel);
-                    OnStop(); // TODO Danger danger
                     return;
                 }
+
                 int time = 0;
 
                 //PlaySong(song, UnixTimeBase.AddSeconds(time).ToLocalTime());
@@ -45,26 +46,22 @@ namespace SOVND.Client.Modules
             Run();
         }
 
-        private async Task PlaySong(string songID)
+        private void PlaySong(string songID)
         {
-            await PlaySong(songID, DateTime.MinValue);
+            PlaySong(songID, DateTime.MinValue);
         }
 
-        private async Task PlaySong(string songID, DateTime startTime)
+        private void PlaySong(string songID, DateTime startTime)
         {
             LogTo.Debug("Playing: {0}", songID);
-
             if (playingTrack?.SongID == songID)
                 return;
 
             if (streamingaudio != null)
-            {
                 streamingaudio.DoComplete();
-                streamingaudio = new SpotifyTrackDataPipe();
-            }
 
+            streamingaudio = new SpotifyTrackDataPipe();
             playingTrack = new Track(songID);
-
             WaveOut player = new WaveOut(App.WindowHandle);
 
             LogTo.Trace("Streaming");
@@ -85,11 +82,16 @@ namespace SOVND.Client.Modules
             };
         }
 
-        protected override void OnStop()
+        public void StopStreaming()
         {
             if (streamingaudio != null)
                 streamingaudio.DoComplete();
             streamingaudio = null;
+        }
+
+        protected override void OnStop()
+        {
+            StopStreaming();
         }
     }
 }
