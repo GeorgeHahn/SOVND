@@ -43,9 +43,9 @@ namespace SOVND.Client.Modules
             Run();
         }
 
-        WaveOut _player;
-        private bool _initted;
-        private BufferedWaveProvider thisProvider;
+        static WaveOut _waveOut;
+        private bool _initialized;
+        private BufferedWaveProvider _thisBuffer;
 
         private void PlaySong(string songID)
         {
@@ -63,21 +63,34 @@ namespace SOVND.Client.Modules
             playingTrack = new Track(songID);
 
             streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr,
-                () => _player.Play(),
-                provider =>
+                () =>
                 {
-                    if (provider != thisProvider)
-                        _initted = false;
-
-                    if (_initted)
-                        return;
-
-                    _player = new WaveOut(App.WindowHandle);
-                    _player.Init(provider);
-                    thisProvider = provider;
-                    _initted = true;
+                    LogTo.Trace("NPH: _waveOut.Play()");
+                    _waveOut.Play();
                 },
-                () => _player.Stop());
+                buffer =>
+                {
+                    LogTo.Trace("NPH: Initialize buffer");
+                    if (buffer != _thisBuffer)
+                        _initialized = false;
+
+                    if (_initialized)
+                    {
+                        LogTo.Trace("NPH: Initialize buffer: already initialized");
+                        return;
+                    }
+
+                    LogTo.Trace("NPH: Initialize buffer: initializing");
+                    _waveOut = new WaveOut(App.WindowHandle);
+                    _waveOut.Init(buffer);
+                    _thisBuffer = buffer;
+                    _initialized = true;
+                },
+                () =>
+                {
+                    LogTo.Trace("NPH: _waveOut.Pause()");
+                    _waveOut.Pause();
+                });
         }
 
         public void StopStreaming()

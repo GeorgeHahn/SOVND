@@ -37,10 +37,10 @@ namespace SOVND.Client.Audio
     public class SpotifyTrackDataPipe : IDisposable
     {
         private static bool _loaded;
-
         private static BufferedWaveProvider _wave;
         private static WaveFormat _waveFormat;
         private static int _jitter;
+        private static bool _bufferset;
 
         private Action _stop;
         private Action<BufferedWaveProvider> _newFormat;
@@ -48,20 +48,26 @@ namespace SOVND.Client.Audio
 
         public SpotifyTrackDataPipe()
         {
+            LogTo.Trace("STDP: Constructor");
             Session.OnAudioDataArrived += Session_OnAudioDataArrived;
             Session.OnAudioStreamComplete += Session_OnAudioStreamComplete;
             Session.AudioBufferStats += Session_AudioBufferStats;
         }
 
-        public void Dispose()
+        public void Dispose() { } // For Fody.Janitor (https://github.com/Fody/Janitor)
+
+        public void DisposeManaged()
         {
+            LogTo.Trace("STDP: DisposeManaged()");
             Session.OnAudioDataArrived -= Session_OnAudioDataArrived;
             Session.OnAudioStreamComplete -= Session_OnAudioStreamComplete;
             Session.AudioBufferStats -= Session_AudioBufferStats;
 
             if (_loaded)
             {
+                LogTo.Trace("STDP: DisposeManaged(): Session.UnloadPlayer()");
                 Session.UnloadPlayer();
+                _stop();
                 _loaded = false;
             }
         }
@@ -73,10 +79,11 @@ namespace SOVND.Client.Audio
 
         public void StartStreaming(DateTime startTime, IntPtr _trackPtr, Action init, Action<BufferedWaveProvider> newFormat, Action stop)
         {
+            LogTo.Trace("STDP: StartStreaming()");
             _init = init;
             _stop = stop;
             _newFormat = newFormat;
-
+            
             var error = Session.LoadPlayer(_trackPtr);
             while (error == sp_error.IS_LOADING)
             {
@@ -98,7 +105,9 @@ namespace SOVND.Client.Audio
 
             // TODO if time is in the future, block here
             // TODO if time is more than a few ms in the future, prefetch song
-            
+
+            _bufferset = false;
+            LogTo.Trace("STDP: StartStreaming(): Session.Play()");
             Session.Play();
             if (startTime != DateTime.MinValue)
                 Session.Seek((int) (DateTime.UtcNow - startTime).TotalMilliseconds);
@@ -106,41 +115,64 @@ namespace SOVND.Client.Audio
 
         private void Session_AudioBufferStats(ref sp_audio_buffer_stats obj)
         {
-            if (_wave == null)
-                return;
+            return;
 
-            obj.samples = _wave.BufferedBytes;
+            if (_wave == null)
+            {
+                LogTo.Trace("STDP: Session_AudioBufferStats: _wave null");
+
+                // TODO: NO IDEA WHAT IMPACT THIS HAS
+                obj.samples = 4000;
+                obj.stutter = 0;
+                return;
+            }
+
+            obj.samples = _wave.BufferedBytes / 2;
             obj.stutter = _jitter;
             _jitter = 0;
         }
 
         private void Session_OnAudioStreamComplete(object obj)
         {
+            LogTo.Trace("STDP: Session_OnAudioStreamComplete");
             Dispose();
-            _stop();
         }
 
         private void Session_OnAudioDataArrived(byte[] buffer, sp_audioformat format)
         {
-            if ((_waveFormat == null) || (format.channels != _waveFormat.Channels) || (format.sample_rate != _waveFormat.SampleRate))
+            //LogTo.Trace("STDP: AudioDataArrived()");
+            if ((!_bufferset) || (_waveFormat == null) || (format.channels != _waveFormat.Channels) || (format.sample_rate != _waveFormat.SampleRate))
                 SetAudioFormat(format);
 
             // Try to keep buffer mostly full
-            if (_wave.BufferedBytes < _wave.BufferLength - 40000) // 40000 samples = ~1s
-                _jitter++;
+            //if (_wave.BufferedBytes < _wave.BufferLength - 40000) // 40000 samples = ~1s
+            //    _jitter++;
 
             _wave.AddSamples(buffer, 0, buffer.Length);
         }
 
         private static void SetupBuffer(sp_audioformat format)
         {
+            LogTo.Trace("STDP: SetupBuffer()");
+            _bufferset = true;
+            if ((_wave != null) && (_waveFormat != null) &&
+                (format.channels == _waveFormat.Channels) && (format.sample_rate == _waveFormat.SampleRate))
+            {
+                LogTo.Trace("STDP: SetupBuffer(): _wave.ClearBuffer()");
+                _wave.ClearBuffer();
+                return;
+            }
+
+            LogTo.Trace("STDP: SetupBuffer(): _wave: new()");
             _waveFormat = new WaveFormat(format.sample_rate, 16, format.channels);
             _wave = new BufferedWaveProvider(_waveFormat);
+            _wave.DiscardOnBufferOverflow = true; // TODO REMOVE THIS WHEN DONE TESTING
             _wave.BufferDuration = TimeSpan.FromSeconds(15);
         }
 
         private void SetAudioFormat(sp_audioformat format)
         {
+            LogTo.Trace("STDP: SetAudioFormat()");
             SetupBuffer(format);
             _newFormat(_wave);
             _init();
