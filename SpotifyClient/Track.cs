@@ -32,6 +32,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Anotar.NLog;
+using JetBrains.Annotations;
 using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
@@ -201,26 +202,44 @@ namespace SpotifyClient
             if (_artwork != null)
                 return _artwork;
 
-            while (_artwork == null)
+            try
             {
-                var buffer = GetAlbumArtBuffer();
-                if (buffer != null)
-                    _artwork = System.Drawing.Image.FromStream(new MemoryStream(buffer));
-                if (_artwork == null)
-                    await Task.Delay(25);
+                while (_artwork == null)
+                {
+                    var buffer = GetAlbumArtBuffer();
+                    if (buffer != null)
+                        _artwork = System.Drawing.Image.FromStream(new MemoryStream(buffer));
+                    if (_artwork == null)
+                        await Task.Delay(250);
+                }
+                RaisePropertyChanged("AlbumArt");
+                return _artwork;
             }
-            RaisePropertyChanged("AlbumArt");
-            return _artwork;
+            catch (Exception e)
+            {
+                LogTo.ErrorException("Album art error", e);
+                return null;
+            }
         }
 
         private string GetAlbumArtLink()
         {
-            return Spotify.GetAlbumArtLink(_albumPtr, sp_image_size.SP_IMAGE_SIZE_SMALL);
+            var image = Spotify.GetAlbumArtLink(_albumPtr, sp_image_size.SP_IMAGE_SIZE_SMALL);
+            if (image == null)
+                image = Spotify.GetAlbumArtLink(_albumPtr, sp_image_size.SP_IMAGE_SIZE_NORMAL);
+            if (image == null)
+                image = Spotify.GetAlbumArtLink(_albumPtr, sp_image_size.SP_IMAGE_SIZE_LARGE);
+            if(image == null)
+                throw new Exception("Couldn't get art link");
+            return image;
         }
 
+        private string artlink;
         private byte[] GetAlbumArtBuffer()
         {
-            return Spotify.GetAlbumArt(GetAlbumArtLink());
+            if(string.IsNullOrEmpty(artlink))
+                artlink = GetAlbumArtLink();
+            return Spotify.GetAlbumArt(artlink);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

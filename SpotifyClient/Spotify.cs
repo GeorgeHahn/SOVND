@@ -392,6 +392,8 @@ namespace SpotifyClient
                 throw new ApplicationException("No session");
 
             LogTo.Trace("Getting art: {0}", link);
+            if (link == "")
+                return null;
 
             IntPtr linkPtr = Functions.StringToLinkPtr(link);
             if (linkPtr == IntPtr.Zero)
