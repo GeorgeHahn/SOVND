@@ -44,8 +44,7 @@ namespace SOVND.Client.Modules
         }
 
         static WaveOut _waveOut;
-        private bool _initialized;
-        private BufferedWaveProvider _thisBuffer;
+        private static BufferedWaveProvider _thisBuffer;
 
         private void PlaySong(string songID)
         {
@@ -71,10 +70,7 @@ namespace SOVND.Client.Modules
                 buffer =>
                 {
                     LogTo.Trace("NPH: Initialize buffer");
-                    if (buffer != _thisBuffer)
-                        _initialized = false;
-
-                    if (_initialized)
+                    if (buffer == _thisBuffer)
                     {
                         LogTo.Trace("NPH: Initialize buffer: already initialized");
                         return;
@@ -84,7 +80,6 @@ namespace SOVND.Client.Modules
                     _waveOut = new WaveOut(App.WindowHandle);
                     _waveOut.Init(buffer);
                     _thisBuffer = buffer;
-                    _initialized = true;
                 },
                 () =>
                 {
