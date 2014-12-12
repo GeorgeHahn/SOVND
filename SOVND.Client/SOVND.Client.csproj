@@ -55,6 +55,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Charlotte.0.1.45\lib\Charlotte.dll</HintPath>
     </Reference>
+    <Reference Include="Janitor">
+      <HintPath>..\packages\Janitor.Fody.1.1.0.0\Lib\portable-net4+sl5+wp8+win8+wpa81+MonoAndroid16+MonoTouch40\Janitor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="M2Mqtt">
       <HintPath>..\packages\M2Mqtt.3.6\lib\net45\M2Mqtt.dll</HintPath>
     </Reference>

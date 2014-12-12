@@ -2,6 +2,7 @@
 using System.Collections.Specialized;
 using System.Threading;
 using System.Windows.Data;
+using Janitor;
 
 // From https://social.msdn.microsoft.com/Forums/vstudio/en-US/0f524459-b14e-4f9a-8264-267953418a2d/trivial-listboxlistview-autoscroll
 
@@ -38,6 +39,7 @@ namespace System.Windows.Workarounds
 
     }
 
+    [SkipWeaving]
     public class AutoScrollHandler : DependencyObject, IDisposable
     {
 
