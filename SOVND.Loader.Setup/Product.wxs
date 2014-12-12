@@ -2,8 +2,10 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
 	<Product Id="*" Name="SOVND" Language="1033" Version="0.3.0.0" Manufacturer="@George_Hahn" UpgradeCode="667fd594-0631-4508-bd29-4f2cdad70369">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perUser" />
+    <Property Id="ARPPRODUCTICON" Value="Icon_square.ico" />
+    <Icon Id="Icon_square.ico" SourceFile="$(var.SOVND.Loader.TargetDir)Icon_square.ico"/>
 
-		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 		<MediaTemplate />
 
 		<Feature Id="ProductFeature" Title="SOVND.Loader.Setup" Level="1">
@@ -40,20 +42,25 @@
         <RegistryKey Root="HKCU" Key="Software\GeorgeHahn\SOVND">
           <RegistryValue Name="Installed" Value="1" KeyPath="yes" Type="integer" />
         </RegistryKey>
+
+
+        <File Id="Icon_square.ico" Source="$(var.SOVND.Loader.TargetDir)Icon_square.ico"/>
         
         <File Id="Fi.MyExe" Name="$(var.SOVND.Loader.TargetFileName)"
             Source="$(var.SOVND.Loader.TargetPath)" DiskId="1" Checksum="yes">
-          
+
           <Shortcut
             Id="DesktopShortcut"
             Directory="DesktopFolder"
             Name="SOVND"
+            Icon="Icon_square.ico"
             WorkingDirectory="MergeRedirectFolder" />
           
           <Shortcut
             Id="StartmenuShortcut"
             Directory="ProgramMenuFolder"
             Name="SOVND"
+            Icon="Icon_square.ico"
             WorkingDirectory="MergeRedirectFolder" />
         </File>
       </Component>
