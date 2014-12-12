@@ -222,9 +222,11 @@ namespace SpotifyClient
             }
         }
 
-        private string GetAlbumArtLink()
+        private string GetAlbumArtLink(sp_image_size artSize = sp_image_size.SP_IMAGE_SIZE_SMALL)
         {
-            var image = Spotify.GetAlbumArtLink(_albumPtr, sp_image_size.SP_IMAGE_SIZE_SMALL);
+            var image = Spotify.GetAlbumArtLink(_albumPtr, artSize);
+            if (image == null)
+                image = Spotify.GetAlbumArtLink(_albumPtr, sp_image_size.SP_IMAGE_SIZE_SMALL);
             if (image == null)
                 image = Spotify.GetAlbumArtLink(_albumPtr, sp_image_size.SP_IMAGE_SIZE_NORMAL);
             if (image == null)
