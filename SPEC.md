@@ -34,7 +34,7 @@ MQTT Communication spec
 	Future
 	/{channel}/toptracks/{1-50} # top tracks, from 1 to 50
 	/user/{username}/reauthflag # Client needs to resend login info
-
+	/update/{clientname}/       # Client update available. JSON? URL? Name? Version?
 
 	User published messages
 	/user/{username}/login
