@@ -34,23 +34,42 @@ using SpotifyClient;
 
 namespace SOVND.Client.Audio
 {
-    public class SpotifyTrackDataPipe
+    public class SpotifyTrackDataPipe : IDisposable
     {
         private bool _complete;
         private static bool _loaded;
-        private BufferedWaveProvider _wave;
         private bool logonce;
-        private WaveFormat waveFormat;
 
+        private static BufferedWaveProvider _wave;
+        private static WaveFormat waveFormat;
 
         private int jitter;
-        private bool formatSet;
 
         private Action _stop;
         private Action<BufferedWaveProvider> _newFormat;
         private Action _init;
 
         public bool Complete { get { return _complete; } }
+
+        public SpotifyTrackDataPipe()
+        {
+            Session.OnAudioDataArrived += Session_OnAudioDataArrived;
+            Session.OnAudioStreamComplete += Session_OnAudioStreamComplete;
+            Session.AudioBufferStats += Session_AudioBufferStats;
+        }
+
+        public void Dispose()
+        {
+            Session.OnAudioDataArrived -= Session_OnAudioDataArrived;
+            Session.OnAudioStreamComplete -= Session_OnAudioStreamComplete;
+            Session.AudioBufferStats -= Session_AudioBufferStats;
+
+            if (_loaded)
+            {
+                Session.UnloadPlayer();
+                _loaded = false;
+            }
+        }
 
         public void StartStreaming(IntPtr _trackPtr, Action init, Action<BufferedWaveProvider> newFormat, Action stop)
         {
@@ -60,9 +79,11 @@ namespace SOVND.Client.Audio
         public void StartStreaming(DateTime startTime, IntPtr _trackPtr, Action init, Action<BufferedWaveProvider> newFormat, Action stop)
         {
             logonce = false;
+            _init = init;
+            _stop = stop;
+            _newFormat = newFormat;
 
             var error = Session.LoadPlayer(_trackPtr);
-
             while (error == sp_error.IS_LOADING)
             {
                 Task.Delay(50);
@@ -70,19 +91,9 @@ namespace SOVND.Client.Audio
             }
 
             if (error != sp_error.OK)
-            {
                 throw new Exception("[Spotify] Streaming error: \{sp_error_message(error)}");
-            }
 
             _loaded = true;
-            _init = init;
-            _stop = stop;
-            _newFormat = newFormat;
-
-            Session.OnAudioDataArrived += Session_OnAudioDataArrived;
-            Session.OnAudioStreamComplete += Session_OnAudioStreamComplete;
-            Session.AudioBufferStats += Session_AudioBufferStats;
-
             sp_availability avail = sp_track_get_availability(Session.SessionPtr, _trackPtr);
 
             if (avail != sp_availability.SP_TRACK_AVAILABILITY_AVAILABLE)
@@ -99,20 +110,6 @@ namespace SOVND.Client.Audio
                 Session.Seek((int) (DateTime.UtcNow - startTime).TotalMilliseconds);
         }
 
-        public void StopStreaming()
-        {
-            if (_loaded)
-            {
-                Session.OnAudioDataArrived -= Session_OnAudioDataArrived;
-                Session.OnAudioStreamComplete -= Session_OnAudioStreamComplete;
-                Session.AudioBufferStats -= Session_AudioBufferStats;
-
-                Session.UnloadPlayer();
-                _loaded = false;
-                formatSet = false;
-            }
-        }
-
         private void Session_AudioBufferStats(ref sp_audio_buffer_stats obj)
         {
             if (_wave == null)
@@ -125,7 +122,7 @@ namespace SOVND.Client.Audio
 
         private void Session_OnAudioStreamComplete(object obj)
         {
-            StopStreaming();
+            Dispose();
             _stop();
         }
 
