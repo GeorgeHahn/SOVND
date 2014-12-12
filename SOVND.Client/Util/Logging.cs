@@ -34,7 +34,7 @@ namespace SOVND.Client.Util
             AsyncTargetWrapper asyncWrapper = new AsyncTargetWrapper(slackTarget);
             config.AddTarget("async", asyncWrapper);
 
-            var slackTargetRules = new LoggingRule("*", LogLevel.Trace, asyncWrapper);
+            var slackTargetRules = new LoggingRule("*", LogLevel.Error, asyncWrapper);
             config.LoggingRules.Add(slackTargetRules);
 
             LogManager.Configuration = config;
