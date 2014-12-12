@@ -15,7 +15,10 @@ namespace SOVND.Client.Util
 
         public static void SetupLogging(string username)
         {
-            var config = new LoggingConfiguration();
+            var config = LogManager.Configuration;
+            if(config == null)
+                config = new LoggingConfiguration();
+
             var slackTarget = new SlackTarget
             {
                 Layout = "${message}",
