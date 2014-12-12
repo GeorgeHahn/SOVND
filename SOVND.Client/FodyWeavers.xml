@@ -12,6 +12,5 @@
       libspotify
     </Unmanaged32Assemblies>
   </Costura>
-  <Stamp />
   <Janitor />
 </Weavers>
