@@ -95,11 +95,11 @@ namespace SpotifyClient
 
         public static event Action<IntPtr> OnLoggedIn;
 
-        public static event Func<byte[], sp_audioformat, int> OnAudioDataArrived;
+        public static Func<byte[], sp_audioformat, int> OnAudioDataArrived;
 
-        public static event Action<object> OnAudioStreamComplete;
+        public static Action<object> OnAudioStreamComplete;
 
-        public static event get_audiobufferstats AudioBufferStats;
+        public static get_audiobufferstats AudioBufferStats;
 
         public static IntPtr SessionPtr
         {
@@ -290,23 +290,25 @@ namespace SpotifyClient
         private static int music_delivery(IntPtr sessionPtr, IntPtr formatPtr, IntPtr framesPtr, int num_frame)
         {
             // API 11 is firing this callback several times after the track ends.  num_frame is set to 22050,
-            // which seems meaninful yet is way out of normal range (usually we get a couple hundred frames or less
+            // which seems meaningful yet is way out of normal range (usually we get a couple hundred frames or less
             // at a time).  The buffers are all zeros, this adds a ton of extra silence to the end of the track for
             // no reason.  Docs don't talk about this new behavior, maybe related to gapless playback??
             // Workaround by ignoring any data received after the end_of_track callback; this ignore is done
             // in SpotifyTrackDataDataPipe.
 
-            if (num_frame == 0)
+            LogTo.Trace("(\{sessionPtr.ToString()}, \{formatPtr.ToString()}, \{framesPtr.ToString()}, \{num_frame})");
+
+            if (OnAudioDataArrived == null)
+            {
+                LogTo.Warn("OnAudioDataArrived is null");
                 return 0;
+            }
 
-            sp_audioformat format = (sp_audioformat)Marshal.PtrToStructure(formatPtr, typeof(sp_audioformat));
-            byte[] buffer = new byte[num_frame * sizeof(Int16) * format.channels];
-            Marshal.Copy(framesPtr, buffer, 0, buffer.Length);
-
-            if (OnAudioDataArrived != null)
-                return OnAudioDataArrived(buffer, format);
-
-            return 0;
+            sp_audioformat format = (sp_audioformat) Marshal.PtrToStructure(formatPtr, typeof (sp_audioformat));
+            byte[] buffer = new byte[num_frame*sizeof (Int16)*format.channels];
+            if(framesPtr != IntPtr.Zero)
+                Marshal.Copy(framesPtr, buffer, 0, buffer.Length);
+            return OnAudioDataArrived(buffer, format);
         }
 
         private static void notify_main_thread(IntPtr sessionPtr)

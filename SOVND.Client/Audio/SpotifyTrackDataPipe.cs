@@ -50,9 +50,9 @@ namespace SOVND.Client.Audio
         public SpotifyTrackDataPipe()
         {
             LogTo.Trace("STDP: Constructor");
-            Session.OnAudioDataArrived += Session_OnAudioDataArrived;
-            Session.OnAudioStreamComplete += Session_OnAudioStreamComplete;
-            Session.AudioBufferStats += Session_AudioBufferStats;
+            Session.OnAudioDataArrived = Session_OnAudioDataArrived;
+            Session.OnAudioStreamComplete = Session_OnAudioStreamComplete;
+            Session.AudioBufferStats = Session_AudioBufferStats;
         }
 
         public void Dispose() { } // For Fody.Janitor (https://github.com/Fody/Janitor)
@@ -60,13 +60,11 @@ namespace SOVND.Client.Audio
         public void DisposeManaged()
         {
             LogTo.Trace("STDP: DisposeManaged()");
-            Session.OnAudioDataArrived -= Session_OnAudioDataArrived;
-            Session.OnAudioStreamComplete -= Session_OnAudioStreamComplete;
-            Session.AudioBufferStats -= Session_AudioBufferStats;
 
             if (_loaded)
             {
                 LogTo.Trace("STDP: DisposeManaged(): Session.UnloadPlayer()");
+                Session.Pause();
                 Session.UnloadPlayer();
                 _stop();
                 _loaded = false;
@@ -85,7 +83,6 @@ namespace SOVND.Client.Audio
             _stop = stop;
             _newFormat = newFormat;
 
-            Session.UnloadPlayer();
             var error = Session.LoadPlayer(_trackPtr);
             while (error == sp_error.IS_LOADING)
             {
@@ -132,15 +129,20 @@ namespace SOVND.Client.Audio
         private void Session_OnAudioStreamComplete(object obj)
         {
             LogTo.Trace("STDP: (NICE TRY) Session_OnAudioStreamComplete");
-            Session.UnloadPlayer();
             //Dispose();
         }
 
         private int Session_OnAudioDataArrived(byte[] buffer, sp_audioformat format)
         {
-            //LogTo.Trace("STDP: AudioDataArrived()");
-            if ((!_bufferset) || (_waveFormat == null) || (format.channels != _waveFormat.Channels) || (format.sample_rate != _waveFormat.SampleRate))
+            if ((!_bufferset) || // Buffer hasn't been setup yet
+                (format.channels != _waveFormat.Channels) || (format.sample_rate != _waveFormat.SampleRate)) // New audio format
                 SetAudioFormat(format);
+
+            if (buffer.Length == 0)
+            {
+                _wave.ClearBuffer();
+                return 0;
+            }
 
             // Try to keep buffer mostly full
             //if (_wave.BufferedBytes < _wave.BufferLength - 40000) // 40000 samples = ~1s
@@ -158,8 +160,8 @@ namespace SOVND.Client.Audio
         {
             LogTo.Trace("STDP: SetupBuffer()");
             _bufferset = true;
-            if ((_wave != null) && (_waveFormat != null) &&
-                (format.channels == _waveFormat.Channels) && (format.sample_rate == _waveFormat.SampleRate))
+            if ((_wave != null) && (_waveFormat != null) && // Buffer is already setup
+                (format.channels == _waveFormat.Channels) && (format.sample_rate == _waveFormat.SampleRate)) // Format is the same
             {
                 LogTo.Trace("STDP: SetupBuffer(): _wave.ClearBuffer()");
                 _wave.ClearBuffer();
@@ -169,7 +171,6 @@ namespace SOVND.Client.Audio
             LogTo.Trace("STDP: SetupBuffer(): _wave: new()");
             _waveFormat = new WaveFormat(format.sample_rate, 16, format.channels);
             _wave = new BufferedWaveProvider(_waveFormat);
-            _wave.DiscardOnBufferOverflow = true; // TODO REMOVE THIS WHEN DONE TESTING
             _wave.BufferDuration = TimeSpan.FromSeconds(15);
         }
 

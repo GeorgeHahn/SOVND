@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Anotar.NLog;
 using NAudio.Wave;
 using Newtonsoft.Json;
@@ -8,6 +7,7 @@ using SOVND.Client.Audio;
 using SOVND.Client.Util;
 using SOVND.Lib.Models;
 using SpotifyClient;
+using System.Threading.Tasks;
 
 namespace SOVND.Client.Modules
 {
@@ -26,18 +26,21 @@ namespace SOVND.Client.Modules
             
             On["/" + channelName + "/nowplaying"] = _ =>
             {
-                NowPlaying song = JsonConvert.DeserializeObject<NowPlaying>(_.Message);
-
-                StopStreaming();
-
-                if (string.IsNullOrWhiteSpace(song.songID))
+                Task.Run(() =>
                 {
-                    playingTrack = null;
-                    LogTo.Warn("Server asked to play empty song on channel {0}", _channel);
-                    return;
-                }
+                    NowPlaying song = JsonConvert.DeserializeObject<NowPlaying>(_.Message);
 
-                Task.Run(() => PlaySong(song.songID, UnixTimeBase.AddMilliseconds(song.votetime)));
+                    StopStreaming();
+
+                    if (string.IsNullOrWhiteSpace(song.songID))
+                    {
+                        playingTrack = null;
+                        LogTo.Warn("Server asked to play empty song on channel {0}", _channel);
+                        return;
+                    }
+
+                    PlaySong(song.songID, UnixTimeBase.AddMilliseconds(song.votetime));
+                });
             };
 
             Run();
@@ -58,7 +61,6 @@ namespace SOVND.Client.Modules
                 return;
 
             streamingaudio = new SpotifyTrackDataPipe();
-
             playingTrack = new Track(songID);
 
             streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr,
@@ -79,6 +81,7 @@ namespace SOVND.Client.Modules
                     LogTo.Trace("NPH: Initialize buffer: initializing");
                     _waveOut = new WaveOut(App.WindowHandle);
                     _waveOut.Init(buffer);
+
                     _thisBuffer = buffer;
                 },
                 () =>
