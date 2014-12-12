@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Controls.Primitives;
 using Anotar.NLog;
 using libspotifydotnet.libspotify;
 using NAudio.Wave;
@@ -64,7 +65,6 @@ namespace SOVND.Client.Audio
             if (_loaded)
             {
                 LogTo.Trace("STDP: DisposeManaged(): Session.UnloadPlayer()");
-                Session.Pause();
                 Session.UnloadPlayer();
                 _stop();
                 _loaded = false;
@@ -103,14 +103,27 @@ namespace SOVND.Client.Audio
                 return;
             }
 
-            // TODO if time is in the future, block here
+            int seektime = (int)(DateTime.UtcNow - startTime).TotalMilliseconds;
+
             // TODO if time is more than a few ms in the future, prefetch song
+            if ((seektime < 0) && (startTime != DateTime.MinValue))
+            {
+                LogTo.Trace("STDP: StartStreaming(): Playing in \{seektime}ms");
+                Thread.Sleep(Math.Abs(seektime));
+            }
 
             _bufferset = false;
             LogTo.Trace("STDP: StartStreaming(): Session.Play()");
             Session.Play();
+
+            if (seektime < 0)
+                return;
+
             if (startTime != DateTime.MinValue)
-                Session.Seek((int) (DateTime.UtcNow - startTime).TotalMilliseconds);
+            {
+                LogTo.Trace("STDP: StartStreaming(): Session.Seek(\{seektime})");
+                Session.Seek(seektime);
+            }
         }
 
         private void Session_AudioBufferStats(ref sp_audio_buffer_stats obj)
@@ -129,7 +142,7 @@ namespace SOVND.Client.Audio
         private void Session_OnAudioStreamComplete(object obj)
         {
             LogTo.Trace("STDP: (NICE TRY) Session_OnAudioStreamComplete");
-            //Dispose();
+            Dispose();
         }
 
         private int Session_OnAudioDataArrived(byte[] buffer, sp_audioformat format)

@@ -296,7 +296,8 @@ namespace SpotifyClient
             // Workaround by ignoring any data received after the end_of_track callback; this ignore is done
             // in SpotifyTrackDataDataPipe.
 
-            LogTo.Trace("(\{sessionPtr.ToString()}, \{formatPtr.ToString()}, \{framesPtr.ToString()}, \{num_frame})");
+            if((num_frame == 0) || (num_frame == 22050))
+                LogTo.Trace("(\{sessionPtr.ToString()}, \{formatPtr.ToString()}, \{framesPtr.ToString()}, \{num_frame})");
 
             if (OnAudioDataArrived == null)
             {

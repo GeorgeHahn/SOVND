@@ -57,9 +57,7 @@ namespace SOVND.Client.Modules
         private void PlaySong(string songID, DateTime startTime)
         {
             LogTo.Debug("Playing: {0}", songID);
-            if (playingTrack?.SongID == songID)
-                return;
-
+            
             streamingaudio = new SpotifyTrackDataPipe();
             playingTrack = new Track(songID);
 
@@ -75,6 +73,7 @@ namespace SOVND.Client.Modules
                     if (buffer == _thisBuffer)
                     {
                         LogTo.Trace("NPH: Initialize buffer: already initialized");
+                        buffer.ClearBuffer();
                         return;
                     }
 
