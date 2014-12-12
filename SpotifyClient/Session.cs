@@ -95,7 +95,7 @@ namespace SpotifyClient
 
         public static event Action<IntPtr> OnLoggedIn;
 
-        public static event Action<byte[], sp_audioformat> OnAudioDataArrived;
+        public static event Func<byte[], sp_audioformat, int> OnAudioDataArrived;
 
         public static event Action<object> OnAudioStreamComplete;
 
@@ -304,9 +304,9 @@ namespace SpotifyClient
             Marshal.Copy(framesPtr, buffer, 0, buffer.Length);
 
             if (OnAudioDataArrived != null)
-                OnAudioDataArrived(buffer, format);
+                return OnAudioDataArrived(buffer, format);
 
-            return num_frame;
+            return 0;
         }
 
         private static void notify_main_thread(IntPtr sessionPtr)

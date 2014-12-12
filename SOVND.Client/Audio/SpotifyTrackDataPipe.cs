@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Anotar.NLog;
 using libspotifydotnet.libspotify;
@@ -83,11 +84,13 @@ namespace SOVND.Client.Audio
             _init = init;
             _stop = stop;
             _newFormat = newFormat;
-            
+
+            Session.UnloadPlayer();
             var error = Session.LoadPlayer(_trackPtr);
             while (error == sp_error.IS_LOADING)
             {
-                Task.Delay(50);
+                Thread.Sleep(150);
+                LogTo.Warn("Can't play just yet, track not loaded");
                 error = Session.LoadPlayer(_trackPtr);
             }
 
@@ -115,30 +118,25 @@ namespace SOVND.Client.Audio
 
         private void Session_AudioBufferStats(ref sp_audio_buffer_stats obj)
         {
-            return;
-
             if (_wave == null)
             {
-                LogTo.Trace("STDP: Session_AudioBufferStats: _wave null");
-
-                // TODO: NO IDEA WHAT IMPACT THIS HAS
-                obj.samples = 4000;
-                obj.stutter = 0;
+                //LogTo.Trace("STDP: Session_AudioBufferStats: _wave null");
                 return;
             }
 
-            obj.samples = _wave.BufferedBytes / 2;
+            obj.samples = _wave.BufferedBytes / 2; // (16 bit audio -> 2 bytes per sample)
             obj.stutter = _jitter;
             _jitter = 0;
         }
 
         private void Session_OnAudioStreamComplete(object obj)
         {
-            LogTo.Trace("STDP: Session_OnAudioStreamComplete");
-            Dispose();
+            LogTo.Trace("STDP: (NICE TRY) Session_OnAudioStreamComplete");
+            Session.UnloadPlayer();
+            //Dispose();
         }
 
-        private void Session_OnAudioDataArrived(byte[] buffer, sp_audioformat format)
+        private int Session_OnAudioDataArrived(byte[] buffer, sp_audioformat format)
         {
             //LogTo.Trace("STDP: AudioDataArrived()");
             if ((!_bufferset) || (_waveFormat == null) || (format.channels != _waveFormat.Channels) || (format.sample_rate != _waveFormat.SampleRate))
@@ -148,7 +146,12 @@ namespace SOVND.Client.Audio
             //if (_wave.BufferedBytes < _wave.BufferLength - 40000) // 40000 samples = ~1s
             //    _jitter++;
 
+            if (buffer.Length > _wave.BufferLength - _wave.BufferedBytes)
+                return 0;
+
             _wave.AddSamples(buffer, 0, buffer.Length);
+
+            return buffer.Length;
         }
 
         private static void SetupBuffer(sp_audioformat format)
