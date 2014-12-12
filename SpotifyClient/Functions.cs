@@ -158,6 +158,9 @@ namespace SpotifyClient
 
         internal static IntPtr StringToLinkPtr(string link)
         {
+            if (link == null)
+                return IntPtr.Zero;
+
             IntPtr hStr = IntPtr.Zero;
             try
             {

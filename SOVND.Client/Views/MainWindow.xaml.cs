@@ -130,6 +130,7 @@ namespace SOVND.Client
             Refresh();
         }
 
+        private object searchlock = new object();
         private async void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string text = tbSearch.Text;
@@ -148,27 +149,30 @@ namespace SOVND.Client
                 searchToken = new CancellationTokenSource();
                 var token = searchToken.Token;
 
-                var search = Spotify.GetSearch(text);
-
-                if (search != null)
+                lock (searchlock)
                 {
-                    try
-                    {
-                        await Task.Factory.StartNew(() =>
-                        {
-                            foreach (var trackPtr in search?.TrackPtrs)
-                            {
-                                if (token.IsCancellationRequested)
-                                    return;
+                    var search = Spotify.GetSearch(text);
 
-                                var track = new Track(trackPtr);
-                                candidates.Add(track);
-                            }
-                        }, token);
-                        lbPlaylist.ItemsSource = candidates;
-                    }
-                    catch (TaskCanceledException)
+                    if (search != null)
                     {
+                        try
+                        {
+                            Task.Run(() =>
+                            {
+                                foreach (var trackPtr in search?.TrackPtrs)
+                                {
+                                    if (token.IsCancellationRequested)
+                                        return;
+
+                                    var track = new Track(trackPtr);
+                                    candidates.Add(track);
+                                }
+                                synchronization.Send((_) => lbPlaylist.ItemsSource = candidates, null);
+                            }, token);
+                        }
+                        catch (TaskCanceledException)
+                        {
+                        }
                     }
                 }
             }

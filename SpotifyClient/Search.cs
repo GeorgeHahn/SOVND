@@ -102,7 +102,7 @@ namespace SpotifyClient
                 Search search = new Search();
                 search._d = new search_complete_cb_delegate(search.search_complete);
                 search._callbackPtr = Marshal.GetFunctionPointerForDelegate(search._d);
-                search._searchPtr = sp_search_create(Session.SessionPtr, Functions.StringToPtr(keywords), 0, 50, 0, 50, 0, 50, 0, 50, sp_search_type.SP_SEARCH_STANDARD, search._callbackPtr, IntPtr.Zero);
+                search._searchPtr = sp_search_create(Session.SessionPtr, Functions.StringToPtr(keywords), 0, 50, 0, 50, 0, 50, 0, 0, sp_search_type.SP_SEARCH_STANDARD, search._callbackPtr, IntPtr.Zero);
                 return search;
             }
             catch (Exception ex)

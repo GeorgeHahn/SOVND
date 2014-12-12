@@ -54,6 +54,7 @@ namespace SpotifyClient
         private static Action<IntPtr> d_on_logged_in = new Action<IntPtr>(Session_OnLoggedIn);
         private static Thread _t;
         private static object _loginLock = new object();
+        private static object ALLTHETHINGS = new object();
 
         private static readonly int REQUEST_TIMEOUT = 20;
         private static readonly string LOG_MODULE = "Spotify";
@@ -314,12 +315,13 @@ namespace SpotifyClient
             if (Session.SessionPtr == IntPtr.Zero)
                 throw new ApplicationException("No session");
 
-            var search = Search.BeginSearch(keywords);
+            LogTo.Trace("Getting search: {0}", keywords);
+            Search search = Search.BeginSearch(keywords);
 
             if (!waitFor(delegate
-                {
-                    return search.IsLoaded;
-                }, REQUEST_TIMEOUT))
+            {
+                return search.IsLoaded;
+            }, REQUEST_TIMEOUT))
             {
                 Log.Warning(LOG_MODULE, "Search timeout");
                 return null;
@@ -331,6 +333,7 @@ namespace SpotifyClient
                 Log.Warning(LOG_MODULE, "Search failed: {0}", err);
                 return null;
             }
+
             return search;
         }
 
@@ -388,18 +391,18 @@ namespace SpotifyClient
             if (Session.SessionPtr == IntPtr.Zero)
                 throw new ApplicationException("No session");
 
+            LogTo.Trace("Getting art: {0}", link);
+
             IntPtr linkPtr = Functions.StringToLinkPtr(link);
             if (linkPtr == IntPtr.Zero)
                 return null;
             try
             {
                 IntPtr coverPtr = sp_image_create_from_link(Session.SessionPtr, linkPtr);
+
                 using (Image img = Image.Load(coverPtr))
                 {
-                    if (!waitFor(delegate()
-                    {
-                        return img.IsLoaded;
-                    }, 1))
+                    if (!waitFor(() => img.IsLoaded, 2))
                         return null;
 
                     var err = img.GetLoadError();
