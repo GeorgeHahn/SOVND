@@ -1,4 +1,7 @@
-﻿using BugSense;
+﻿using System.Diagnostics;
+using System.Reflection;
+using Anotar.NLog;
+using BugSense;
 using NLog;
 using NLog.Config;
 using NLog.Slack;
@@ -40,6 +43,9 @@ namespace SOVND.Client.Util
             LogManager.Configuration = config;
 
             BugSenseHandler.Instance.UserIdentifier = username;
+
+            var ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            LogTo.Error("SOVND Ver {0} running as {1}", ver, username);
         }
     }
 }
