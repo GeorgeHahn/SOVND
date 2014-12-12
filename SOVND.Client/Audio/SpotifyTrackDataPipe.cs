@@ -36,20 +36,15 @@ namespace SOVND.Client.Audio
 {
     public class SpotifyTrackDataPipe : IDisposable
     {
-        private bool _complete;
         private static bool _loaded;
-        private bool logonce;
 
         private static BufferedWaveProvider _wave;
-        private static WaveFormat waveFormat;
-
-        private int jitter;
+        private static WaveFormat _waveFormat;
+        private static int _jitter;
 
         private Action _stop;
         private Action<BufferedWaveProvider> _newFormat;
         private Action _init;
-
-        public bool Complete { get { return _complete; } }
 
         public SpotifyTrackDataPipe()
         {
@@ -78,7 +73,6 @@ namespace SOVND.Client.Audio
 
         public void StartStreaming(DateTime startTime, IntPtr _trackPtr, Action init, Action<BufferedWaveProvider> newFormat, Action stop)
         {
-            logonce = false;
             _init = init;
             _stop = stop;
             _newFormat = newFormat;
@@ -115,9 +109,9 @@ namespace SOVND.Client.Audio
             if (_wave == null)
                 return;
 
-            obj.samples = _wave.BufferedBytes / 2;
-            obj.stutter = jitter;
-            jitter = 0;
+            obj.samples = _wave.BufferedBytes;
+            obj.stutter = _jitter;
+            _jitter = 0;
         }
 
         private void Session_OnAudioStreamComplete(object obj)
@@ -128,27 +122,26 @@ namespace SOVND.Client.Audio
 
         private void Session_OnAudioDataArrived(byte[] buffer, sp_audioformat format)
         {
-            if ((waveFormat == null) || (format.channels != waveFormat.Channels) || (format.sample_rate != waveFormat.SampleRate))
-            {
+            if ((_waveFormat == null) || (format.channels != _waveFormat.Channels) || (format.sample_rate != _waveFormat.SampleRate))
                 SetAudioFormat(format);
-            }
 
-            if (!_complete && _loaded)
-            {
-                // Try to keep buffer mostly full
-                if (_wave.BufferedBytes < _wave.BufferLength - 40000)
-                    jitter++;
+            // Try to keep buffer mostly full
+            if (_wave.BufferedBytes < _wave.BufferLength - 40000) // 40000 samples = ~1s
+                _jitter++;
 
-                _wave.AddSamples(buffer, 0, buffer.Length);
-            }
+            _wave.AddSamples(buffer, 0, buffer.Length);
+        }
+
+        private static void SetupBuffer(sp_audioformat format)
+        {
+            _waveFormat = new WaveFormat(format.sample_rate, 16, format.channels);
+            _wave = new BufferedWaveProvider(_waveFormat);
+            _wave.BufferDuration = TimeSpan.FromSeconds(15);
         }
 
         private void SetAudioFormat(sp_audioformat format)
         {
-            waveFormat = new WaveFormat(format.sample_rate, 16, format.channels);
-            _wave = new BufferedWaveProvider(waveFormat);
-            _wave.BufferDuration = TimeSpan.FromSeconds(15);
-
+            SetupBuffer(format);
             _newFormat(_wave);
             _init();
         }
