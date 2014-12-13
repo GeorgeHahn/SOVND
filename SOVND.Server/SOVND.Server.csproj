@@ -51,6 +51,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>MonoBins\HipchatApiV2.dll</HintPath>
     </Reference>
+    <Reference Include="Immutable">
+      <HintPath>..\packages\Immutable.Fody.0.3.4.0\Lib\NET35\Immutable.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="M2Mqtt, Version=3.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>MonoBins\M2Mqtt.dll</HintPath>
