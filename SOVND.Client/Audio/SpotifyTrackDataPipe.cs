@@ -83,6 +83,24 @@ namespace SOVND.Client.Audio
             _stop = stop;
             _newFormat = newFormat;
 
+            // Prefetch
+            int seektime = (int)(DateTime.UtcNow - startTime).TotalMilliseconds;
+            if (seektime < -250)
+            {
+                Session.PrefetchTrack(_trackPtr); // I have no clue how long this takes
+                LogTo.Error("STDP: We have some time ({0}ms), prefetching track", seektime);
+            }
+
+            // Time sync
+            seektime = (int)(DateTime.UtcNow - startTime).TotalMilliseconds;
+            if ((seektime < 0) && (startTime != DateTime.MinValue))
+            {
+                LogTo.Error("STDP: StartStreaming(): Playing in {0}ms", seektime);
+                Thread.Sleep(-seektime);
+                seektime = 0;
+            }
+
+            // Libspotify play + error handling
             var error = Session.LoadPlayer(_trackPtr);
             while (error == sp_error.IS_LOADING)
             {
@@ -106,25 +124,12 @@ namespace SOVND.Client.Audio
                 return;
             }
 
-            int seektime = (int)(DateTime.UtcNow - startTime).TotalMilliseconds;
-            if (seektime < -250)
-            {
-                Session.PrefetchTrack(_trackPtr); // I have no clue how long this takes
-                LogTo.Error("STDP: We have some time ({0}ms), prefetching track", seektime);
-            }
-
-            seektime = (int)(DateTime.UtcNow - startTime).TotalMilliseconds;
-            if ((seektime < 0) && (startTime != DateTime.MinValue))
-            {
-                LogTo.Error("STDP: StartStreaming(): Playing in {0}ms", seektime);
-                Thread.Sleep(-seektime);
-            }
-
+            // Play
             _bufferset = false;
             LogTo.Trace("STDP: StartStreaming(): Session.Play()");
             Session.Play();
 
-            if (seektime < 0)
+            if (seektime <= 0)
                 return;
 
             if (startTime != DateTime.MinValue)
