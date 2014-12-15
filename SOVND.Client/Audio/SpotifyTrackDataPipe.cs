@@ -107,12 +107,14 @@ namespace SOVND.Client.Audio
             }
 
             int seektime = (int)(DateTime.UtcNow - startTime).TotalMilliseconds;
+            if (seektime < -250)
+                Session.PrefetchTrack(_trackPtr); // I have no clue how long this takes
 
-            // TODO if time is more than a few ms in the future, prefetch song
+            seektime = (int)(DateTime.UtcNow - startTime).TotalMilliseconds;
             if ((seektime < 0) && (startTime != DateTime.MinValue))
             {
-                LogTo.Trace("STDP: StartStreaming(): Playing in \{seektime}ms");
-                Thread.Sleep(Math.Abs(seektime));
+                LogTo.Trace("STDP: StartStreaming(): Playing in {0}ms", seektime);
+                Thread.Sleep(-seektime);
             }
 
             _bufferset = false;

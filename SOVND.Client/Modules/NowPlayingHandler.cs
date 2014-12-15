@@ -48,10 +48,10 @@ namespace SOVND.Client.Modules
                     else
                     {
                         // This is the third song or later, adjust the time offset
-                        song.votetime += ServerLag.Value;
+                        song.votetime -= ServerLag.Value;
                     }
                     
-                    song.votetime -= PrefetchTime;
+                    song.votetime += PrefetchTime;
 
                     StopStreaming();
 
