@@ -44,16 +44,15 @@ namespace SOVND.Client.Modules
                     {
                         // This is the second song - capture the lag offset
                         ServerLag = Time.Timestamp() - song.votetime;
+                        LogTo.Error("Server lag set to {0}ms", ServerLag.Value);
                     }
                     else
                     {
                         // This is the third song or later, adjust the time offset
-                        song.votetime -= ServerLag.Value;
+                        song.votetime += ServerLag.Value;
                     }
                     
                     song.votetime += PrefetchTime;
-
-                    StopStreaming();
 
                     if (string.IsNullOrWhiteSpace(song.songID))
                     {
@@ -115,8 +114,6 @@ namespace SOVND.Client.Modules
 
         public void StopStreaming()
         {
-            ASongHasPlayed = false;
-            ServerLag = null;
             streamingaudio?.Dispose();
         }
 
