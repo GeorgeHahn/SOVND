@@ -8,6 +8,7 @@ using SOVND.Client.Util;
 using SOVND.Lib.Models;
 using SpotifyClient;
 using System.Threading.Tasks;
+using SOVND.Lib.Utils;
 
 namespace SOVND.Client.Modules
 {
@@ -18,7 +19,11 @@ namespace SOVND.Client.Modules
         private SpotifyTrackDataPipe streamingaudio;
         private readonly string _channel;
 
+        private bool ASongHasPlayed;
+        private long? ServerLag;
+
         private readonly DateTime UnixTimeBase = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        const int PrefetchTime = 1000;
 
         public NowPlayingHandler(AuthPair auth, string channelName) : base(auth)
         {
@@ -29,6 +34,24 @@ namespace SOVND.Client.Modules
                 Task.Run(() =>
                 {
                     NowPlaying song = JsonConvert.DeserializeObject<NowPlaying>(_.Message);
+
+                    if (!ASongHasPlayed)
+                    {
+                        // This is the first song to play in this channel (probably a partial)
+                        ASongHasPlayed = true;
+                    }
+                    else if (ServerLag == null)
+                    {
+                        // This is the second song - capture the lag offset
+                        ServerLag = Time.Timestamp() - song.votetime;
+                    }
+                    else
+                    {
+                        // This is the third song or later, adjust the time offset
+                        song.votetime += ServerLag.Value;
+                    }
+                    
+                    song.votetime -= PrefetchTime;
 
                     StopStreaming();
 
@@ -92,6 +115,8 @@ namespace SOVND.Client.Modules
 
         public void StopStreaming()
         {
+            ASongHasPlayed = false;
+            ServerLag = null;
             streamingaudio?.Dispose();
         }
 

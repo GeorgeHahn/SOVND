@@ -154,6 +154,11 @@ namespace SpotifyClient
             return sp_session_player_load(_sessionPtr, trackPtr);
         }
 
+        public static sp_error PrefetchTrack(IntPtr trackPtr)
+        {
+            return sp_session_player_prefetch(_sessionPtr, trackPtr);
+        }
+
         public static void Play()
         {
             sp_session_player_play(_sessionPtr, true);
@@ -218,6 +223,7 @@ namespace SpotifyClient
 
             IntPtr sessionPtr;
             sp_error err = sp_session_create(ref config, out sessionPtr);
+            sp_session_set_cache_size(sessionPtr, 0);
 
             if (err == sp_error.OK)
             {
