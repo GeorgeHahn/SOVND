@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Anotar.NLog;
@@ -8,6 +10,7 @@ using BugSense.Core.Model;
 using NLog;
 using NLog.Config;
 using NLog.Slack;
+using NLog.Targets;
 using NLog.Targets.Wrappers;
 
 namespace SOVND.Client.Util
@@ -21,6 +24,17 @@ namespace SOVND.Client.Util
             SetupLogging("");
         }
 
+        public static IEnumerable<string> Tail(int lines)
+        {
+            if (memoryTarget == null)
+                return null;
+            if(memoryTarget.Logs.Count > lines)
+                return memoryTarget.Logs.Skip(Math.Max(0, memoryTarget.Logs.Count() - lines)).Take(lines);
+            return memoryTarget.Logs;
+        }
+
+        private static MemoryTarget memoryTarget;
+
         public static void SetupLogging(string username)
         {
             Username = username;
@@ -28,27 +42,39 @@ namespace SOVND.Client.Util
             if(config == null)
                 config = new LoggingConfiguration();
 
+            var loggername = "asyncslack";
+            if (config.FindTargetByName(loggername) != null)
+                config.RemoveTarget(loggername);
+
             var slackTarget = new SlackTarget
             {
-                Layout = "${message}",
+                Layout = "${message} ${exception:format=tostring}",
                 WebHookUrl = "https://hooks.slack.com/services/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",
                 Channel = "#sovnd-client-logs",
                 Username = username,
                 Compact = true
             };
 
-            var loggername = "asyncslack";
-            if (config.FindTargetByName(loggername) != null)
-                config.RemoveTarget(loggername);
-
-            AsyncTargetWrapper asyncWrapper = new AsyncTargetWrapper(slackTarget);
-            config.AddTarget(loggername, asyncWrapper);
-
-            var slackTargetRules = new LoggingRule("*", LogLevel.Error, asyncWrapper);
+            AsyncTargetWrapper asyncSlack = new AsyncTargetWrapper(slackTarget);
+            config.AddTarget(loggername, asyncSlack);
+            var slackTargetRules = new LoggingRule("*", LogLevel.Error, asyncSlack);
             config.LoggingRules.Add(slackTargetRules);
 
-            LogManager.Configuration = config;
 
+            loggername = "asyncmem";
+            if (memoryTarget == null)
+            {
+                memoryTarget = new MemoryTarget { Layout = "${message} ${exception:format=tostring}" };
+                config.AddTarget(loggername, memoryTarget);
+
+                var memTargetRules = new LoggingRule("*", LogLevel.Trace, memoryTarget);
+                config.LoggingRules.Add(memTargetRules);
+
+                if (config.FindTargetByName(loggername) != null)
+                    config.RemoveTarget(loggername);
+            }
+
+            LogManager.Configuration = config;
             BugSenseHandler.Instance.UserIdentifier = username;
 
             var ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -65,10 +91,9 @@ namespace SOVND.Client.Util
                 var extraData = new LimitedCrashExtraDataList
                 {
                     new CrashExtraData("username", Logging.Username),
-                    new CrashExtraData("tail-15", "goes here")
+                    new CrashExtraData("tail-15", string.Join(Environment.NewLine, Logging.Tail(15))),
                 };
-
-                BugSenseLogResult logResult = BugSenseHandler.Instance.LogException(exception, extraData);
+                BugSenseHandler.Instance.LogException(exception, extraData);
             });
         }
     }
