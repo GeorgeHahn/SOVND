@@ -31,11 +31,12 @@ namespace SOVND.Client.Util
                 Compact = true
             };
 
-            if (config.FindTargetByName("slack") != null)
-                config.RemoveTarget("slack");
+            var loggername = "asyncslack";
+            if (config.FindTargetByName(loggername) != null)
+                config.RemoveTarget(loggername);
 
             AsyncTargetWrapper asyncWrapper = new AsyncTargetWrapper(slackTarget);
-            config.AddTarget("async", asyncWrapper);
+            config.AddTarget(loggername, asyncWrapper);
 
             var slackTargetRules = new LoggingRule("*", LogLevel.Error, asyncWrapper);
             config.LoggingRules.Add(slackTargetRules);
