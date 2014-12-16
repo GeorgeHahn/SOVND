@@ -405,12 +405,7 @@ namespace SpotifyClient
                 using (Image img = Image.Load(coverPtr))
                 {
                     if (!waitFor(() => img.IsLoaded, timeout))
-                    {
-                        var exrr = img.GetLoadError();
-                        if(exrr == sp_error.IS_LOADING)
-                            return null;
-                        throw new ApplicationException(string.Format("Image failed to load: {0}", exrr));
-                    }
+                        return null;
 
                     var err = img.GetLoadError();
                     if (err != sp_error.OK)
