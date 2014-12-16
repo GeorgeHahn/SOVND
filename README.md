@@ -2,7 +2,7 @@
 
 Open source replacement for Soundrop.fm
 
-[Alpha signup](http://104.131.87.42:2880/)
+[Beta signup](http://www.sovndapp.com/)
 
 Clients:
   - Desktop client ([alpha release](https://github.com/GeorgeHahn/SOVND/releases)) - [Current issues](https://github.com/GeorgeHahn/SOVND/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Beta+1%22)
