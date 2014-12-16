@@ -386,7 +386,7 @@ namespace SpotifyClient
             }
         }
 
-        public static byte[] GetAlbumArt(string link)
+        public static byte[] GetAlbumArt(string link, int timeout = 2)
         {
             if (Session.SessionPtr == IntPtr.Zero)
                 throw new ApplicationException("No session");
@@ -404,13 +404,18 @@ namespace SpotifyClient
 
                 using (Image img = Image.Load(coverPtr))
                 {
-                    if (!waitFor(() => img.IsLoaded, 2))
-                        return null;
+                    if (!waitFor(() => img.IsLoaded, timeout))
+                    {
+                        var exrr = img.GetLoadError();
+                        if(exrr == sp_error.IS_LOADING)
+                            return null;
+                        throw new ApplicationException(string.Format("Image failed to load: {0}", exrr));
+                    }
 
                     var err = img.GetLoadError();
                     if (err != sp_error.OK)
                     {
-                        throw new ApplicationException(String.Format("Image failed to load: {0}", err));
+                        throw new ApplicationException(string.Format("Image failed to load: {0}", err));
                     }
 
                     //sp_imageformat imageformat = libspotify.sp_image_format(img.ImagePtr);

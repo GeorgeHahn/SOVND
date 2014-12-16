@@ -204,9 +204,24 @@ namespace SpotifyClient
 
             try
             {
+                int timeout = 1;
+                int tries = 0;
                 while (_artwork == null)
                 {
-                    var buffer = GetAlbumArtBuffer();
+                    sp_image_size size = sp_image_size.SP_IMAGE_SIZE_SMALL;
+                    if (timeout < 30)
+                        timeout = timeout*2;
+                    else
+                    {
+                        tries++;
+                        if(tries % 3 == 0)
+                            size = sp_image_size.SP_IMAGE_SIZE_SMALL;
+                        else if (tries % 3 == 1)
+                            size = sp_image_size.SP_IMAGE_SIZE_NORMAL;
+                        else if (tries % 3 == 2)
+                            size = sp_image_size.SP_IMAGE_SIZE_LARGE;
+                    }
+                    var buffer = GetAlbumArtBuffer(timeout, size);
                     if (buffer != null)
                         _artwork = System.Drawing.Image.FromStream(new MemoryStream(buffer));
                     if (_artwork == null)
@@ -237,11 +252,11 @@ namespace SpotifyClient
         }
 
         private string artlink;
-        private byte[] GetAlbumArtBuffer()
+        private byte[] GetAlbumArtBuffer(int timeout = 2, sp_image_size size = sp_image_size.SP_IMAGE_SIZE_SMALL)
         {
             if(string.IsNullOrEmpty(artlink))
-                artlink = GetAlbumArtLink();
-            return Spotify.GetAlbumArt(artlink);
+                artlink = GetAlbumArtLink(size);
+            return Spotify.GetAlbumArt(artlink, timeout);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
