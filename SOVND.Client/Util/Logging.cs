@@ -80,6 +80,11 @@ namespace SOVND.Client.Util
             var ver = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             LogTo.Error("SOVND Ver {0} running as {1}", ver, username);
         }
+
+        public static void Event(string eventName)
+        {
+            BugSenseHandler.Instance.SendEventAsync(eventName);
+        }
     }
 
     public static class AsyncErrorHandler

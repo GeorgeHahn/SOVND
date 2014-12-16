@@ -79,7 +79,8 @@ namespace SOVND.Client.Modules
         private void PlaySong(string songID, DateTime startTime)
         {
             LogTo.Debug("Playing: {0}", songID);
-            
+            Logging.Event("Played song");
+
             streamingaudio = new SpotifyTrackDataPipe();
             playingTrack = new Track(songID);
 

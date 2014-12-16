@@ -184,10 +184,11 @@ namespace SOVND.Client
                     searchToken.Cancel();
                 Track.Check();
                 BindToPlaylist();
+                Logging.Event("Searched");
             }
         }
 
-        private async void AddSong_Click(object sender, RoutedEventArgs e)
+        private void AddSong_Click(object sender, RoutedEventArgs e)
         {
             var item = ((Button)sender).DataContext as Track;
             if (item == null)
@@ -198,7 +199,7 @@ namespace SOVND.Client
             EnqueueTrack(item);
             tbSearch.Clear();
 
-            await BugSenseHandler.Instance.SendEventAsync("Added song");
+            Logging.Event("Added song");
         }
         
         private void VoteUp_Click(object sender, RoutedEventArgs e)
@@ -208,6 +209,8 @@ namespace SOVND.Client
                 return;
 
             EnqueueTrack(item.track);
+
+            Logging.Event("Voted");
         }
 
         private void EnqueueTrack(Track track)
@@ -219,6 +222,7 @@ namespace SOVND.Client
         {
             _client.SendChat(chatinput.Text);
             chatinput.Clear();
+            Logging.Event("Chatted");
         }
 
         private void NewChannel(object sender, RoutedEventArgs e)
@@ -228,7 +232,10 @@ namespace SOVND.Client
             {
                 var channel = newch.ChannelName;
                 _client.SubscribeToChannel(channel);
+                Logging.Event("Created new channel");
             }
+            else
+                Logging.Event("Cancelled new channel creation");
         }
 
         private void Del_Click(object sender, RoutedEventArgs e)
@@ -238,6 +245,7 @@ namespace SOVND.Client
                 return;
 
             _client.DeleteSong(item);
+            Logging.Event("Deleted song");
         }
 
         private void Blk_Click(object sender, RoutedEventArgs e)
@@ -247,6 +255,7 @@ namespace SOVND.Client
                 return;
 
             _client.BlockSong(item);
+            Logging.Event("Blocked song");
         }
 
         private void Rpt_Click(object sender, RoutedEventArgs e)
@@ -256,6 +265,7 @@ namespace SOVND.Client
                 return;
 
             _client.ReportSong(item);
+            Logging.Event("Reported song");
         }
 
         private void Channelbox_SelectionChanged(object sender, RoutedEventArgs e)
@@ -268,6 +278,7 @@ namespace SOVND.Client
                 _player = _playerFactory.CreatePlayer(channel.Name);
                 _client.SubscribeToChannel(channel.Name);
                 SetupChannel();
+                Logging.Event("Switched channels");
             }
         }
 
