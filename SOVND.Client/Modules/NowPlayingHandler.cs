@@ -82,7 +82,7 @@ namespace SOVND.Client.Modules
             Logging.Event("Played song");
 
             streamingaudio = new SpotifyTrackDataPipe();
-            playingTrack = new Track(songID);
+            playingTrack = new Track(songID, false);
 
             streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr,
                 () =>
