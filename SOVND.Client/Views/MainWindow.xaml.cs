@@ -10,6 +10,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
+using BugSense;
+using BugSense.Core.Model;
 using SOVND.Client.Modules;
 using SOVND.Client.Util;
 using SOVND.Client.ViewModels;
@@ -185,7 +187,7 @@ namespace SOVND.Client
             }
         }
 
-        private void AddSong_Click(object sender, RoutedEventArgs e)
+        private async void AddSong_Click(object sender, RoutedEventArgs e)
         {
             var item = ((Button)sender).DataContext as Track;
             if (item == null)
@@ -195,6 +197,8 @@ namespace SOVND.Client
 
             EnqueueTrack(item);
             tbSearch.Clear();
+
+            await BugSenseHandler.Instance.SendEventAsync("Added song");
         }
         
         private void VoteUp_Click(object sender, RoutedEventArgs e)
