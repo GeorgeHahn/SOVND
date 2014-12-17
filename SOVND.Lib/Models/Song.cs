@@ -72,7 +72,7 @@ namespace SOVND.Lib.Models
 
         public override string ToString()
         {
-            return string.Format("ID: {0}, Votes: {1}, Votetime: {2}, Voters: {3}", SongID, Votes, Votetime, Voters);
+            return string.Format("ID: {0}, Votes: {1}, Votetime: {2}, Voters: {3}, Playing: {4}", SongID, Votes, Votetime, Voters, Playing);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

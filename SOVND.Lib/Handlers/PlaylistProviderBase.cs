@@ -114,22 +114,14 @@ namespace SOVND.Lib.Handlers
 
                 if (song == null)
                 {
-                    song = new Song(newsong.SongID, true)
-                    {
-                        Removed = newsong.Removed,
-                        Voters = newsong.Voters,
-                        Votes = newsong.Votes,
-                        Votetime = newsong.Votetime
-                    };
+                    song = new Song(newsong.SongID, true);
                     AddNewSong(song);
                 }
-                else
-                {
-                    song.Voters = newsong.Voters;
-                    song.Votes = newsong.Votes;
-                    song.Votetime = newsong.Votetime;
-                    song.Removed = newsong.Removed;
-                }
+                song.Voters = newsong.Voters;
+                song.Votes = newsong.Votes;
+                song.Votetime = newsong.Votetime;
+                song.Removed = newsong.Removed;
+                song.Playing = newsong.Playing;
 
                 LogTo.Debug("[{0}] Song {1} modified: {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.ToString());
             };
