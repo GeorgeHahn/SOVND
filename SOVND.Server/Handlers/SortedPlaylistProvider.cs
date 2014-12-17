@@ -42,12 +42,20 @@ namespace SOVND.Server.Handlers
             var song_voters = GetVotersID(songID);
             var song_votes = GetVotesID(songID);
 
+            int votes;
+            int.TryParse(_redis.StringGet(song_votes), out votes);
+
+            string votersstring = null;
+            var voters = _redis.SetMembers(song_voters).ToStringArray();
+            if (voters != null)
+                votersstring = string.Join(",", voters);
+
             var newsong = new SongModel
             {
                 Playing = playing,
                 SongID = songID,
-                Votes = int.Parse(_redis.StringGet(song_votes)),
-                Voters = string.Join(",", _redis.SetMembers(song_voters).ToStringArray()),
+                Votes = votes,
+                Voters = votersstring,
                 Votetime = Time.Timestamp()
             };
             Publish("/\{_channel.Name}/playlist/\{songID}", JsonConvert.SerializeObject(newsong), true);

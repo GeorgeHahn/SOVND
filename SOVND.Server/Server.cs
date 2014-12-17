@@ -225,18 +225,15 @@ namespace SOVND.Server
         {
             LogTo.Debug("[{0}] {1} removed song {2}", channel, username, songID);
 
-            if (!_redis.SetContains(GetChannelModeratorID(channel), username))
-            {
-                LogTo.Error("[{0}] Error: User {1} not a moderator of channel", channel, username);
-                return;
-            }
+            //if (!_redis.SetContains(GetChannelModeratorID(channel), username))
+            //{
+            //    LogTo.Error("[{0}] Error: User {1} not a moderator of channel", channel, username);
+            //    return;
+            //}
 
             CancellationTokenSource value;
             if (tokens.TryGetValue(songID, out value))
-            {
-                LogTo.Trace("Cancelling song token for {0}", songID);
                 value.Cancel();
-            }
 
             Publish("/\{channel}/playlist/\{songID}", "", true);
         }
@@ -270,8 +267,8 @@ namespace SOVND.Server
                     LogTo.Debug("Already running scheduler for {0}", channelHandler.Name);
                     return;
                 }
-                else
-                    runningScheduler[channelHandler] = true;
+
+                runningScheduler[channelHandler] = true;
             }
 
             var channel = channelHandler.Name;
