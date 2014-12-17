@@ -235,7 +235,7 @@ namespace SOVND.Server
             if (tokens.TryGetValue(songID, out value))
                 value.Cancel();
 
-            Publish("/\{channel}/playlist/\{songID}", "", true);
+            Publish("/\{channel}/playlist/\{songID}", "remove", true);
         }
 
         private void BlockSong(string channel, string songID, string username)

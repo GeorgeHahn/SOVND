@@ -144,7 +144,7 @@ namespace SOVND.Server.Handlers
                 Song song;
                 _channel.SongsByID.TryGetValue(_.songid, out song);
 
-                if (string.IsNullOrEmpty(_.Message))
+                if (string.IsNullOrEmpty(_.Message) || (_.Message == "remove"))
                 {
                     // Remove song
                     if (song != null)
@@ -189,7 +189,7 @@ namespace SOVND.Server.Handlers
             Disconnect();
         }
 
-        public List<Song> Songs { get; private set; }
+        public List<Song> Songs { get; }
 
         /// <summary>
         /// Gets the song at the top of the list
@@ -249,10 +249,6 @@ namespace SOVND.Server.Handlers
         {
             _redis = redis.redis.GetDatabase();
             Songs = new List<Song>();
-
-            staticredis = _redis;
         }
-
-        private static IDatabase staticredis;
     }
 }

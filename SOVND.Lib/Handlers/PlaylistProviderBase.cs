@@ -97,7 +97,7 @@ namespace SOVND.Lib.Handlers
                 Song song;
                 _channel.SongsByID.TryGetValue(_.songid, out song);
 
-                if (_.Message == "")
+                if ((_.Message == "") || (_.Message == "remove"))
                 {
                     // Remove song
                     if (song != null)
