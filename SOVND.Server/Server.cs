@@ -282,6 +282,8 @@ namespace SOVND.Server
         {
             Song song = playlist.GetTopSong();
 
+            LogTo.Trace("[{0}] {1}", channel, song?.ToString());
+
             if (song == null)
             {
                 LogTo.Debug("[{0}] No songs in channel, waiting for a song", channel);
@@ -348,7 +350,7 @@ namespace SOVND.Server
             }
 
             SortedPlaylistProvider playlist = (SortedPlaylistProvider)channel.Playlist;
-            playlist.SetPlaying(song.SongID, true);
+            playlist.SetPlaying(song.SongID, false);
 
             // Set prev song to 0 votes, 0 vote time
             channel.ClearVotes(song.SongID);

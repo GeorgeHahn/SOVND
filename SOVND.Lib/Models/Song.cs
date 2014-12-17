@@ -56,9 +56,6 @@ namespace SOVND.Lib.Models
             if (two == null)
                 throw new ArgumentException("Obj is not Song");
 
-            if (Playing && !two.Playing)
-                return -1;
-
             if (Votes > two.Votes)
                 return -1;
             if (two.Votes > Votes)
