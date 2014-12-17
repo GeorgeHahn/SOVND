@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Anotar.NLog;
 using Charlotte;
+using Newtonsoft.Json;
 using SOVND.Lib.Models;
 
 namespace SOVND.Lib.Handlers
@@ -78,47 +79,60 @@ namespace SOVND.Lib.Handlers
             AddSong(song);
         }
 
+        private void AddNewSong(Song song)
+        {
+            LogTo.Trace("Added song {0}", song.SongID);
+            _channel.SongsByID[song.SongID] = song;
+
+            AddSong(song);
+        }
+
         public void Subscribe(ChannelHandler channel)
         {
             _channel = channel;
 
             // ChannelHandler playlists
-            On["/" + _channel.Name + "/playlist/{songid}/votes"] = _ =>
+            On["/" + _channel.Name + "/playlist/{songid}"] = _ =>
             {
+                Song song;
+                _channel.SongsByID.TryGetValue(_.songid, out song);
+
                 if (_.Message == "")
                 {
                     // Remove song
-                    if (_channel.SongsByID.ContainsKey(_.songid))
+                    if (song != null)
                     {
-                        Song song = _channel.SongsByID[_.songid];
                         RemoveSong(song);
-                        LogTo.Debug("[{0}] Removed song {1}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID);
+                        LogTo.Debug("[{0}] Removed song {1}", _channel.Name,
+                            song.track.Loaded ? song.track.Name : song.SongID);
                         _channel.SongsByID.Remove(_.songid);
                     }
+                    return;
+                }
+
+                SongModel newsong = JsonConvert.DeserializeObject<SongModel>(_.Message);
+
+                if (song == null)
+                {
+                    song = new Song(newsong.SongID, true)
+                    {
+                        Removed = newsong.Removed,
+                        Voters = newsong.Voters,
+                        Votes = newsong.Votes,
+                        Votetime = newsong.Votetime
+                    };
+                    AddNewSong(song);
                 }
                 else
                 {
-                    if (!_channel.SongsByID.ContainsKey(_.songid))
-                        AddNewSong(_.songid);
-                    Song song = _channel.SongsByID[_.songid];
-                    song.Votes = int.Parse(_.Message);
-
-                    LogTo.Debug("[{0}] Votes for song {1} set to {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.Votes);
+                    song.Voters = newsong.Voters;
+                    song.Votes = newsong.Votes;
+                    song.Votetime = newsong.Votetime;
+                    song.Removed = newsong.Removed;
                 }
+
+                LogTo.Debug("[{0}] Song {1} modified: {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.ToString());
             };
-
-            On["/" + _channel.Name + "/playlist/{songid}/votetime"] = _ =>
-            {
-                // See if this is just to delete the song
-                if (_.Message == "")
-                    return;
-
-                if (!_channel.SongsByID.ContainsKey(_.songid))
-                    AddNewSong(_.songid);
-                var song = _channel.SongsByID[_.songid];
-                song.Votetime = long.Parse(_.Message);
-            };
-
             Run();
         }
 

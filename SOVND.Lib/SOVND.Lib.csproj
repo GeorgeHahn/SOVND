@@ -90,6 +90,7 @@
     <Compile Include="Models\IMQTTSettings.cs" />
     <Compile Include="Models\NowPlaying.cs" />
     <Compile Include="Models\Song.cs" />
+    <Compile Include="Models\SongModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\FilesystemSettingsProvider.cs" />
     <Compile Include="Settings\IAppName.cs" />

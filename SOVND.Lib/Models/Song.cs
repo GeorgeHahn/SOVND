@@ -48,12 +48,16 @@ namespace SOVND.Lib.Models
         public string Voters { get; set; }
         public bool Removed { get; set; }
         public Track track { get; set; }
+        public bool Playing { get; set; }
 
         public int CompareTo(object obj)
         {
             var two = obj as Song;
             if (two == null)
                 throw new ArgumentException("Obj is not Song");
+
+            if (Playing && !two.Playing)
+                return -1;
 
             if (Votes > two.Votes)
                 return -1;
@@ -64,6 +68,11 @@ namespace SOVND.Lib.Models
             if (two.Votetime < Votetime)
                 return 1;
             return 0;
+        }
+
+        public override string ToString()
+        {
+            return string.Format("ID: {0}, Votes: {1}, Votetime: {2}, Voters: {3}", SongID, Votes, Votetime, Voters);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

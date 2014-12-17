@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Anotar.NLog;
 using Charlotte;
+using Newtonsoft.Json;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
 using SOVND.Lib.Utils;
@@ -54,15 +55,21 @@ namespace SOVND.Server.Handlers
                 _redis.StringIncrement(song_votes);
                 _redis.SetAdd(song_voters, username);
 
-                Publish("/\{_channel.Name}/playlist/\{songID}/votes", _redis.StringGet(song_votes), true);
-                Publish("/\{_channel.Name}/playlist/\{songID}/votetime", Time.Timestamp().ToString(), true);
+                var newsong = new SongModel
+                {
+                    SongID = songID,
+                    Votes = int.Parse(_redis.StringGet(song_votes)),
+                    Voters = string.Join(",", _redis.SetMembers(song_voters).ToStringArray()),
+                    Votetime = Time.Timestamp()
+                };
+                Publish("/\{_channel.Name}/playlist/\{songID}", JsonConvert.SerializeObject(newsong), true);
 
                 // TODO publish voter names
                 return true;
             }
             else
             {
-                LogTo.Error("[{0}] Vote was invalid: {1} voted for {2}", chname, username, songID);
+                LogTo.Error("[{0}] Vote was invalid: {1} voted for {2}", _channel.Name, username, songID);
                 return false;
             }
         }
@@ -92,8 +99,13 @@ namespace SOVND.Server.Handlers
             if (song.SongID != ID)
                 return;
 
-            LogTo.Trace("Added song {0}", ID);
-            _channel.SongsByID[ID] = song;
+            AddNewSong(song);
+        }
+
+        private void AddNewSong(Song song)
+        {
+            LogTo.Trace("Added song {0}", song.SongID);
+            _channel.SongsByID[song.SongID] = song;
 
             AddSong(song);
         }
@@ -103,51 +115,46 @@ namespace SOVND.Server.Handlers
             _channel = channel;
             chname = _channel.Name + ".";
 
-            // ChannelHandler playlists
-            On["/" + _channel.Name + "/playlist/{songid}/votes"] = _ =>
+            On["/" + _channel.Name + "/playlist/{songid}"] = _ =>
             {
-                if (_.Message == "") // Delete song
+                Song song;
+                _channel.SongsByID.TryGetValue(_.songid, out song);
+
+                if (_.Message == "")
                 {
-                    if (_channel.SongsByID.ContainsKey(_.songid))
+                    // Remove song
+                    if (song != null)
                     {
-                        Song songToRemove = _channel.SongsByID[_.songid];
-                        RemoveSong(songToRemove);
+                        RemoveSong(song);
                         LogTo.Debug("[{0}] Removed song {1}", _channel.Name,
-                            songToRemove.track.Loaded ? songToRemove.track.Name : songToRemove.SongID);
+                            song.track.Loaded ? song.track.Name : song.SongID);
                         _channel.SongsByID.Remove(_.songid);
                     }
                     return;
                 }
 
-                if (!_channel.SongsByID.ContainsKey(_.songid))
-                    AddNewSong(_.songid);
-
-                Song song = _channel.SongsByID[_.songid];
-
-                int songvotes;
-                if (!int.TryParse(_.Message, out songvotes))
+                SongModel newsong = JsonConvert.DeserializeObject<SongModel>(_.Message);
+                if (newsong == null)
                 {
-                    LogTo.Debug("[{0}] Invalid vote number, clearing. {1}", _channel.Name, (string) _.Message);
-                    Publish("/" + _channel.Name + "/playlist/\{_.songid}/votes", "0", true);
+                    LogTo.Debug("[{0}] Error: newsong is null");
                     return;
                 }
 
-                song.Votes = songvotes;
-                LogTo.Debug("[{0}] Votes for song {1} set to {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.Votes);
+                if (song == null)
+                {
+                    AddNewSong(newsong.SongID);
+                    song = _channel.SongsByID[_.songid];
+                }
+                else
+                {
+                    song.Voters = newsong.Voters;
+                    song.Votes = newsong.Votes;
+                    song.Votetime = newsong.Votetime;
+                    song.Removed = newsong.Removed;
+                }
+
+                LogTo.Debug("[{0}] Song {1} modified: {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.ToString());
             };
-
-            On["/" + _channel.Name + "/playlist/{songid}/votetime"] = _ =>
-            {
-                // See if this is just to delete the song
-                if (_.Message == "")
-                    return;
-
-                if (!_channel.SongsByID.ContainsKey(_.songid))
-                    AddNewSong(_.songid);
-                var song = _channel.SongsByID[_.songid];
-                song.Votetime = long.Parse(_.Message);
-            };
-
             Run();
         }
 
