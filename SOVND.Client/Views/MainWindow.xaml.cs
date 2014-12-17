@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -10,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media.Animation;
 using BugSense;
 using BugSense.Core.Model;
 using SOVND.Client.Modules;
@@ -139,50 +141,35 @@ namespace SOVND.Client
 
             if (!string.IsNullOrWhiteSpace(text))
             {
-                var shortlist = new List<Track>();
-                var candidates = new List<Track>();
-
                 if (searchToken != null)
-                {
                     searchToken.Cancel();
-                    // TODO accessviolation from libspotify if we continue and a track's albumart happens to be in the process of fetching
-                }
 
                 searchToken = new CancellationTokenSource();
                 var token = searchToken.Token;
 
                 lock (searchlock)
                 {
-                    var search = Spotify.GetSearch(text);
-
-                    if (search != null)
+                    Task.Run(() =>
                     {
-                        try
-                        {
-                            Task.Run(() =>
-                            {
-                                foreach (var trackPtr in search?.TrackPtrs)
-                                {
-                                    if (token.IsCancellationRequested)
-                                        return;
+                        var search = Spotify.GetSearch(text);
 
-                                    var track = new Track(trackPtr);
-                                    candidates.Add(track);
-                                }
-                                synchronization.Send((_) => lbPlaylist.ItemsSource = candidates, null);
-                            }, token);
-                        }
-                        catch (TaskCanceledException)
-                        {
-                        }
-                    }
+                        if (search == null)
+                            return;
+
+                        var tracks = from trackPtr in search.TrackPtrs
+                            select new Track(trackPtr);
+
+                        if (token.IsCancellationRequested)
+                            return;
+
+                        synchronization.Send((_) => lbPlaylist.ItemsSource = tracks.Take(10), null);
+                    }, token);
                 }
             }
             else
             {
                 if (searchToken != null)
                     searchToken.Cancel();
-                Track.Check();
                 BindToPlaylist();
                 Logging.Event("Searched");
             }
