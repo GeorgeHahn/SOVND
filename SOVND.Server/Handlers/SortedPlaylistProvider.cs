@@ -53,6 +53,14 @@ namespace SOVND.Server.Handlers
             Publish("/\{_channel.Name}/playlist/\{songID}", JsonConvert.SerializeObject(newsong), true);
         }
 
+        public static void RemoveSong(string channel, string songID)
+        {
+            staticredis.KeyDelete(channel + "." + songID + ".votes");
+            staticredis.KeyDelete(channel + "." + songID + ".voters");
+            staticredis.KeyDelete(channel + "." + songID + ".adder");
+            staticredis.KeyDelete(channel + "." + songID + ".addtime");
+        }
+
         public bool AddVote(string songID, string username) // TODO: THIS DOES NOT BELONG IN THIS CLASS
         {
             var song_voters = GetVotersID(songID);
@@ -168,7 +176,7 @@ namespace SOVND.Server.Handlers
                 song.Removed = newsong.Removed;
                 song.Playing = newsong.Playing;
 
-                LogTo.Debug("[{0}] Song {1} modified: {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.ToString());
+                LogTo.Debug("[{0}] Song {1} modified: {2}", _channel.Name, song.track.Loaded ? song.track.Name : "", song.ToString());
             };
             Run();
         }
@@ -232,6 +240,10 @@ namespace SOVND.Server.Handlers
         {
             _redis = redis.redis.GetDatabase();
             Songs = new List<Song>();
+
+            staticredis = _redis;
         }
+
+        private static IDatabase staticredis;
     }
 }

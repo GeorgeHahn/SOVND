@@ -123,7 +123,7 @@ namespace SOVND.Lib.Handlers
                 song.Removed = newsong.Removed;
                 song.Playing = newsong.Playing;
 
-                LogTo.Debug("[{0}] Song {1} modified: {2}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID, song.ToString());
+                LogTo.Debug("[{0}] Song {1} modified: {2}", _channel.Name, song.track.Loaded ? song.track.Name : "", song.ToString());
             };
             Run();
         }

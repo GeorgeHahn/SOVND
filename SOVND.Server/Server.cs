@@ -225,12 +225,17 @@ namespace SOVND.Server
         {
             LogTo.Debug("[{0}] \{username} removed song \{songID}", channel);
 
+            CancellationTokenSource value;
+            if(tokens.TryGetValue(songID, out value))
+                value.Cancel();
+
             if (!_redis.SetContains(GetChannelModeratorID(channel), username))
             {
                 LogTo.Error("[{0}] Error: User {1} not a moderator of channel", channel, username);
                 return;
             }
 
+            SortedPlaylistProvider.RemoveSong(channel, songID);
             Publish("/\{channel}/playlist/\{songID}", "", true);
         }
 
@@ -282,8 +287,6 @@ namespace SOVND.Server
         {
             Song song = playlist.GetTopSong();
 
-            LogTo.Trace("[{0}] {1}", channel, song?.ToString());
-
             if (song == null)
             {
                 LogTo.Debug("[{0}] No songs in channel, waiting for a song", channel);
@@ -320,7 +323,7 @@ namespace SOVND.Server
 
             var songtime = song.track.Seconds;
             PlaySong(channelHandler, song);
-            Thread.Sleep((int) Math.Ceiling(songtime*1000));
+            Task.Delay((int) Math.Ceiling(songtime*1000), token.Token).Wait();
             tokens.Remove(song.SongID);
             ClearSong(channelHandler, song);
             token.Dispose();
