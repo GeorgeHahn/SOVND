@@ -96,6 +96,7 @@
     <Compile Include="Settings\IFileLocationProvider.cs" />
     <Compile Include="Settings\ISettingsProvider.cs" />
     <Compile Include="Settings\SettingsModel.cs" />
+    <Compile Include="Utils\SongComparer.cs" />
     <Compile Include="Utils\Time.cs" />
   </ItemGroup>
   <ItemGroup>

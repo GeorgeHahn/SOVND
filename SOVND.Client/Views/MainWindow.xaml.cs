@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -21,6 +19,7 @@ using SOVND.Client.Views;
 using SOVND.Lib.Handlers;
 using SOVND.Lib.Models;
 using SOVND.Lib.Settings;
+using SOVND.Lib.Utils;
 using SpotifyClient;
 
 namespace SOVND.Client
@@ -108,19 +107,6 @@ namespace SOVND.Client
 
         private void Refresh() => OnObservablePlaylistOnPropertyChanged(null, null);
 
-
-        class SongComparer : IComparer
-        {
-            public int Compare(object x, object y)
-            {
-                var xs = x as Song;
-                var ys = y as Song;
-                if (xs == null || ys == null)
-                    throw new ArgumentOutOfRangeException("Both objects must be of type Song");
-
-                return xs.CompareTo(y);
-            }
-        }
 
         private CancellationTokenSource searchToken = null;
         private ListCollectionView playlist;
