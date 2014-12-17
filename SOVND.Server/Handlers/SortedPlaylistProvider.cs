@@ -44,7 +44,7 @@ namespace SOVND.Server.Handlers
 
             if (!_redis.SetContains(song_voters, username))
             {
-                LogTo.Trace("Vote was valid");
+                LogTo.Trace("[{0}] Vote was valid", _channel.Name);
 
                 if (song_votes == "0")
                 {
@@ -104,7 +104,7 @@ namespace SOVND.Server.Handlers
 
         private void AddNewSong(Song song)
         {
-            LogTo.Trace("Added song {0}", song.SongID);
+            LogTo.Trace("[{0}] Added song {1}", _channel.Name, song.SongID);
             _channel.SongsByID[song.SongID] = song;
 
             AddSong(song);

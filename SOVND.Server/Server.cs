@@ -180,7 +180,7 @@ namespace SOVND.Server
 
         private void AddVote(string channel, string songid, string username)
         {
-            LogTo.Debug("{0} voted for song {1}", username, songid);
+            LogTo.Debug("[{0}] {1} voted for song {2}", channel, username, songid);
             if (!channels.ContainsKey(channel))
             {
                 LogTo.Warn("Got a vote from {0} for nonexistent channel: {1}", username, channel);
@@ -217,9 +217,7 @@ namespace SOVND.Server
         {
             LogTo.Debug("[{0}] \{username} reported song \{songID}", channel);
 
-            // TODO Record that user reported song
-
-            Publish("/\{channel}/playlist/\{songID}/reported", "true");
+            // TODO Record report
         }
 
         private void RemoveSong(string channel, string songID, string username)
@@ -232,9 +230,7 @@ namespace SOVND.Server
                 return;
             }
 
-            Publish("/\{channel}/playlist/\{songID}/votes", "", true);
-            Publish("/\{channel}/playlist/\{songID}/votetime", "", true);
-            Publish("/\{channel}/playlist/\{songID}/removed", "true");
+            Publish("/\{channel}/playlist/\{songID}", "", true);
         }
 
         private void BlockSong(string channel, string songID, string username)
@@ -350,10 +346,15 @@ namespace SOVND.Server
 
             // Set prev song to 0 votes, 0 vote time
             channel.ClearVotes(song.SongID);
+            var sm = new SongModel()
+            {
+                SongID = song.SongID,
+                Votes = 0,
+                Voters = "",
+                Votetime = Time.Timestamp()
+            };
 
-            Publish("/\{channel.Name}/playlist/\{song.SongID}/votes", "0", true);
-            Publish("/\{channel.Name}/playlist/\{song.SongID}/votetime", Time.Timestamp().ToString(), true);
-            Publish("/\{channel.Name}/playlist/\{song.SongID}/voters", "", true);
+            Publish("/\{channel.Name}/playlist/\{song.SongID}", JsonConvert.SerializeObject(sm), true);
         }
     }
 
