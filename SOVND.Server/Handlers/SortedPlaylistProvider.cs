@@ -53,14 +53,6 @@ namespace SOVND.Server.Handlers
             Publish("/\{_channel.Name}/playlist/\{songID}", JsonConvert.SerializeObject(newsong), true);
         }
 
-        public static void RemoveSong(string channel, string songID)
-        {
-            staticredis.KeyDelete(channel + "." + songID + ".votes");
-            staticredis.KeyDelete(channel + "." + songID + ".voters");
-            staticredis.KeyDelete(channel + "." + songID + ".adder");
-            staticredis.KeyDelete(channel + "." + songID + ".addtime");
-        }
-
         public bool AddVote(string songID, string username) // TODO: THIS DOES NOT BELONG IN THIS CLASS
         {
             var song_voters = GetVotersID(songID);
@@ -144,11 +136,13 @@ namespace SOVND.Server.Handlers
                 Song song;
                 _channel.SongsByID.TryGetValue(_.songid, out song);
 
-                if (_.Message == "")
+                if (string.IsNullOrEmpty(_.Message))
                 {
                     // Remove song
                     if (song != null)
                     {
+                        LogTo.Debug("Remove song {0}", song);
+
                         RemoveSong(song);
                         LogTo.Debug("[{0}] Removed song {1}", _channel.Name,
                             song.track.Loaded ? song.track.Name : song.SongID);
@@ -166,6 +160,7 @@ namespace SOVND.Server.Handlers
 
                 if (song == null)
                 {
+                    LogTo.Debug("[{0}] Adding new song {1}", channel.Name, (string)_.Message);
                     AddNewSong(newsong.SongID);
                     song = _channel.SongsByID[_.songid];
                 }
@@ -217,6 +212,12 @@ namespace SOVND.Server.Handlers
         internal void RemoveSong(Song song)
         {
             Songs.Remove(song);
+
+            var songID = song.SongID;
+            _redis.KeyDelete(chname + songID + ".votes");
+            _redis.KeyDelete(chname + songID + ".voters");
+            _redis.KeyDelete(chname + songID + ".adder");
+            _redis.KeyDelete(chname + songID + ".addtime");
         }
 
         internal void ClearSongVotes(string id)

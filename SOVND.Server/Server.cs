@@ -223,11 +223,7 @@ namespace SOVND.Server
 
         private void RemoveSong(string channel, string songID, string username)
         {
-            LogTo.Debug("[{0}] \{username} removed song \{songID}", channel);
-
-            CancellationTokenSource value;
-            if(tokens.TryGetValue(songID, out value))
-                value.Cancel();
+            LogTo.Debug("[{0}] {1} removed song {2}", channel, username, songID);
 
             if (!_redis.SetContains(GetChannelModeratorID(channel), username))
             {
@@ -235,7 +231,13 @@ namespace SOVND.Server
                 return;
             }
 
-            SortedPlaylistProvider.RemoveSong(channel, songID);
+            CancellationTokenSource value;
+            if (tokens.TryGetValue(songID, out value))
+            {
+                LogTo.Trace("Cancelling song token for {0}", songID);
+                value.Cancel();
+            }
+
             Publish("/\{channel}/playlist/\{songID}", "", true);
         }
 
@@ -323,9 +325,15 @@ namespace SOVND.Server
 
             var songtime = song.track.Seconds;
             PlaySong(channelHandler, song);
-            Task.Delay((int) Math.Ceiling(songtime*1000), token.Token).Wait();
+
+            var time = DateTime.Now.AddMilliseconds((int)Math.Ceiling(songtime * 1000));
+            while ((DateTime.Now < time) && !token.IsCancellationRequested)
+                Thread.Sleep(100);
+
+            if (!token.IsCancellationRequested)
+                ClearSong(channelHandler, song);
+
             tokens.Remove(song.SongID);
-            ClearSong(channelHandler, song);
             token.Dispose();
         }
 
