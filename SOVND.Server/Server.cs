@@ -14,6 +14,7 @@ using SOVND.Lib.Models;
 using SOVND.Server.Settings;
 using Newtonsoft.Json;
 using SOVND.Lib.Utils;
+using SOVND.Server.Handlers;
 using SOVND.Server.Utils;
 using StackExchange.Redis;
 
@@ -327,8 +328,10 @@ namespace SOVND.Server
         {
             LogTo.Debug("[{0}] Playing song {1}", channel.Name, song.track.Name);
 
+            SortedPlaylistProvider playlist = (SortedPlaylistProvider) channel.Playlist;
+            playlist.SetPlaying(song.SongID, true);
+
             var nowplaying = new NowPlaying {songID = song.SongID, votetime = Time.Timestamp()};
-            
             Publish("/\{channel.Name}/nowplaying", JsonConvert.SerializeObject(nowplaying), true);
         }
 
@@ -343,6 +346,9 @@ namespace SOVND.Server
                 value.Cancel();
                 tokens.Remove(song.SongID);
             }
+
+            SortedPlaylistProvider playlist = (SortedPlaylistProvider)channel.Playlist;
+            playlist.SetPlaying(song.SongID, true);
 
             // Set prev song to 0 votes, 0 vote time
             channel.ClearVotes(song.SongID);
