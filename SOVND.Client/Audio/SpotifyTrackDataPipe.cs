@@ -189,15 +189,15 @@ namespace SOVND.Client.Audio
             if ((_wave != null) && (_waveFormat != null) && // Buffer is already setup
                 (format.channels == _waveFormat.Channels) && (format.sample_rate == _waveFormat.SampleRate)) // Format is the same
             {
-                LogTo.Trace("STDP: SetupBuffer(): _wave.ClearBuffer()");
+                LogTo.Trace("Buffer already setup for this waveformat, clearing and continuing");
                 _wave.ClearBuffer();
                 return;
             }
 
-            LogTo.Trace("STDP: SetupBuffer(): _wave: new()");
+            LogTo.Trace("Buffer not setup for this waveformat");
             _waveFormat = new WaveFormat(format.sample_rate, 16, format.channels);
             _wave = new BufferedWaveProvider(_waveFormat);
-            _wave.BufferDuration = TimeSpan.FromSeconds(15);
+            _wave.BufferDuration = TimeSpan.FromSeconds(10);
         }
 
         private void SetAudioFormat(sp_audioformat format)

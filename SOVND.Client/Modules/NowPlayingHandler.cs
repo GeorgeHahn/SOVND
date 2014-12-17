@@ -89,6 +89,7 @@ namespace SOVND.Client.Modules
                 {
                     LogTo.Trace("NPH: _waveOut.Play()");
                     _waveOut.Play();
+                    _waveOut.Volume = 1;
                 },
                 buffer =>
                 {
@@ -109,7 +110,8 @@ namespace SOVND.Client.Modules
                 () =>
                 {
                     LogTo.Trace("NPH: _waveOut.Pause()");
-                    _waveOut.Pause();
+                    _waveOut.Stop();
+                    _waveOut.Volume = 0;
                 });
         }
 
