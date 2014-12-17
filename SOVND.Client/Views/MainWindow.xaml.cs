@@ -134,8 +134,7 @@ namespace SOVND.Client
             Refresh();
         }
 
-        private object searchlock = new object();
-        private async void TextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string text = tbSearch.Text;
 
@@ -147,24 +146,18 @@ namespace SOVND.Client
                 searchToken = new CancellationTokenSource();
                 var token = searchToken.Token;
 
-                lock (searchlock)
+                Task.Run(() =>
                 {
-                    Task.Run(() =>
-                    {
-                        var search = Spotify.GetSearch(text);
+                    var search = Spotify.GetSearch(text);
 
-                        if (search == null)
-                            return;
+                    if (search == null)
+                        return;
 
-                        var tracks = from trackPtr in search.TrackPtrs
-                            select new Track(trackPtr);
+                    var tracks = from trackPtr in search.TrackPtrs
+                        select new Track(trackPtr);
 
-                        if (token.IsCancellationRequested)
-                            return;
-
-                        synchronization.Send((_) => lbPlaylist.ItemsSource = tracks.Take(10), null);
-                    }, token);
-                }
+                    synchronization.Send((_) => lbPlaylist.ItemsSource = tracks.Take(25), null);
+                }, token);
             }
             else
             {
