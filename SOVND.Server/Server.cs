@@ -134,9 +134,15 @@ namespace SOVND.Server
                 if (channels.ContainsKey(_.channel))
                 {
                     var topic = string.Format("/{0}/chat", _.channel);
-                    var message = string.Format("{0}: {1}", _.username, _.Message);
-                    Publish(topic, message);
-                    HipchatSender.SendNotification(_.channel, message, RoomColors.Gray);
+                    var message = new ChatMessage
+                    {
+                        message = _.Message,
+                        username = _.username,
+                        time = Time.Timestamp()
+                    };
+                    var messageJson = JsonConvert.SerializeObject(message);
+                    Publish(topic, messageJson);
+                    HipchatSender.SendNotification(_.channel, string.Format("{0}: {1}", message.username, message.message), RoomColors.Gray);
                 }
                 else
                     LogTo.Debug("Chat was for invalid channel");

@@ -29,7 +29,13 @@ MQTT Communication spec
 	/{channel}/stats
 		/users     # number of active users
 		/usernames # names of nonanonymous users in channel
-	/{channel}/chat # ATM Username: Message; future: JSON message object
+	/{channel}/chat
+		JSON with:
+			username
+			message
+			time
+	/{channel}/chatback
+		JSON array of recent messages (same format as chat messages)
 
 	Future
 	/{channel}/toptracks/{1-50} # top tracks, from 1 to 50

@@ -2,11 +2,8 @@ namespace SOVND.Lib.Models
 {
     public class ChatMessage
     {
-        public string Message { get; private set; }
-
-        public ChatMessage(string message)
-        {
-            Message = message;
-        }
+        public string message { get; set; }
+        public string username { get; set; }
+        public long time { get; set; }
     }
 }

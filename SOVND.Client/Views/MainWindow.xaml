@@ -366,9 +366,15 @@
                         HorizontalContentAlignment="Stretch">
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type models:ChatMessage}">
-                        <TextBlock
-                            TextWrapping="Wrap"
-                            Text="{Binding Path=Message}" />
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock
+                                TextWrapping="Wrap"
+                                FontStyle="Italic"
+                                Text="{Binding Path=username}" />
+                            <TextBlock
+                                TextWrapping="Wrap"
+                                Text="{Binding Path=message}" />
+                        </StackPanel>
                     </DataTemplate>
                 </ListBox.Resources>
             </ListBox>

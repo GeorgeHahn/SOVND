@@ -1,7 +1,10 @@
 using System.Collections.ObjectModel;
 using Anotar.NLog;
 using Charlotte;
+using Newtonsoft.Json;
 using SOVND.Lib.Models;
+
+// TODO This is client only code, why is it in Lib? (Move to Client)
 
 namespace SOVND.Lib.Handlers
 {
@@ -23,7 +26,8 @@ namespace SOVND.Lib.Handlers
             {
                 LogTo.Trace("[{0}]: {1}", channel.Name, (string)_.Message);
 
-                Chats.Add(new ChatMessage(_.Message));
+                var msg = JsonConvert.DeserializeObject<ChatMessage>(_.Message);
+                Chats.Add(msg);
             };
 
             Run();
