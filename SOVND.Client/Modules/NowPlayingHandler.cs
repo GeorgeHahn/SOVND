@@ -22,6 +22,8 @@ namespace SOVND.Client.Modules
         private bool ASongHasPlayed;
         private long? ServerLag;
 
+        public Action<string, bool> PlayingSongChanged;
+
         private readonly DateTime UnixTimeBase = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
         const int PrefetchTime = 1000;
 
@@ -31,6 +33,13 @@ namespace SOVND.Client.Modules
             
             On["/" + channelName + "/nowplaying"] = _ =>
             {
+                if (string.IsNullOrEmpty(_.Message) || _.Message == "remove")
+                {
+
+                    _waveOut?.Stop();
+                    return;
+                }
+
                 Task.Run(() =>
                 {
                     NowPlaying song = JsonConvert.DeserializeObject<NowPlaying>(_.Message);
@@ -82,14 +91,14 @@ namespace SOVND.Client.Modules
             Logging.Event("Played song");
 
             streamingaudio = new SpotifyTrackDataPipe();
-            playingTrack = new Track(songID, false);
+            playingTrack = new Track(songID, true);
 
             streamingaudio.StartStreaming(startTime, playingTrack.TrackPtr,
                 () =>
                 {
                     LogTo.Trace("NPH: _waveOut.Play()");
+                    PlayingSongChanged(songID, true);
                     _waveOut.Play();
-                    _waveOut.Volume = 1;
                 },
                 buffer =>
                 {
@@ -110,8 +119,8 @@ namespace SOVND.Client.Modules
                 () =>
                 {
                     LogTo.Trace("NPH: _waveOut.Pause()");
+                    PlayingSongChanged(songID, false);
                     _waveOut.Stop();
-                    _waveOut.Volume = 0;
                 });
         }
 
