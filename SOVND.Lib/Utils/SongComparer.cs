@@ -15,6 +15,9 @@ namespace SOVND.Lib.Utils
             if(ys == null)
                 throw new ArgumentOutOfRangeException("y");
 
+            if (xs.Playing && ys.Playing)
+                return xs.CompareTo(y);
+
             if (xs.Playing)
                 return -1;
             if (ys.Playing)
