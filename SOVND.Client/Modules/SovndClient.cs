@@ -105,7 +105,7 @@ namespace SOVND.Client.Modules
         {
             if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
             {
-                LogTo.Info("Deleting song {0} on channel {1}", item.track.Loaded ? item.track.Name : item.SongID, SubscribedChannelHandler.Name);
+                LogTo.Info("[{1}] Asking server to delete song {0}", item.track.Loaded ? item.track.Name : item.SongID, SubscribedChannelHandler.Name);
                 Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{item.SongID}", "remove");
             }
             else
