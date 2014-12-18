@@ -232,10 +232,13 @@ namespace SOVND.Server
             //}
 
             CancellationTokenSource value;
-            if (tokens.TryGetValue(songID, out value))
+            if (tokens.TryGetValue(channel + songID, out value))
                 value.Cancel();
 
             Publish("/\{channel}/playlist/\{songID}", "remove", true);
+            Publish("/\{channel}/nowplaying", "remove", true);
+            Publish("/\{channel}/playlist/\{songID}", "", true);
+            Publish("/\{channel}/nowplaying", "", true);
         }
 
         private void BlockSong(string channel, string songID, string username)
@@ -318,7 +321,7 @@ namespace SOVND.Server
             }
 
             CancellationTokenSource token = new CancellationTokenSource();
-            tokens[song.SongID] = token;
+            tokens[channelHandler.Name + song.SongID] = token;
 
             var songtime = song.track.Seconds;
             PlaySong(channelHandler, song);
@@ -327,10 +330,9 @@ namespace SOVND.Server
             while ((DateTime.Now < time) && !token.IsCancellationRequested)
                 Thread.Sleep(100);
 
-            if (!token.IsCancellationRequested)
-                ClearSong(channelHandler, song);
+            ClearSong(channelHandler, song);
 
-            tokens.Remove(song.SongID);
+            tokens.Remove(channelHandler.Name + song.SongID);
             token.Dispose();
         }
 
@@ -350,19 +352,16 @@ namespace SOVND.Server
             LogTo.Debug("[{0}] Clearing song {1}", channel.Name, song.track.Name);
 
             CancellationTokenSource value;
-            if (tokens.TryGetValue(song.SongID, out value))
+            if (tokens.TryGetValue(channel.Name + song.SongID, out value))
             {
-                LogTo.Debug("[{0}] Cancelled token {1}", channel.Name, song.track.Name);
-                value.Cancel();
-                tokens.Remove(song.SongID);
+                tokens.Remove(channel.Name + song.SongID);
+
+                if (value.IsCancellationRequested)
+                    return;
             }
 
-            SortedPlaylistProvider playlist = (SortedPlaylistProvider)channel.Playlist;
-            playlist.SetPlaying(song.SongID, false);
-
-            // Set prev song to 0 votes, 0 vote time
             channel.ClearVotes(song.SongID);
-            var sm = new SongModel()
+            var model = new SongModel()
             {
                 SongID = song.SongID,
                 Votes = 0,
@@ -370,7 +369,7 @@ namespace SOVND.Server
                 Votetime = Time.Timestamp()
             };
 
-            Publish("/\{channel.Name}/playlist/\{song.SongID}", JsonConvert.SerializeObject(sm), true);
+            Publish("/\{channel.Name}/playlist/\{song.SongID}", JsonConvert.SerializeObject(model), true);
         }
     }
 

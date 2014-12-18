@@ -50,15 +50,14 @@ namespace SOVND.Server.Handlers
             if (voters != null)
                 votersstring = string.Join(",", voters);
 
-            var newsong = new SongModel
+            var model = new SongModel
             {
-                Playing = playing,
                 SongID = songID,
                 Votes = votes,
                 Voters = votersstring,
                 Votetime = Time.Timestamp()
             };
-            Publish("/\{_channel.Name}/playlist/\{songID}", JsonConvert.SerializeObject(newsong), true);
+            Publish("/\{_channel.Name}/playlist/\{songID}", JsonConvert.SerializeObject(model), true);
         }
 
         public bool AddVote(string songID, string username) // TODO: THIS DOES NOT BELONG IN THIS CLASS
@@ -149,11 +148,8 @@ namespace SOVND.Server.Handlers
                     // Remove song
                     if (song != null)
                     {
-                        LogTo.Debug("Remove song {0}", song);
-
                         RemoveSong(song);
-                        LogTo.Debug("[{0}] Removed song {1}", _channel.Name,
-                            song.track.Loaded ? song.track.Name : song.SongID);
+                        LogTo.Debug("[{0}] Removed song {1}", _channel.Name, song.track.Loaded ? song.track.Name : song.SongID);
                         _channel.SongsByID.Remove(_.songid);
                     }
                     return;
@@ -177,8 +173,7 @@ namespace SOVND.Server.Handlers
                 song.Votes = newsong.Votes;
                 song.Votetime = newsong.Votetime;
                 song.Removed = newsong.Removed;
-                song.Playing = newsong.Playing;
-
+                
                 LogTo.Debug("[{0}] Song {1} modified: {2}", _channel.Name, song.track.Loaded ? song.track.Name : "", song.ToString());
             };
             Run();
@@ -201,11 +196,6 @@ namespace SOVND.Server.Handlers
                 return null;
 
             Songs.Sort();
-
-            // TODO Ability to toggle verbose debugging like this at runtime
-            //var first = Songs[0].Votetime;
-            //for (int i = 0; i < Songs.Count; i++)
-            //    LogTo.Debug("Song {0}: {1} has {2} votes at {3} (o {4})", i, Songs[i].track?.Name, Songs[i].Votes, Songs[i].Votetime, Songs[i].Votetime - first);
 
             return Songs[0];
         }
