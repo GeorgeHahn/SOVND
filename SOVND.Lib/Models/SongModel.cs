@@ -7,6 +7,5 @@ namespace SOVND.Lib.Models
         public int Votes { get; set; }
         public long Votetime { get; set; }
         public bool Removed { get; set; }
-        public bool Playing { get; set; }
     }
 }
