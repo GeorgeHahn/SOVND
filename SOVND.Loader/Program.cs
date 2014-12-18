@@ -22,8 +22,8 @@ namespace SOVND.Loader
 
             IPackageRepository repo = PackageRepositoryFactory.Default.CreateRepository("https://www.myget.org/F/sovnd/");
 
-            var package = repo.FindPackagesById(packageID)
-                              .FirstOrDefault(x => x.IsLatestVersion);
+            var packages = repo.FindPackagesById(packageID);
+            var package = packages.FirstOrDefault(x => x.IsLatestVersion);
 
             var fullinstallpath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), installpath);
             PackageManager packageManager = new PackageManager(repo, fullinstallpath);
