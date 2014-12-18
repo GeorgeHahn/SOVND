@@ -15,4 +15,5 @@
   <Janitor />
   <Immutable />
   <AsyncErrorHandler />
+  <PropertyChanged />
 </Weavers>
