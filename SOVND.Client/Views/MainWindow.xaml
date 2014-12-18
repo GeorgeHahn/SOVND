@@ -205,7 +205,19 @@
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type models:Song}">
                         <!-- This is a song in the playlist -->
-                        <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
+                        <Border Name="border" BorderThickness="1" Padding="3" Margin="3">
+                            <Border.Style>
+                                <Style TargetType="{x:Type Border}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=Playing}" Value="True">
+                                            <Setter Property="BorderBrush" Value="White"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=Playing}" Value="False">
+                                            <Setter Property="BorderBrush" Value="Gray"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
                             <DockPanel>
                                 <Image 
                                     DockPanel.Dock="Left"
