@@ -37,29 +37,6 @@ namespace SOVND.Server.Handlers
             return chname + songID + ".addtime";
         }
 
-        public void SetPlaying(string songID, bool playing)
-        {
-            var song_voters = GetVotersID(songID);
-            var song_votes = GetVotesID(songID);
-
-            int votes;
-            int.TryParse(_redis.StringGet(song_votes), out votes);
-
-            string votersstring = null;
-            var voters = _redis.SetMembers(song_voters).ToStringArray();
-            if (voters != null)
-                votersstring = string.Join(",", voters);
-
-            var model = new SongModel
-            {
-                SongID = songID,
-                Votes = votes,
-                Voters = votersstring,
-                Votetime = Time.Timestamp()
-            };
-            Publish("/\{_channel.Name}/playlist/\{songID}", JsonConvert.SerializeObject(model), true);
-        }
-
         public bool AddVote(string songID, string username) // TODO: THIS DOES NOT BELONG IN THIS CLASS
         {
             var song_voters = GetVotersID(songID);
