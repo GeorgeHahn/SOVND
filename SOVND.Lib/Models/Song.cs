@@ -1,10 +1,12 @@
 using System;
 using System.ComponentModel;
 using Anotar.NLog;
+using PropertyChanged;
 using SpotifyClient;
 
 namespace SOVND.Lib.Models
 {
+    [ImplementPropertyChanged]
     public class Song : IComparable, INotifyPropertyChanged
     {
         private int _votes;
@@ -20,31 +22,15 @@ namespace SOVND.Lib.Models
 
             track = new Track(songID, fetchAlbumArt);
             track.onLoad = () => LogTo.Info("Loaded {0}: {1}", track.SongID, track.Name);
-            track.PropertyChanged += (sender, args) => RaisePropertyChanged("track." + args.PropertyName);
+            track.PropertyChanged += (sender, args) =>
+            {
+                PropertyChanged?.Invoke(null, new PropertyChangedEventArgs("track." + args.PropertyName));
+            };
         }
 
         public string SongID { get; private set; }
-
-        public long Votetime
-        {
-            get { return _votetime; }
-            set
-            {
-                _votetime = value;
-                RaisePropertyChanged("Votetime");
-            }
-        }
-
-        public int Votes
-        {
-            get { return _votes; }
-            set
-            {
-                _votes = value;
-                RaisePropertyChanged("Votes");
-            }
-        }
-
+        public long Votetime { get; set; }
+        public int Votes { get; set; }
         public string Voters { get; set; }
         public bool Removed { get; set; }
         public Track track { get; set; }
@@ -73,13 +59,5 @@ namespace SOVND.Lib.Models
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
-
-        private void RaisePropertyChanged(string propertyName)
-        {
-            if (PropertyChanged != null)
-            {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
-        }
     }
 }
