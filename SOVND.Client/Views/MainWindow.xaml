@@ -205,12 +205,12 @@
                 <ListBox.Resources>
                     <DataTemplate DataType="{x:Type models:Song}">
                         <!-- This is a song in the playlist -->
-                        <Border Name="border" BorderThickness="1" Padding="3" Margin="3">
+                        <Border Name="border" BorderThickness="1" Padding="3" Margin="3" CornerRadius="8">
                             <Border.Style>
                                 <Style TargetType="{x:Type Border}">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Path=Playing}" Value="True">
-                                            <Setter Property="BorderBrush" Value="White"/>
+                                            <Setter Property="BorderBrush" Value="Black"/>
                                         </DataTrigger>
                                         <DataTrigger Binding="{Binding Path=Playing}" Value="False">
                                             <Setter Property="BorderBrush" Value="Gray"/>
