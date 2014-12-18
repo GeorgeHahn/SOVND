@@ -9,7 +9,7 @@ namespace SOVND.Client.Util
     {
         public StartSpotify(IAppName _appname, ISettingsProvider settings)
         {
-            var _auth = settings.GetAuthSettings();
+            var _auth = settings.GetSettings();
 
             Spotify.Initialize();
             if (!Spotify.Login(_appname.Name, _auth.SpotifyUsername, _auth.SpotifyPassword))

@@ -11,6 +11,7 @@ namespace SOVND.Lib.Settings
         public string SpotifyPassword { get; set; }
         public string LastfmUsername { get; set; }
         public string LastfmPassword { get; set; }
+        public string LastChannel { get; set; }
         
         private string _file;
 

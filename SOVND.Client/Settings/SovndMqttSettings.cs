@@ -19,12 +19,12 @@ namespace SOVND.Client.Settings
 
         public string Username
         {
-            get { return _settings.GetAuthSettings().SOVNDUsername; }
+            get { return _settings.GetSettings().SOVNDUsername; }
         }
 
         public string Password
         {
-            get { return _settings.GetAuthSettings().SOVNDPassword; }
+            get { return _settings.GetSettings().SOVNDPassword; }
         }
     }
 }

@@ -23,7 +23,7 @@ namespace SOVND.Client.Modules
         {
             _chf = chf;
 
-            Username = auth.Settings.GetAuthSettings().SOVNDUsername;
+            Username = auth.Settings.GetSettings().SOVNDUsername;
             Logging.SetupLogging(Username);
 
             // TODO Track channel list

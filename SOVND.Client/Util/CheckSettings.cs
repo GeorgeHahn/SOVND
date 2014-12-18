@@ -8,11 +8,11 @@ namespace SOVND.Client.Util
     {
         public CheckSettings(ISettingsProvider settings)
         {
-            if (!settings.AuthSettingsSet())
+            if (!settings.IsSet())
             {
                 LogTo.Trace("Auth settings are not set, showing window");
                 SettingsWindow w = new SettingsWindow();
-                var settingsViewModel = new SettingsViewModel(settings.GetAuthSettings());
+                var settingsViewModel = new SettingsViewModel(settings.GetSettings());
                 w.DataContext = settingsViewModel;
                 w.ShowDialog();
                 LogTo.Trace("Auth window closed");

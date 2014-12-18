@@ -9,12 +9,12 @@ namespace SOVND.Lib.Settings
             _loc = loc;
         }
 
-        public SettingsModel GetAuthSettings()
+        public SettingsModel GetSettings()
         {
             return SettingsModel.Load(_loc.GetSettingsPath());
         }
 
-        public bool AuthSettingsSet()
+        public bool IsSet()
         {
             return SettingsModel.IsSet(_loc.GetSettingsPath());
         }

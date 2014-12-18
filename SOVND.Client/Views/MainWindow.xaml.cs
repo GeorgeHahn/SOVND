@@ -34,15 +34,18 @@ namespace SOVND.Client
     {
         private readonly SovndClient _client;
         private readonly IPlayerFactory _playerFactory;
+        private readonly SettingsModel _settings;
         private NowPlayingHandler _player;
         private SynchronizationContext synchronization;
 
-        public MainWindow(SovndClient client, ChannelDirectory channels, IPlayerFactory playerFactory)
+        public MainWindow(SovndClient client, ChannelDirectory channels, IPlayerFactory playerFactory, ISettingsProvider settings)
         {
             InitializeComponent();
 
             _client = client;
             _playerFactory = playerFactory;
+            _settings = settings.GetSettings();
+
             AllowDrop = true;
             channelbox.ItemsSource = channels.channels;
             
@@ -56,8 +59,13 @@ namespace SOVND.Client
 
                 _client.Run();
 
-                // if(preferences_for_channel_set)
-                //      SetupChannel(channel_pref);
+                if (!string.IsNullOrWhiteSpace(_settings.LastChannel))
+                {
+                    _player = _playerFactory.CreatePlayer(_settings.LastChannel);
+                    _client.SubscribeToChannel(_settings.LastChannel);
+                    SetupChannel();
+                    Logging.Event("Switched to previously set channel");
+                }
             };
 
             Closed += (_, __) =>
@@ -263,6 +271,9 @@ namespace SOVND.Client
             if (channel != null)
             {
                 DropChannel();
+
+                _settings.LastChannel = channel.Name;
+                _settings.Save();
 
                 _player = _playerFactory.CreatePlayer(channel.Name);
                 _client.SubscribeToChannel(channel.Name);
