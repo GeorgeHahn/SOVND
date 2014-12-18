@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data.OleDb;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -12,6 +14,7 @@ using System.Windows.Interop;
 using System.Windows.Media.Animation;
 using BugSense;
 using BugSense.Core.Model;
+using ServiceStack.Text;
 using SOVND.Client.Modules;
 using SOVND.Client.Util;
 using SOVND.Client.ViewModels;
@@ -40,9 +43,11 @@ namespace SOVND.Client
 
             _client = client;
             _playerFactory = playerFactory;
-
+            AllowDrop = true;
             channelbox.ItemsSource = channels.channels;
             
+            DragEnter += OnDragEnter;
+
             Loaded += (_, __) =>
             {
                 BindingOperations.EnableCollectionSynchronization(channels.channels, channels.channels);
@@ -63,12 +68,30 @@ namespace SOVND.Client
             };
         }
 
+        private void OnDragEnter(object sender, DragEventArgs dragEventArgs)
+        {
+            var formats = dragEventArgs.Data.GetFormats();
+            var data = new List<string>();
+            foreach(var format in formats)
+                data.Add(dragEventArgs.Data.GetData(format).ToString());
+
+
+            return;
+        }
+
         private void SetupChannel()
         {
             var observablePlaylist = ((IObservablePlaylistProvider)_client.SubscribedChannelHandler.Playlist);
 
             playlist = (ListCollectionView)(CollectionViewSource.GetDefaultView(observablePlaylist.Songs));
             playlist.CustomSort = new SongComparer();
+
+            _player.PlayingSongChanged = (songID, playing) =>
+            {
+                var song = observablePlaylist.Songs.FirstOrDefault(x => x.SongID == songID);
+                if(song != null)
+                    song.Playing = playing;
+            };
 
             // TODO: Is this bad? Seems like it's a recipe for leaking - probably holds a ref to playlist.Songs and handler.Chats
             synchronization.Send((_) =>
