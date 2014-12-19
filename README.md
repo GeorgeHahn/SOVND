@@ -4,11 +4,25 @@ Open source replacement for Soundrop.fm
 
 [Beta signup](http://www.sovndapp.com/)
 
-Clients:
-  - Desktop client ([alpha release](https://github.com/GeorgeHahn/SOVND/releases)) - [Current issues](https://github.com/GeorgeHahn/SOVND/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Beta+1%22)
-  - Android (coming!)
+# Desktop client 
+[![Build status](https://ci.appveyor.com/api/projects/status/we8gubs49k0jm0n3/branch/master?svg=true)](https://ci.appveyor.com/project/GeorgeHahn/sovnd/branch/master)
 
-Third party clients welcome! See [SPEC.md](SPEC.md) for implementation details. MQTT Server is live at `sovndapp.com:8883`.
+Features
+ - Create, join, and enjoy genre or location based rooms
+ - Search for new tracks to add or upvote existing ones
+ - Chat with others in the room and enable optional chat notifications
+ - Drag and drop songs from Spotify into your favorite SOVND rooms
+
+
+[Download](https://github.com/GeorgeHahn/SOVND/releases)
+
+[Current issues](https://github.com/GeorgeHahn/SOVND/issues?q=is%3Aopen+is%3Aissue+milestone%3A%22Beta+3%22)
+
+# Android client
+On the way!
+
+# Third party clients
+Third party clients are welcome on the SOVND platform! See [SPEC.md](SPEC.md) for implementation details. Our MQTT Server is live at `sovndapp.com:8883`.
 
 # Contributing
 
