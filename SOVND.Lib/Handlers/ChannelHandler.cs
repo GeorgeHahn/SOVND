@@ -12,7 +12,8 @@ namespace SOVND.Lib.Handlers
         {
             _chatProviderFactory = chatProviderFactory;
             Playlist = playlistProvider;
-            
+            SongsByID = new Dictionary<string, Song>();
+
             Name = name;
         }
 
@@ -34,7 +35,7 @@ namespace SOVND.Lib.Handlers
 
         // TODO Moderators
 
-        public Dictionary<string, Song> SongsByID { get; set; } = new Dictionary<string, Song>();
+        public Dictionary<string, Song> SongsByID { get; set; }
 
         public IPlaylistProvider Playlist { get; private set; } // TODO this should be private with important parts exposed via properties
 

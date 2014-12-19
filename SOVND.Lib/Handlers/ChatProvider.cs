@@ -10,7 +10,7 @@ namespace SOVND.Lib.Handlers
 {
     public class ChatProvider : MqttModule, IChatProvider
     {
-        public ObservableCollection<ChatMessage> Chats { get; private set; } = new ObservableCollection<ChatMessage>();
+        public ObservableCollection<ChatMessage> Chats { get; private set; }
 
         public void ShutdownHandler()
         {
@@ -21,6 +21,7 @@ namespace SOVND.Lib.Handlers
         public ChatProvider(IMQTTSettings settings, Channel channel)
             : base(settings.Broker, settings.Port, settings.Username, settings.Password)
         {
+            Chats = new ObservableCollection<ChatMessage>();
             // ChannelHandler chats
             On["/" + channel.Name + "/chat"] = _ =>
             {
