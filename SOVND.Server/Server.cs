@@ -94,7 +94,7 @@ namespace SOVND.Server
                     return;
                 }
 
-                LogTo.Info("[{0}] \{_.username} sent channel data: {1}", (string)_.channel, (string)_.Message);
+                LogTo.Info("[{0}] {1} sent channel data: {2}", (string)_.channel, (string) _.username, (string)_.Message);
 
                 if (!_redis.KeyExists(GetChannelNameID(_.channel)))
                 {
@@ -121,13 +121,13 @@ namespace SOVND.Server
                     _redis.StringSet(GetChannelDescriptionID(_.channel), channel.Description);
                 }
 
-                Publish("/\{_.channel}/info", _.Message, true);
+                Publish(string.Format("/{0}/info", _.channel), _.Message, true);
             };
 
             // Handle user chat messages
             On["/user/{username}/{channel}/chat"] = _ =>
             {
-                LogTo.Trace("\{_.username}->\{_.channel}: \{_.Message}");
+                LogTo.Trace("{0}->{1}: {2}", (string)_.username, (string)_.channel, (string)_.Message);
 
                 // TODO [LOW] Allow moderators to mute users
 
@@ -222,7 +222,7 @@ namespace SOVND.Server
 
         private void ReportSong(string channel, string songID, string username)
         {
-            LogTo.Debug("[{0}] \{username} reported song \{songID}", channel);
+            LogTo.Debug("[{0}] {1} reported song {2}", channel, username, songID);
 
             // TODO Record report
         }
@@ -241,15 +241,15 @@ namespace SOVND.Server
             if (tokens.TryGetValue(channel + songID, out value))
                 value.Cancel();
 
-            Publish("/\{channel}/playlist/\{songID}", "remove", true);
-            Publish("/\{channel}/nowplaying", "remove", true);
-            Publish("/\{channel}/playlist/\{songID}", "", true);
-            Publish("/\{channel}/nowplaying", "", true);
+            Publish(string.Format("/{0}/playlist/{1}", channel, songID), "remove", true);
+            Publish(string.Format("/{0}/nowplaying", channel), "remove", true);
+            Publish(string.Format("/{0}//playlist/{1}", channel, songID), "", true);
+            Publish(string.Format("/{0}/nowplaying", channel), "", true);
         }
 
         private void BlockSong(string channel, string songID, string username)
         {
-            LogTo.Debug("\{username} blocked song \{songID} on \{channel}");
+            LogTo.Debug("{0} blocked song {1} on {2}", username, songID, channel);
 
             // TODO Record block
 
@@ -347,7 +347,7 @@ namespace SOVND.Server
             LogTo.Debug("[{0}] Playing song {1}", channel.Name, song.track.Name);
 
             var nowplaying = new NowPlaying {songID = song.SongID, votetime = Time.Timestamp()};
-            Publish("/\{channel.Name}/nowplaying", JsonConvert.SerializeObject(nowplaying), true);
+            Publish(string.Format("/{0}/nowplaying", channel.Name), JsonConvert.SerializeObject(nowplaying), true);
         }
 
         private void ClearSong(ChannelHandler channel, Song song)
@@ -372,7 +372,7 @@ namespace SOVND.Server
                 Votetime = Time.Timestamp()
             };
 
-            Publish("/\{channel.Name}/playlist/\{song.SongID}", JsonConvert.SerializeObject(model), true);
+            Publish(string.Format("/{0}/playlist/{1}", channel.Name, song.SongID), JsonConvert.SerializeObject(model), true);
         }
     }
 

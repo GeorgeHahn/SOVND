@@ -62,7 +62,7 @@ namespace SOVND.Server.Handlers
                     Voters = string.Join(",", _redis.SetMembers(song_voters).ToStringArray()),
                     Votetime = Time.Timestamp()
                 };
-                Publish("/\{_channel.Name}/playlist/\{songID}", JsonConvert.SerializeObject(newsong), true);
+                Publish(string.Format("/{0}/playlist/{1}", _channel.Name, songID), JsonConvert.SerializeObject(newsong), true);
 
                 // TODO publish voter names
                 return true;
@@ -161,7 +161,7 @@ namespace SOVND.Server.Handlers
             Disconnect();
         }
 
-        public List<Song> Songs { get; }
+        public List<Song> Songs { get; private set; }
 
         /// <summary>
         /// Gets the song at the top of the list

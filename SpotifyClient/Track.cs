@@ -133,7 +133,8 @@ namespace SpotifyClient
         ~Track()
         {
             sp_track_release(TrackPtr);
-            _artwork?.Dispose();
+            if(_artwork != null)
+                _artwork.Dispose();
         }
 
         private static List<Track> ToInitialize = new List<Track>();

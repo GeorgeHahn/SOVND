@@ -35,8 +35,8 @@ namespace SOVND.Client.Modules
             {
                 if (string.IsNullOrEmpty(_.Message) || _.Message == "remove")
                 {
-
-                    _waveOut?.Stop();
+                    if(_waveOut != null)
+                        _waveOut.Stop();
                     return;
                 }
 
@@ -130,7 +130,8 @@ namespace SOVND.Client.Modules
 
         public void StopStreaming()
         {
-            streamingaudio?.Dispose();
+            if(streamingaudio != null)
+                streamingaudio.Dispose();
         }
 
         protected override void OnStop()

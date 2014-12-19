@@ -156,16 +156,18 @@ namespace SOVND.Client
 
         private void DropChannel()
         {
-            _player?.Disconnect();
+            if(_player != null)
+                _player.Disconnect();
             lbPlaylist.ItemsSource = null;
 
-            if (_client?.SubscribedChannelHandler?.Playlist != null)
+            if (_client != null && _client.SubscribedChannelHandler != null && _client.SubscribedChannelHandler.Playlist != null)
             {
                 var observablePlaylist = ((IObservablePlaylistProvider)_client.SubscribedChannelHandler.Playlist);
                 observablePlaylist.PropertyChanged -= OnObservablePlaylistOnPropertyChanged;
             }
 
-            _client?.SubscribedChannelHandler?.ShutdownHandler();
+            if(_client != null & _client.SubscribedChannelHandler != null)
+                _client.SubscribedChannelHandler.ShutdownHandler();
 
             playlist = null;
             chatbox.ItemsSource = null;
@@ -176,7 +178,10 @@ namespace SOVND.Client
             synchronization.Send(x => playlist.Refresh(), null);
         }
 
-        private void Refresh() => OnObservablePlaylistOnPropertyChanged(null, null);
+        private void Refresh()
+        {
+            OnObservablePlaylistOnPropertyChanged(null, null);
+        } 
 
 
         private CancellationTokenSource searchToken = null;

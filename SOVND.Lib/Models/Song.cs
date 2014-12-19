@@ -24,7 +24,8 @@ namespace SOVND.Lib.Models
             track.onLoad = () => LogTo.Info("Loaded {0}: {1}", track.SongID, track.Name);
             track.PropertyChanged += (sender, args) =>
             {
-                PropertyChanged?.Invoke(null, new PropertyChangedEventArgs("track." + args.PropertyName));
+                if(PropertyChanged != null)
+                    PropertyChanged(null, new PropertyChangedEventArgs("track." + args.PropertyName));
             };
         }
 

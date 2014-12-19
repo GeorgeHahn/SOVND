@@ -46,7 +46,7 @@ namespace SOVND.Client.Modules
         internal void SendChat(string text)
         {
             if (SubscribedChannelHandler != null)
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/chat", text);
+                Publish(string.Format("/user/{0}/{1}/chat", Username, SubscribedChannelHandler.Name), text);
             else
                 LogTo.Warn("Cannot send chat: not subscribed to a channel");
         }
@@ -70,7 +70,7 @@ namespace SOVND.Client.Modules
 
             var msg = JsonConvert.SerializeObject(channel);
 
-            Publish("/user/\{Username}/register/\{channel.Name}", msg);
+            Publish(string.Format("/user/{0}/register/{1}", Username, channel.Name), msg);
             return true;
         }
 
@@ -92,7 +92,7 @@ namespace SOVND.Client.Modules
         {
             if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
             {
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{track}", "vote");
+                Publish(string.Format("/user/{0}/{1}/songs/{2}", Username, SubscribedChannelHandler.Name, track), "vote");
             }
             else
                 LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");
@@ -103,7 +103,7 @@ namespace SOVND.Client.Modules
             if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
             {
                 LogTo.Info("[{1}] Asking server to delete song {0}", item.track.Loaded ? item.track.Name : item.SongID, SubscribedChannelHandler.Name);
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{item.SongID}", "remove");
+                Publish(string.Format("/user/{0}/{1}/songs/{2}", Username, SubscribedChannelHandler.Name, item.SongID), "remove");
             }
             else
                 LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");
@@ -114,7 +114,7 @@ namespace SOVND.Client.Modules
             if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
             {
                 LogTo.Info("Blocking song {0} on channel {1}", item.track.Loaded ? item.track.Name : item.SongID, SubscribedChannelHandler.Name);
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{item.SongID}", "block");
+                Publish(string.Format("/user/{0}/{1}/songs/{2}", Username, SubscribedChannelHandler.Name, item.SongID), "block");
             }
             else
                 LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");
@@ -125,7 +125,7 @@ namespace SOVND.Client.Modules
             if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
             {
                 LogTo.Info("Reporting song {0} on channel {1}", item.track.Loaded ? item.track.Name : item.SongID, SubscribedChannelHandler.Name);
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{item.SongID}", "report");
+                Publish(string.Format("/user/{0}/{1}/songs/{2}", Username, SubscribedChannelHandler.Name, item.SongID), "report");
             }
             else
                 LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");

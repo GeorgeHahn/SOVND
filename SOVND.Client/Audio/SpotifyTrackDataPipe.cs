@@ -111,7 +111,7 @@ namespace SOVND.Client.Audio
 
             if (error != sp_error.OK)
             {
-                LogTo.Error("[Spotify] Streaming error: \{sp_error_message(error)}");
+                LogTo.Error("[Spotify] Streaming error: {0}", sp_error_message(error));
                 return;
             }   
 
@@ -134,7 +134,7 @@ namespace SOVND.Client.Audio
 
             if (startTime != DateTime.MinValue)
             {
-                LogTo.Trace("STDP: StartStreaming(): Session.Seek(\{seektime})");
+                LogTo.Trace("STDP: StartStreaming(): Session.Seek({0})", seektime);
                 Session.Seek(seektime);
             }
         }

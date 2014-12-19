@@ -19,7 +19,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.SOVNDUsername = value;
                 _settings.Save();
-                RaisePropertyChanged(nameof(SOVNDUsername));
+                RaisePropertyChanged("SOVNDUsername");
             }
         }
 
@@ -30,7 +30,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.SOVNDPassword = value;
                 _settings.Save();
-                RaisePropertyChanged(nameof(SOVNDPassword));
+                RaisePropertyChanged("SOVNDPassword");
             }
         }
 
@@ -41,7 +41,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.SpotifyUsername = value;
                 _settings.Save();
-                RaisePropertyChanged(nameof(SpotifyUsername));
+                RaisePropertyChanged("SpotifyUsername");
             }
         }
 
@@ -52,7 +52,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.SpotifyPassword = value;
                 _settings.Save();
-                RaisePropertyChanged(nameof(SpotifyPassword));
+                RaisePropertyChanged("SpotifyPassword");
             }
         }
 
@@ -63,7 +63,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.LastfmUsername = value;
                 _settings.Save();
-                RaisePropertyChanged(nameof(LastfmUsername));
+                RaisePropertyChanged("LastfmUsername");
             }
         }
 
@@ -74,7 +74,7 @@ namespace SOVND.Client.ViewModels
             {
                 _settings.LastfmPassword = value;
                 _settings.Save();
-                RaisePropertyChanged(nameof(LastfmPassword));
+                RaisePropertyChanged("LastfmPassword");
             }
         }
 
