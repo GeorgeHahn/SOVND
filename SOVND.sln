@@ -27,6 +27,11 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SOVND.Loader.Setup", "SOVND
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SOVND.Loader.Bootstrap", "SOVND.Loader.Bootstrap\SOVND.Loader.Bootstrap.wixproj", "{AB584913-3617-46FC-AE99-313E69703BF9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{62C292B5-3E33-4E46-BCD9-10403A8DD540}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86

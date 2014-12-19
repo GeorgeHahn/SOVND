@@ -27,6 +27,10 @@ using SOVND.Lib.Models;
 using SOVND.Lib.Settings;
 using SOVND.Lib.Utils;
 using SpotifyClient;
+using Toastify;
+using Key = System.Windows.Input.Key;
+using Song = SOVND.Lib.Models.Song;
+using Spotify = SpotifyClient.Spotify;
 
 namespace SOVND.Client
 {
@@ -40,10 +44,14 @@ namespace SOVND.Client
         private readonly SettingsModel _settings;
         private NowPlayingHandler _player;
         private SynchronizationContext synchronization;
+        private Toast toast;
 
         public MainWindow(SovndClient client, ChannelDirectory channels, IPlayerFactory playerFactory, ISettingsProvider settings)
         {
             InitializeComponent();
+
+            toast = new Toast();
+            toast.Show();
 
             _client = client;
             _playerFactory = playerFactory;
@@ -123,8 +131,14 @@ namespace SOVND.Client
             _player.PlayingSongChanged = (songID, playing) =>
             {
                 var song = observablePlaylist.Songs.FirstOrDefault(x => x.SongID == songID);
-                if(song != null)
-                    song.Playing = playing;
+                if (song == null)
+                    return;
+
+                song.Playing = playing;
+                if (!playing)
+                    return;
+
+                toast.NewSong(song.track);
             };
 
             // TODO: Is this bad? Seems like it's a recipe for leaking - probably holds a ref to playlist.Songs and handler.Chats
