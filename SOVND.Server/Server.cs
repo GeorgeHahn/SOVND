@@ -231,18 +231,21 @@ namespace SOVND.Server
         {
             LogTo.Debug("[{0}] {1} removed song {2}", channel, username, songID);
 
-            //if (!_redis.SetContains(GetChannelModeratorID(channel), username))
-            //{
-            //    LogTo.Error("[{0}] Error: User {1} not a moderator of channel", channel, username);
-            //    return;
-            //}
+            if (!_redis.SetContains(GetChannelModeratorID(channel), username))
+            {
+                LogTo.Error("[{0}] Error: User {1} not a moderator of channel", channel, username);
+                return;
+            }
 
             CancellationTokenSource value;
             if (tokens.TryGetValue(channel + songID, out value))
                 value.Cancel();
 
+            // Ask clients to remove these songs
             Publish(string.Format("/{0}/playlist/{1}", channel, songID), "remove", true);
             Publish(string.Format("/{0}/nowplaying", channel), "remove", true);
+
+            // Delete on broker
             Publish(string.Format("/{0}/playlist/{1}", channel, songID), "", true);
             Publish(string.Format("/{0}/nowplaying", channel), "", true);
         }
