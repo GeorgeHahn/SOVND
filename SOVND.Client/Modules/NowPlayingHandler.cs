@@ -22,7 +22,7 @@ namespace SOVND.Client.Modules
         private bool ASongHasPlayed;
         private long? ServerLag;
 
-        public Action<string, bool> PlayingSongChanged;
+        public Action<string, bool> PlayingSongChanged { get; set; }
 
         private readonly DateTime UnixTimeBase = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
         const int PrefetchTime = 1000;
@@ -97,7 +97,8 @@ namespace SOVND.Client.Modules
                 () =>
                 {
                     LogTo.Trace("NPH: _waveOut.Play()");
-                    PlayingSongChanged(songID, true);
+                    if(PlayingSongChanged != null)
+                        PlayingSongChanged(songID, true);
                     if(_waveOut != null)
                         _waveOut.Play();
                 },
@@ -120,7 +121,8 @@ namespace SOVND.Client.Modules
                 () =>
                 {
                     LogTo.Trace("NPH: _waveOut.Pause()");
-                    PlayingSongChanged(songID, false);
+                    if (PlayingSongChanged != null)
+                        PlayingSongChanged(songID, false);
                     if(_waveOut != null)
                         _waveOut.Stop();
                 });
