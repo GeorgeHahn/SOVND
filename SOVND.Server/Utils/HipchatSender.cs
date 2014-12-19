@@ -22,14 +22,13 @@ namespace SOVND.Server.Utils
             {
                 _hipchat.SendNotification(roomName, message, color);
             }
-            catch (HipchatWebException e) if (e.Message.Contains("Room not found"))
+            catch (HipchatWebException e)
             {
-                _hipchat.CreateRoom(roomName, false, null, RoomPrivacy.Private);
+                if (e.Message.Contains("Room not found"))
+                    _hipchat.CreateRoom(roomName, false, null, RoomPrivacy.Private);
+                if (e.Message.Contains("rate"))
+                    return;
                 goto retry;
-            }
-            catch (HipchatWebException e) if (e.Message.Contains("rate"))
-            {
-                // Fail silently
             }
             catch (Exception e)
             {
