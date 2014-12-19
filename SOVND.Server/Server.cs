@@ -243,7 +243,7 @@ namespace SOVND.Server
 
             Publish(string.Format("/{0}/playlist/{1}", channel, songID), "remove", true);
             Publish(string.Format("/{0}/nowplaying", channel), "remove", true);
-            Publish(string.Format("/{0}//playlist/{1}", channel, songID), "", true);
+            Publish(string.Format("/{0}/playlist/{1}", channel, songID), "", true);
             Publish(string.Format("/{0}/nowplaying", channel), "", true);
         }
 
