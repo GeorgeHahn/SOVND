@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.OleDb;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,6 +14,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media.Animation;
+using Anotar.NLog;
 using BugSense;
 using BugSense.Core.Model;
 using ServiceStack.Text;
@@ -48,8 +51,13 @@ namespace SOVND.Client
 
             AllowDrop = true;
             channelbox.ItemsSource = channels.channels;
-            
-            DragEnter += OnDragEnter;
+
+            PreviewDragOver += OnPreviewDragEnter;
+            PreviewDragEnter += OnPreviewDragEnter;
+            DragEnter += OnPreviewDragEnter;
+            DragOver += OnPreviewDragEnter;
+
+            Drop += OnDrop;
 
             Loaded += (_, __) =>
             {
@@ -76,15 +84,33 @@ namespace SOVND.Client
             };
         }
 
-        private void OnDragEnter(object sender, DragEventArgs dragEventArgs)
+        private void OnDrop(object sender, DragEventArgs dragEventArgs)
         {
-            var formats = dragEventArgs.Data.GetFormats();
-            var data = new List<string>();
-            foreach(var format in formats)
-                data.Add(dragEventArgs.Data.GetData(format).ToString());
+            var dats = (string)dragEventArgs.Data.GetData("Text");
+            var b = OpenLinkToURI(dats);
+            if (b == null)
+                return;
 
+            EnqueueTrack(b);
+        }
 
-            return;
+        private void OnPreviewDragEnter(object sender, DragEventArgs dragEventArgs)
+        {
+            var dats = (string)dragEventArgs.Data.GetData("Text");
+            if (OpenLinkToURI(dats) == null)
+                dragEventArgs.Effects = DragDropEffects.None;
+            else
+                dragEventArgs.Effects = DragDropEffects.All;
+            dragEventArgs.Handled = true;
+        }
+
+        private string OpenLinkToURI(string link)
+        {
+            if (!link.StartsWith("http://open.spotify.com/track/"))
+                return null;
+            if (link.Contains("?"))
+                link = link.Remove(link.IndexOf("?"));
+            return "spotify:track:" + link.Remove(0, link.LastIndexOf("/") + 1);
         }
 
         private void SetupChannel()
@@ -208,6 +234,11 @@ namespace SOVND.Client
             EnqueueTrack(item.track);
 
             Logging.Event("Voted");
+        }
+
+        private void EnqueueTrack(string songID)
+        {
+            _client.AddTrack(songID);
         }
 
         private void EnqueueTrack(Track track)

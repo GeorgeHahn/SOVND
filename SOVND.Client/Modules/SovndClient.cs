@@ -85,17 +85,14 @@ namespace SOVND.Client.Modules
 
         public void AddTrack(Track track)
         {
-            if (!track.Loaded)
-            {
-                LogTo.Warn("Tried to vote for a track that wasn't loaded");
-            }
+            AddTrack(track.SongID);
+        }
 
+        public void AddTrack(string track)
+        {
             if (SubscribedChannelHandler != null && SubscribedChannelHandler.Name != null)
             {
-                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{track.SongID}", "vote");
-
-                if(track.Loaded)
-                    Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songssearch/", track.Name + " " + track?.Artists[0]);
+                Publish("/user/\{Username}/\{SubscribedChannelHandler.Name}/songs/\{track}", "vote");
             }
             else
                 LogTo.Warn("Not subscribed to a channel or channel subscription is malformed (null or Name null)");
