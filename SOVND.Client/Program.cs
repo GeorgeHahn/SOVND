@@ -63,10 +63,10 @@ namespace SOVND.Client
             {
                 if (exclusive)
                 {
-                    return true;
+                    return false;
                 }
                 MessageBox.Show("SOVND is already running.", "SOVND is already running", MessageBoxButton.OK, MessageBoxImage.Information);
-                return false;
+                return true;
             }
         }
     }
