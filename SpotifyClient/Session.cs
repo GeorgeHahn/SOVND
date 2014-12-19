@@ -25,7 +25,6 @@
  */
 
 using System;
-using System.Environment;
 using System.IO;
 using System.Runtime.InteropServices;
 using Anotar.NLog;
@@ -207,8 +206,8 @@ namespace SpotifyClient
             config.user_agent = appname;
             config.application_key_size = appkey.Length;
             config.application_key = Marshal.AllocHGlobal(appkey.Length);
-            config.cache_location = Path.Combine(GetFolderPath(SpecialFolder.ApplicationData), appname, "spotifycache");
-            config.settings_location = Path.Combine(GetFolderPath(SpecialFolder.ApplicationData), appname, "spotifysettings");
+            config.cache_location = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appname, "spotifycache");
+            config.settings_location = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), appname, "spotifysettings");
             config.callbacks = callbacksPtr;
             config.compress_playlists = true;
             config.dont_save_metadata_for_playlists = false;

@@ -1,4 +1,4 @@
-using System.Environment;
+using System;
 using System.IO;
 using SOVND.Lib.Settings;
 
@@ -15,7 +15,7 @@ namespace SOVND.Client.Settings
 
         public string GetRootPath()
         {
-            return Path.Combine(GetFolderPath(SpecialFolder.ApplicationData), _appname);
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), _appname);
         }
 
         public string GetSettingsPath()
