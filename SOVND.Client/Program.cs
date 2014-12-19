@@ -1,5 +1,7 @@
 ﻿using System;
 using System.IO;
+using System.Threading;
+using System.Windows;
 using Anotar.NLog;
 using Ninject;
 using Ninject.Extensions.Factory;
@@ -17,7 +19,8 @@ namespace SOVND.Client
         [STAThread]
         public static void Main()
         {
-            LogTo.Trace("Starting client (version TODO)");
+            if (AlreadyRunning())
+                return;
 
             IKernel kernel = new StandardKernel();
             kernel.Bind<IMQTTSettings>().To<SovndMqttSettings>();
@@ -53,5 +56,18 @@ namespace SOVND.Client
             app.Run(window);
         }
 
+        private static bool AlreadyRunning()
+        {
+            bool exclusive;
+            using (Mutex m = new Mutex(true, "b1cddd64-d226-40ca-9a17-1221174b3e2c", out exclusive))
+            {
+                if (exclusive)
+                {
+                    return true;
+                }
+                MessageBox.Show("SOVND is already running.", "SOVND is already running", MessageBoxButton.OK, MessageBoxImage.Information);
+                return false;
+            }
+        }
     }
 }
