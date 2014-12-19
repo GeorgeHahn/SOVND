@@ -30,7 +30,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls.Primitives;
 using Anotar.NLog;
-using libspotifydotnet.libspotify;
+using libspotifydotnet;
 using NAudio.Wave;
 using SpotifyClient;
 
@@ -102,23 +102,23 @@ namespace SOVND.Client.Audio
 
             // Libspotify play + error handling
             var error = Session.LoadPlayer(_trackPtr);
-            while (error == sp_error.IS_LOADING)
+            while (error == libspotify.sp_error.IS_LOADING)
             {
                 Thread.Sleep(150);
                 LogTo.Warn("Can't play just yet, track not loaded");
                 error = Session.LoadPlayer(_trackPtr);
             }
 
-            if (error != sp_error.OK)
+            if (error != libspotify.sp_error.OK)
             {
-                LogTo.Error("[Spotify] Streaming error: {0}", sp_error_message(error));
+                LogTo.Error("[Spotify] Streaming error: {0}", libspotify.sp_error_message(error));
                 return;
             }   
 
             _loaded = true;
-            sp_availability avail = sp_track_get_availability(Session.SessionPtr, _trackPtr);
+            libspotify.sp_availability avail = libspotify.sp_track_get_availability(Session.SessionPtr, _trackPtr);
 
-            if (avail != sp_availability.SP_TRACK_AVAILABILITY_AVAILABLE)
+            if (avail != libspotify.sp_availability.SP_TRACK_AVAILABILITY_AVAILABLE)
             {
                 LogTo.Warn("Track is unavailable: {0}", avail);
                 return;
@@ -139,7 +139,7 @@ namespace SOVND.Client.Audio
             }
         }
 
-        private void Session_AudioBufferStats(ref sp_audio_buffer_stats obj)
+        private void Session_AudioBufferStats(ref libspotify.sp_audio_buffer_stats obj)
         {
             if (_wave == null)
             {
@@ -158,7 +158,7 @@ namespace SOVND.Client.Audio
             Dispose();
         }
 
-        private int Session_OnAudioDataArrived(byte[] buffer, sp_audioformat format)
+        private int Session_OnAudioDataArrived(byte[] buffer, libspotify.sp_audioformat format)
         {
             if ((!_bufferset) || // Buffer hasn't been setup yet
                 (format.channels != _waveFormat.Channels) || (format.sample_rate != _waveFormat.SampleRate)) // New audio format
@@ -182,7 +182,7 @@ namespace SOVND.Client.Audio
             return buffer.Length;
         }
 
-        private static void SetupBuffer(sp_audioformat format)
+        private static void SetupBuffer(libspotify.sp_audioformat format)
         {
             LogTo.Trace("STDP: SetupBuffer()");
             _bufferset = true;
@@ -200,7 +200,7 @@ namespace SOVND.Client.Audio
             _wave.BufferDuration = TimeSpan.FromSeconds(10);
         }
 
-        private void SetAudioFormat(sp_audioformat format)
+        private void SetAudioFormat(libspotify.sp_audioformat format)
         {
             LogTo.Trace("STDP: SetAudioFormat()");
             SetupBuffer(format);

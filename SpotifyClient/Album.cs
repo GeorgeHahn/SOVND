@@ -28,7 +28,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using libspotifydotnet;
-using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -48,7 +47,7 @@ namespace SpotifyClient
 
         public List<IntPtr> TrackPtrs { get; private set; }
 
-        public sp_albumtype Type { get; private set; }
+        public libspotify.sp_albumtype Type { get; private set; }
 
         public Album(IntPtr albumPtr)
         {
@@ -56,11 +55,11 @@ namespace SpotifyClient
                 throw new InvalidOperationException("Album pointer is null.");
 
             this.AlbumPtr = albumPtr;
-            this.Name = Functions.PtrToString(sp_album_name(albumPtr));
-            this.Type = sp_album_type(albumPtr);
-            IntPtr artistPtr = sp_album_artist(albumPtr);
+            this.Name = Functions.PtrToString(libspotify.sp_album_name(albumPtr));
+            this.Type = libspotify.sp_album_type(albumPtr);
+            IntPtr artistPtr = libspotify.sp_album_artist(albumPtr);
             if (artistPtr != IntPtr.Zero)
-                this.Artist = Functions.PtrToString(sp_artist_name(artistPtr));
+                this.Artist = Functions.PtrToString(libspotify.sp_artist_name(artistPtr));
         }
 
         public string GetAlbumArtLink()
@@ -113,21 +112,21 @@ namespace SpotifyClient
         {
             try
             {
-                sp_error error = sp_albumbrowse_error(result);
+                libspotify.sp_error error = libspotify.sp_albumbrowse_error(result);
 
-                if (error != sp_error.OK)
+                if (error != libspotify.sp_error.OK)
                 {
-                    Log.Error(Plugin.LOG_MODULE, "Album browse failed: {0}", sp_error_message(error));
+                    Log.Error(Plugin.LOG_MODULE, "Album browse failed: {0}", libspotify.sp_error_message(error));
                     return;
                 }
 
-                int numtracks = sp_albumbrowse_num_tracks(_browsePtr);
+                int numtracks = libspotify.sp_albumbrowse_num_tracks(_browsePtr);
 
                 List<IntPtr> trackPtrs = new List<IntPtr>();
 
-                for (int i = 0; i < sp_albumbrowse_num_tracks(_browsePtr); i++)
+                for (int i = 0; i < libspotify.sp_albumbrowse_num_tracks(_browsePtr); i++)
                 {
-                    trackPtrs.Add(sp_albumbrowse_track(_browsePtr, i));
+                    trackPtrs.Add(libspotify.sp_albumbrowse_track(_browsePtr, i));
                 }
 
                 this.TrackPtrs = trackPtrs;
@@ -146,7 +145,7 @@ namespace SpotifyClient
             {
                 _d = new albumbrowse_complete_cb_delegate(this.albumbrowse_complete);
                 IntPtr callbackPtr = Marshal.GetFunctionPointerForDelegate(_d);
-                _browsePtr = sp_albumbrowse_create(Session.SessionPtr, this.AlbumPtr, callbackPtr, IntPtr.Zero);
+                _browsePtr = libspotify.sp_albumbrowse_create(Session.SessionPtr, this.AlbumPtr, callbackPtr, IntPtr.Zero);
 
                 return true;
             }

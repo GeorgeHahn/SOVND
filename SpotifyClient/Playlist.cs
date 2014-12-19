@@ -28,7 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Anotar.NLog;
-using libspotifydotnet.libspotify;
+using libspotifydotnet;
 
 namespace SpotifyClient
 {
@@ -89,7 +89,7 @@ namespace SpotifyClient
 
         public bool IsInRAM { get; private set; }
 
-        public sp_playlist_offline_status OfflineStatus { get; private set; }
+        public libspotify.sp_playlist_offline_status OfflineStatus { get; private set; }
 
         public IntPtr Pointer { get; private set; }
 
@@ -128,17 +128,17 @@ namespace SpotifyClient
             IntPtr linkPtr = Functions.StringToLinkPtr(playlistLink);
             try
             {
-                return new Playlist(sp_playlist_create(Session.SessionPtr, linkPtr));
+                return new Playlist(libspotify.sp_playlist_create(Session.SessionPtr, linkPtr));
             }
             finally
             {
-                sp_link_release(linkPtr);
+                libspotify.sp_link_release(linkPtr);
             }
         }
 
         public static string GetLink(IntPtr playlistPtr)
         {
-            IntPtr linkPtr = sp_link_create_from_playlist(playlistPtr);
+            IntPtr linkPtr = libspotify.sp_link_create_from_playlist(playlistPtr);
             return Functions.LinkPtrToString(linkPtr);
         }
 
@@ -156,7 +156,7 @@ namespace SpotifyClient
 
         public bool IsLoaded
         {
-            get { return this.Pointer != IntPtr.Zero && sp_playlist_is_loaded(this.Pointer); }
+            get { return this.Pointer != IntPtr.Zero && libspotify.sp_playlist_is_loaded(this.Pointer); }
         }
 
         public bool TracksAreLoaded
@@ -169,8 +169,8 @@ namespace SpotifyClient
 
                 for (int i = 0; i < this.TrackCount; i++)
                 {
-                    IntPtr trackPtr = sp_playlist_track(this.Pointer, i);
-                    if (!sp_track_is_loaded(trackPtr))
+                    IntPtr trackPtr = libspotify.sp_playlist_track(this.Pointer, i);
+                    if (!libspotify.sp_track_is_loaded(trackPtr))
                         return false;
                 }
 
@@ -197,7 +197,7 @@ namespace SpotifyClient
             this.fn_track_message_changed = new track_message_changed_delegate(track_message_changed);
             this.fn_subscribers_changed = new subscribers_changed_delegate(subscribers_changed);
 
-            sp_playlist_callbacks callbacks = new sp_playlist_callbacks();
+            libspotify.sp_playlist_callbacks callbacks = new libspotify.sp_playlist_callbacks();
 
             callbacks.tracks_added = Marshal.GetFunctionPointerForDelegate(fn_tracks_added);
             callbacks.tracks_removed = Marshal.GetFunctionPointerForDelegate(fn_tracks_removed);
@@ -216,7 +216,7 @@ namespace SpotifyClient
             _callbacksPtr = Marshal.AllocHGlobal(Marshal.SizeOf(callbacks));
             Marshal.StructureToPtr(callbacks, _callbacksPtr, true);
 
-            sp_playlist_add_callbacks(this.Pointer, _callbacksPtr, IntPtr.Zero);
+            libspotify.sp_playlist_add_callbacks(this.Pointer, _callbacksPtr, IntPtr.Zero);
         }
 
         private void safeRemoveCallbacks()
@@ -229,7 +229,7 @@ namespace SpotifyClient
                 if (_callbacksPtr == IntPtr.Zero)
                     return;
 
-                sp_playlist_remove_callbacks(this.Pointer, _callbacksPtr, IntPtr.Zero);
+                libspotify.sp_playlist_remove_callbacks(this.Pointer, _callbacksPtr, IntPtr.Zero);
             }
             catch { }
         }
@@ -242,7 +242,7 @@ namespace SpotifyClient
 
                 for (int i = 0; i < this.TrackCount; i++)
                 {
-                    IntPtr trackPtr = sp_playlist_track(this.Pointer, i);
+                    IntPtr trackPtr = libspotify.sp_playlist_track(this.Pointer, i);
 
                     _tracks.Add(new Track(trackPtr));
                 }
@@ -253,13 +253,13 @@ namespace SpotifyClient
 
         private void populateMetadata()
         {
-            this.Name = Functions.PtrToString(sp_playlist_name(this.Pointer));
-            this.TrackCount = sp_playlist_num_tracks(this.Pointer);
-            this.Description = Functions.PtrToString(sp_playlist_get_description(this.Pointer));
-            this.SubscriberCount = (int)sp_playlist_num_subscribers(this.Pointer);
-            this.IsInRAM = sp_playlist_is_in_ram(Session.SessionPtr, this.Pointer);
-            this.OfflineStatus = sp_playlist_get_offline_status(Session.SessionPtr, this.Pointer);
-            this.TrackCount = sp_playlist_num_tracks(this.Pointer);
+            this.Name = Functions.PtrToString(libspotify.sp_playlist_name(this.Pointer));
+            this.TrackCount = libspotify.sp_playlist_num_tracks(this.Pointer);
+            this.Description = Functions.PtrToString(libspotify.sp_playlist_get_description(this.Pointer));
+            this.SubscriberCount = (int) libspotify.sp_playlist_num_subscribers(this.Pointer);
+            this.IsInRAM = libspotify.sp_playlist_is_in_ram(Session.SessionPtr, this.Pointer);
+            this.OfflineStatus = libspotify.sp_playlist_get_offline_status(Session.SessionPtr, this.Pointer);
+            this.TrackCount = libspotify.sp_playlist_num_tracks(this.Pointer);
         }
 
         private void tracks_added(IntPtr playlistPtr, IntPtr tracksPtr, int num_tracks, int position, IntPtr userDataPtr)
@@ -286,7 +286,7 @@ namespace SpotifyClient
         private void state_changed(IntPtr playlistPtr, IntPtr userDataPtr)
         {
             Log.Trace(LOG_MODULE, "state_changed");
-            if (sp_playlist_is_loaded(playlistPtr))
+            if (libspotify.sp_playlist_is_loaded(playlistPtr))
             {
                 populateMetadata();
             }

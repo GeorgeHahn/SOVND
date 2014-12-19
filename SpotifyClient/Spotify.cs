@@ -31,7 +31,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Anotar.NLog;
-using libspotifydotnet.libspotify;
+using libspotifydotnet;
 
 namespace SpotifyClient
 {
@@ -117,9 +117,9 @@ namespace SpotifyClient
 
                 _programSignal.WaitOne();
 
-                if (Session.LoginError != sp_error.OK)
+                if (Session.LoginError != libspotify.sp_error.OK)
                 {
-                    Log.Error(Plugin.LOG_MODULE, "Login failed: {0}", sp_error_message(Session.LoginError));
+                    Log.Error(Plugin.LOG_MODULE, "Login failed: {0}", libspotify.sp_error_message(Session.LoginError));
                     return false;
                 }
 
@@ -220,14 +220,14 @@ namespace SpotifyClient
 
         public static string GetAlbumLink(IntPtr albumPtr)
         {
-            IntPtr linkPtr = sp_link_create_from_album(albumPtr);
+            IntPtr linkPtr = libspotify.sp_link_create_from_album(albumPtr);
             return Functions.LinkPtrToString(linkPtr);
         }
 
         public static Album AlbumFromLink(string albumLink)
         {
             IntPtr linkPtr = Functions.StringToLinkPtr(albumLink);
-            return new Album(sp_link_as_album(linkPtr));
+            return new Album(libspotify.sp_link_as_album(linkPtr));
         }
 
         public static Playlist GetPlaylist(string playlistLink, bool needTracks)
@@ -257,7 +257,7 @@ namespace SpotifyClient
 
             try
             {
-                inboxPtr = sp_session_inbox_create(Session.SessionPtr);
+                inboxPtr = libspotify.sp_session_inbox_create(Session.SessionPtr);
 
                 Playlist p = new Playlist(inboxPtr);
 
@@ -273,7 +273,7 @@ namespace SpotifyClient
                 try
                 {
                     if (inboxPtr != IntPtr.Zero)
-                        sp_playlist_release(inboxPtr);
+                        libspotify.sp_playlist_release(inboxPtr);
                 }
                 catch { }
             }
@@ -288,7 +288,7 @@ namespace SpotifyClient
 
             try
             {
-                starredPtr = sp_session_starred_create(Session.SessionPtr);
+                starredPtr = libspotify.sp_session_starred_create(Session.SessionPtr);
 
                 Playlist p = new Playlist(starredPtr);
 
@@ -304,7 +304,7 @@ namespace SpotifyClient
                 try
                 {
                     if (starredPtr != IntPtr.Zero)
-                        sp_playlist_release(starredPtr);
+                        libspotify.sp_playlist_release(starredPtr);
                 }
                 catch { }
             }
@@ -328,7 +328,7 @@ namespace SpotifyClient
             }
 
             var err = search.GetSearchError();
-            if (err != sp_error.OK)
+            if (err != libspotify.sp_error.OK)
             {
                 Log.Warning(LOG_MODULE, "Search failed: {0}", err);
                 return null;
@@ -344,8 +344,8 @@ namespace SpotifyClient
 
             string[] parts = data.Split("|".ToCharArray());
 
-            int region = parts[0].Equals("ForMe") ? (int)sp_toplistregion.SP_TOPLIST_REGION_USER : parts[0].Equals("Everywhere") ? (int)sp_toplistregion.SP_TOPLIST_REGION_EVERYWHERE : Convert.ToInt32(parts[0]);
-            sp_toplisttype type = parts[1].Equals("Artists") ? sp_toplisttype.SP_TOPLIST_TYPE_ARTISTS : parts[1].Equals("Albums") ? sp_toplisttype.SP_TOPLIST_TYPE_ALBUMS : sp_toplisttype.SP_TOPLIST_TYPE_TRACKS;
+            int region = parts[0].Equals("ForMe") ? (int) libspotify.sp_toplistregion.SP_TOPLIST_REGION_USER : parts[0].Equals("Everywhere") ? (int) libspotify.sp_toplistregion.SP_TOPLIST_REGION_EVERYWHERE : Convert.ToInt32(parts[0]);
+            libspotify.sp_toplisttype type = parts[1].Equals("Artists") ? libspotify.sp_toplisttype.SP_TOPLIST_TYPE_ARTISTS : parts[1].Equals("Albums") ? libspotify.sp_toplisttype.SP_TOPLIST_TYPE_ALBUMS : libspotify.sp_toplisttype.SP_TOPLIST_TYPE_TRACKS;
 
             TopList toplist = TopList.BeginBrowse(type, region);
 
@@ -355,7 +355,7 @@ namespace SpotifyClient
             }, REQUEST_TIMEOUT);
 
             var err = toplist.GetBrowseError();
-            if (err != sp_error.OK)
+            if (err != libspotify.sp_error.OK)
             {
                 Log.Warning(LOG_MODULE, "Toplist browse failed: {0}", err);
                 return null;
@@ -374,7 +374,7 @@ namespace SpotifyClient
             if (Session.SessionPtr == IntPtr.Zero)
                 throw new ApplicationException("No session");
 
-            IntPtr linkPtr = sp_link_create_from_track(trackPtr, offset);
+            IntPtr linkPtr = libspotify.sp_link_create_from_track(trackPtr, offset);
             try
             {
                 return Functions.LinkPtrToString(linkPtr);
@@ -382,7 +382,7 @@ namespace SpotifyClient
             finally
             {
                 if (linkPtr != IntPtr.Zero)
-                    sp_link_release(linkPtr);
+                    libspotify.sp_link_release(linkPtr);
             }
         }
 
@@ -400,7 +400,7 @@ namespace SpotifyClient
                 return null;
             try
             {
-                IntPtr coverPtr = sp_image_create_from_link(Session.SessionPtr, linkPtr);
+                IntPtr coverPtr = libspotify.sp_image_create_from_link(Session.SessionPtr, linkPtr);
 
                 using (Image img = Image.Load(coverPtr))
                 {
@@ -408,7 +408,7 @@ namespace SpotifyClient
                         return null;
 
                     var err = img.GetLoadError();
-                    if (err != sp_error.OK)
+                    if (err != libspotify.sp_error.OK)
                     {
                         throw new ApplicationException(string.Format("Image failed to load: {0}", err));
                     }
@@ -418,7 +418,7 @@ namespace SpotifyClient
                     // ATM all are JPEG
 
                     int bytes = 0;
-                    IntPtr bufferPtr = sp_image_data(img.ImagePtr, out bytes);
+                    IntPtr bufferPtr = libspotify.sp_image_data(img.ImagePtr, out bytes);
                     byte[] buffer = new byte[bytes];
                     Marshal.Copy(bufferPtr, buffer, 0, buffer.Length);
 
@@ -428,7 +428,7 @@ namespace SpotifyClient
             finally
             {
                 if (linkPtr != IntPtr.Zero)
-                    sp_link_release(linkPtr);
+                    libspotify.sp_link_release(linkPtr);
             }
         }
 
@@ -441,7 +441,7 @@ namespace SpotifyClient
             {
                 if (!waitFor(delegate
                 {
-                    return sp_album_is_loaded(album.AlbumPtr);
+                    return libspotify.sp_album_is_loaded(album.AlbumPtr);
                 }, REQUEST_TIMEOUT))
                     Log.Debug(Plugin.LOG_MODULE, "GetAlbumTracks() TIMEOUT waiting for album to load");
 
@@ -463,20 +463,20 @@ namespace SpotifyClient
 
         public static string GetPlaylistLink(IntPtr playlistPtr)
         {
-            IntPtr linkPtr = sp_link_create_from_playlist(playlistPtr);
+            IntPtr linkPtr = libspotify.sp_link_create_from_playlist(playlistPtr);
             return Functions.LinkPtrToString(linkPtr);
         }
 
         public static string GetArtistLink(IntPtr artistPtr)
         {
-            IntPtr linkPtr = sp_link_create_from_artist(artistPtr);
+            IntPtr linkPtr = libspotify.sp_link_create_from_artist(artistPtr);
             return Functions.LinkPtrToString(linkPtr);
         }
 
         public static Artist ArtistFromLink(string artistLink)
         {
             IntPtr linkPtr = Functions.StringToLinkPtr(artistLink);
-            return new Artist(sp_link_as_artist(linkPtr));
+            return new Artist(libspotify.sp_link_as_artist(linkPtr));
         }
 
         public static IntPtr[] GetArtistAlbums(string artistLink)
@@ -488,7 +488,7 @@ namespace SpotifyClient
             {
                 if (!waitFor(delegate
                 {
-                    return sp_artist_is_loaded(artist.ArtistPtr);
+                    return libspotify.sp_artist_is_loaded(artist.ArtistPtr);
                 }, REQUEST_TIMEOUT))
                     Log.Debug(Plugin.LOG_MODULE, "GetArtistAlbums() TIMEOUT waiting for artist to load");
 
@@ -517,7 +517,7 @@ namespace SpotifyClient
 
             try
             {
-                ptr = sp_session_publishedcontainer_for_user_create(Session.SessionPtr, GetUserCanonicalNamePtr(userPtr));
+                ptr = libspotify.sp_session_publishedcontainer_for_user_create(Session.SessionPtr, GetUserCanonicalNamePtr(userPtr));
 
                 PlaylistContainer c = PlaylistContainer.Get(ptr);
 
@@ -546,10 +546,10 @@ namespace SpotifyClient
 
             waitFor(delegate()
             {
-                return sp_user_is_loaded(userPtr);
+                return libspotify.sp_user_is_loaded(userPtr);
             }, REQUEST_TIMEOUT);
 
-            return sp_user_canonical_name(userPtr);
+            return libspotify.sp_user_canonical_name(userPtr);
         }
 
         private static bool waitFor(Test t, int timeout)
@@ -584,9 +584,9 @@ namespace SpotifyClient
                 {
                     try
                     {
-                        sp_error err = sp_session_player_unload(Session.SessionPtr);
-                        err = sp_session_logout(Session.SessionPtr);
-                        err = sp_session_release(Session.SessionPtr);
+                        libspotify.sp_error err = libspotify.sp_session_player_unload(Session.SessionPtr);
+                        err = libspotify.sp_session_logout(Session.SessionPtr);
+                        err = libspotify.sp_session_release(Session.SessionPtr);
                     }
                     catch (Exception ex)
                     {
@@ -633,7 +633,7 @@ namespace SpotifyClient
                             {
                                 do
                                 {
-                                    sp_session_process_events(Session.SessionPtr, out timeout);
+                                    libspotify.sp_session_process_events(Session.SessionPtr, out timeout);
                                 } while (!_shutDown && timeout == 0);
                             }
                         }
@@ -674,7 +674,7 @@ namespace SpotifyClient
 
         public static void Session_OnLoggedIn(IntPtr obj)
         {
-            if (Session.LoginError == sp_error.OK)
+            if (Session.LoginError == libspotify.sp_error.OK)
                 _isLoggedIn = true;
             if (_programSignal != null)
                 _programSignal.Set();
@@ -718,12 +718,12 @@ namespace SpotifyClient
 
         public static string GetAlbumArtLink(IntPtr albumPtr)
         {
-            return GetAlbumArtLink(albumPtr, sp_image_size.SP_IMAGE_SIZE_LARGE);
+            return GetAlbumArtLink(albumPtr, libspotify.sp_image_size.SP_IMAGE_SIZE_LARGE);
         }
 
-        public static string GetAlbumArtLink(IntPtr albumPtr, sp_image_size size)
+        public static string GetAlbumArtLink(IntPtr albumPtr, libspotify.sp_image_size size)
         {
-            IntPtr linkPtr = sp_link_create_from_album_cover(albumPtr, size);
+            IntPtr linkPtr = libspotify.sp_link_create_from_album_cover(albumPtr, size);
             if (linkPtr == IntPtr.Zero)
             {
                 Log.Warning(Plugin.LOG_MODULE, "No link could be created for album cover");
@@ -738,7 +738,7 @@ namespace SpotifyClient
             finally
             {
                 if (linkPtr != IntPtr.Zero)
-                    sp_link_release(linkPtr);
+                    libspotify.sp_link_release(linkPtr);
             }
         }
     }

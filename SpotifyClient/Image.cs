@@ -27,7 +27,6 @@
 using System;
 using System.Runtime.InteropServices;
 using libspotifydotnet;
-using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -47,8 +46,8 @@ namespace SpotifyClient
             if (ptr == IntPtr.Zero)
                 throw new ApplicationException("Image pointer is null");
 
-            var error = sp_image_add_ref(ptr);
-            if (error != sp_error.OK)
+            var error = libspotify.sp_image_add_ref(ptr);
+            if (error != libspotify.sp_error.OK)
                 throw new ApplicationException("Image add ref failed");
 
             Image image = new Image();
@@ -58,9 +57,9 @@ namespace SpotifyClient
             return image;
         }
 
-        public sp_error GetLoadError()
+        public libspotify.sp_error GetLoadError()
         {
-            return sp_image_error(this.ImagePtr);
+            return libspotify.sp_image_error(this.ImagePtr);
         }
 
         private Image()
@@ -101,14 +100,14 @@ namespace SpotifyClient
             {
                 if (_callbackPtr != IntPtr.Zero)
                 {
-                    sp_image_remove_load_callback(this.ImagePtr, _callbackPtr, IntPtr.Zero);
+                    libspotify.sp_image_remove_load_callback(this.ImagePtr, _callbackPtr, IntPtr.Zero);
                 }
             }
             catch { }
 
             try
             {
-                sp_image_release(this.ImagePtr);
+                libspotify.sp_image_release(this.ImagePtr);
             }
             catch { }
         }
@@ -117,8 +116,8 @@ namespace SpotifyClient
         {
             _d = new image_loaded_cb_delegate(onImageLoaded);
             _callbackPtr = Marshal.GetFunctionPointerForDelegate(_d);
-            var err = sp_image_add_load_callback(this.ImagePtr, _callbackPtr, IntPtr.Zero);
-            if (err != sp_error.OK)
+            var err = libspotify.sp_image_add_load_callback(this.ImagePtr, _callbackPtr, IntPtr.Zero);
+            if (err != libspotify.sp_error.OK)
                 throw new ApplicationException("Unable to add image load callbacks");
         }
 
@@ -127,7 +126,7 @@ namespace SpotifyClient
             this.IsLoaded = true;
             if (_callbackPtr != IntPtr.Zero)
             {
-                sp_image_remove_load_callback(this.ImagePtr, _callbackPtr, IntPtr.Zero);
+                libspotify.sp_image_remove_load_callback(this.ImagePtr, _callbackPtr, IntPtr.Zero);
                 _callbackPtr = IntPtr.Zero;
             }
         }
