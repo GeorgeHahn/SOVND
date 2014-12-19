@@ -15,6 +15,7 @@ namespace SOVND.Client
         public App()
         {
             BugSenseHandler.Instance.InitAndStartSession(new ExceptionManager(Current), "w8cb3749"); 
+            InitializeComponent();
         }
     }
 }

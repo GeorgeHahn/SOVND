@@ -229,32 +229,7 @@ namespace SOVND.Client
                 Logging.Event("Searched");
             }
         }
-
-        private void AddSong_Click(object sender, RoutedEventArgs e)
-        {
-            var item = ((Button)sender).DataContext as Track;
-            if (item == null)
-                return;
-
-            BindToPlaylist();
-
-            EnqueueTrack(item);
-            tbSearch.Clear();
-
-            Logging.Event("Added song");
-        }
         
-        private void VoteUp_Click(object sender, RoutedEventArgs e)
-        {
-            var item = ((Button)sender).DataContext as Song;
-            if (item == null)
-                return;
-
-            EnqueueTrack(item.track);
-
-            Logging.Event("Voted");
-        }
-
         private void EnqueueTrack(string songID)
         {
             _client.AddTrack(songID);
@@ -285,36 +260,6 @@ namespace SOVND.Client
                 Logging.Event("Cancelled new channel creation");
         }
 
-        private void Del_Click(object sender, RoutedEventArgs e)
-        {
-            var item = ((Button)sender).DataContext as Song;
-            if (item == null)
-                return;
-
-            _client.DeleteSong(item);
-            Logging.Event("Deleted song");
-        }
-
-        private void Blk_Click(object sender, RoutedEventArgs e)
-        {
-            var item = ((Button)sender).DataContext as Song;
-            if (item == null)
-                return;
-
-            _client.BlockSong(item);
-            Logging.Event("Blocked song");
-        }
-
-        private void Rpt_Click(object sender, RoutedEventArgs e)
-        {
-            var item = ((Button)sender).DataContext as Song;
-            if (item == null)
-                return;
-
-            _client.ReportSong(item);
-            Logging.Event("Reported song");
-        }
-
         private void Channelbox_SelectionChanged(object sender, RoutedEventArgs e)
         {
             var channel = channelbox.SelectedItem as Channel;
@@ -338,6 +283,61 @@ namespace SOVND.Client
             {
                 SendChat(null, null);
             }
+        }
+
+        private void SongControl_OnOnVoteUp(object sender, EventArgs e)
+        {
+            var item = ((Button)sender).DataContext as Song;
+            if (item == null)
+                return;
+
+            EnqueueTrack(item.track);
+
+            Logging.Event("Voted");
+        }
+
+        private void SongControl_OnOnBlock(object sender, EventArgs e)
+        {
+            var item = ((Button)sender).DataContext as Song;
+            if (item == null)
+                return;
+
+            _client.BlockSong(item);
+            Logging.Event("Blocked song");
+        }
+
+        private void SongControl_OnOnDelete(object sender, EventArgs e)
+        {
+            var item = ((Button)sender).DataContext as Song;
+            if (item == null)
+                return;
+
+            _client.DeleteSong(item);
+            Logging.Event("Deleted song");
+        }
+
+        private void SongControl_OnOnReport(object sender, EventArgs e)
+        {
+            var item = ((Button)sender).DataContext as Song;
+            if (item == null)
+                return;
+
+            _client.ReportSong(item);
+            Logging.Event("Reported song");
+        }
+
+        private void TrackControl_OnOnSongAdd(object sender, EventArgs e)
+        {
+            var item = ((Button)sender).DataContext as Track;
+            if (item == null)
+                return;
+
+            BindToPlaylist();
+
+            EnqueueTrack(item);
+            tbSearch.Clear();
+
+            Logging.Event("Added song");
         }
     }
 }

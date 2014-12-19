@@ -124,6 +124,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audio\SpotifyTrackDataPipe.cs" />
+    <Compile Include="Controls\SongControl.xaml.cs">
+      <DependentUpon>SongControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\TrackControl.xaml.cs">
+      <DependentUpon>TrackControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Models\NewChannelModel.cs" />
     <Compile Include="Modules\IPlayerFactory.cs" />
     <Compile Include="Modules\NowPlayingHandler.cs" />
@@ -172,6 +178,14 @@
     <Compile Include="Settings\SovndMqttSettings.cs" />
     <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Page Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\SongControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\TrackControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
