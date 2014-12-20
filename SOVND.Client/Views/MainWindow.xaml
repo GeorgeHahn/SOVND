@@ -21,9 +21,22 @@
 
     <Controls:MetroWindow.RightWindowCommands>
       <Controls:WindowCommands>
-            <Button Content="settings" />
+            <Button Content="settings"
+                    Click="SettingsButton_OnClick"/>
         </Controls:WindowCommands>
     </Controls:MetroWindow.RightWindowCommands>    
+    
+    <Controls:MetroWindow.Flyouts>
+        <Controls:FlyoutsControl>
+            <Controls:Flyout
+                Header="Settings"
+                Position="Right"
+                Width="300"
+                x:Name="SettingsFlyout">
+                
+            </Controls:Flyout>
+        </Controls:FlyoutsControl>
+    </Controls:MetroWindow.Flyouts>
     
     <Grid>
         <Grid.ColumnDefinitions>
@@ -139,7 +152,7 @@
                 Chat
             </TextBlock>
             
-            <ListBox Grid.Row="1" Grid.Column="1"
+            <ListBox Grid.Row="1"
                         x:Name="chatbox"
                         w:ListBox.AutoScroll="True"
                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
@@ -159,7 +172,7 @@
                 </ListBox.Resources>
             </ListBox>
 
-            <DockPanel Grid.Row="2" Grid.Column="1"
+            <DockPanel Grid.Row="2"
                         LastChildFill="True">
                 <Button 
                     HorizontalAlignment="Right" 

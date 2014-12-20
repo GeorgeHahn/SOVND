@@ -340,5 +340,10 @@ namespace SOVND.Client
 
             Logging.Event("Added song");
         }
+
+        private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            SettingsFlyout.IsOpen = !SettingsFlyout.IsOpen;
+        }
     }
 }
