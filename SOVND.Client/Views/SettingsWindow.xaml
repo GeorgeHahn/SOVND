@@ -62,31 +62,6 @@
                     util:PasswordHelper.Attach="True" 
                     util:PasswordHelper.Password="{Binding Path=SpotifyPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ></PasswordBox>
             </Grid>
-            
-            
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <TextBlock>Last.fm Username</TextBlock>
-                <TextBox 
-                    Grid.Column="1" 
-                    Text="{Binding Path=LastfmUsername}"/>
-            </Grid>
-            
-            
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
-                <TextBlock>Last.fm Password</TextBlock>
-                <PasswordBox
-                    Grid.Column="1"
-                    util:PasswordHelper.Attach="True" 
-                    util:PasswordHelper.Password="{Binding Path=LastfmPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" ></PasswordBox>
-            </Grid>
         </StackPanel>
         
         <Grid Grid.Row="1">

@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
 using libspotifydotnet;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace SOVND.Lib.Settings
 {
@@ -14,17 +15,27 @@ namespace SOVND.Lib.Settings
         public string SOVNDPassword { get; set; }
         public string SpotifyUsername { get; set; }
         public string SpotifyPassword { get; set; }
-        public string LastfmUsername { get; set; }
-        public string LastfmPassword { get; set; }
         public string LastChannel { get; set; }
         public bool Normalization { get; set; }
         public bool Scrobbling { get; set; }
         public bool SongToasts { get; set; }
         public bool ChatToasts { get; set; }
         public libspotify.sp_bitrate Bitrate { get; set; }
-        public string LastfmSession { get; set; }
+
+        public string LastfmSession
+        {
+            get
+            {
+                return _lastfmSession;
+            }
+            set
+            {
+                _lastfmSession = value;
+            }
+        }
 
         private string _file;
+        private string _lastfmSession;
 
         // TODO refactor to FilesystemSettingsProvider
         public void Save()
@@ -45,9 +56,15 @@ namespace SOVND.Lib.Settings
             _file = file;
         }
 
+        private static Dictionary<string, SettingsModel> settingses = new Dictionary<string, SettingsModel>();
+
         // TODO refactor to FilesystemSettingsProvider
-        public static SettingsModel Load(string file)
+        public static SettingsModel Load(string file) // Loads singletons
         {
+            SettingsModel value;
+            if (settingses.TryGetValue(file, out value))
+                return value;
+
             SettingsModel settings;
             if (IsSet(file))
             {
@@ -56,6 +73,8 @@ namespace SOVND.Lib.Settings
             }
             else
                 settings = new SettingsModel(file);
+
+            settingses[file] = settings;
             return settings;
         }
 

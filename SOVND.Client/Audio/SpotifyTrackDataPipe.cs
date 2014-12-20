@@ -128,6 +128,7 @@ namespace SOVND.Client.Audio
             _bufferset = false;
             LogTo.Trace("STDP: StartStreaming(): Session.Play()");
             Session.Play();
+            _init();
 
             if (seektime <= 0)
                 return;

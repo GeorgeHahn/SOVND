@@ -16,58 +16,68 @@ namespace SOVND.Client.Util
         private readonly SettingsModel _settings;
         private Lpfm.LastFmScrobbler.Scrobbler _scrobbler;
         private Track thisTrack;
+
         public void Scrobble(Song song, bool playing)
         {
-            if(_scrobbler.HasSession && string.IsNullOrWhiteSpace(_settings.LastfmSession))
-                _settings.LastfmSession = _scrobbler.GetSession();
+            if (song.track == null || !song.track.Loaded)
+                return;
 
             if (playing)
-            {
                 thisTrack = new Track
                 {
                     TrackName = song.track.Name,
                     AlbumName = song.track.Album.Name,
                     ArtistName = song.track.Artists[0],
-                    Duration = new TimeSpan(0, 0, decimal.ToInt32(song.track.Seconds)),
-                    WhenStartedPlaying = new DateTime?(DateTime.Now)
+                    Duration = TimeSpan.FromSeconds(decimal.ToInt32(song.track.Seconds)),
+                    WhenStartedPlaying = DateTime.Now
                 };
-                if (_scrobbler.HasSession)
-                    try
-                    {
-                        _scrobbler.NowPlaying(thisTrack);
-                    }
-                    catch (Exception e)
-                    {
-                        LogTo.Error("Scrobble error: {0}", e.Message);
-                    }
+
+            if (!_scrobbler.HasSession)
+            {
+                Auth();
+                try
+                {
+                    if (_settings.LastfmSession == null)
+                        _settings.LastfmSession = _scrobbler.GetSession();
+                }
+                catch (Exception)
+                { }
                 return;
             }
 
-            if(thisTrack == null)
-                return;
-            
-            if(_scrobbler.HasSession)
-                try
+            try
+            {
+                if (playing)
                 {
-                    _scrobbler.Scrobble(thisTrack);
+                    _scrobbler.NowPlaying(thisTrack);
                 }
-                catch (Exception e)
+                else
                 {
-                    LogTo.Error("Scrobble error: {0}", e.Message);
+                    if (thisTrack != null)
+                        _scrobbler.Scrobble(thisTrack);
+                    thisTrack = null;
                 }
-            thisTrack = null;
+            }
+            catch (Exception e)
+            {
+                LogTo.Error("Scrobble error: {0}", e.Message);
+            }
+        }
+
+        private bool triedtoauth;
+
+        public void Auth()
+        {
+            if (triedtoauth) return;
+            triedtoauth = true;
+            Process.Start(_scrobbler.GetAuthorisationUri());
+            _settings.LastfmSession = null;
         }
 
         public Scrobbler(ISettingsProvider settingsProvider)
         {
             _settings = settingsProvider.GetSettings();
-                
             _scrobbler = new Lpfm.LastFmScrobbler.Scrobbler("3f372a470689b8a50d83ce8c40a1a01d", "7e7c030e4b1f6670965ea8d518dcce04", _settings.LastfmSession);
-
-            if (string.IsNullOrWhiteSpace(_settings.LastfmSession))
-            {
-                Process.Start(_scrobbler.GetAuthorisationUri());
-            }
         }
     }
 }

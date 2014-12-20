@@ -186,8 +186,6 @@
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Settings\AppDataLocationProvider.cs" />
-    <Compile Include="Settings\IListeningSettings.cs" />
-    <Compile Include="Settings\SovndListeningSettings.cs" />
     <Compile Include="Settings\SovndMqttSettings.cs" />
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>

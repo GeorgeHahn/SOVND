@@ -194,7 +194,12 @@ namespace SOVND.Client
 
         private void OnObservablePlaylistOnPropertyChanged(object _, PropertyChangedEventArgs __)
         {
-            synchronization.Send(x => playlist.Refresh(), null);
+            try
+            {
+                synchronization.Send(x => playlist.Refresh(), null); // Sometimes throws ugly exceptions from deep within wpf
+            }
+            catch(Exception e)
+            { }
         }
 
         private void Refresh()
