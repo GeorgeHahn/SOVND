@@ -25,6 +25,7 @@
  */
 
 using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace libspotifydotnet {
@@ -108,9 +109,13 @@ namespace libspotifydotnet {
             INT16_NATIVE_ENDIAN = 0
         }       
 
-        public enum sp_bitrate {
-            BITRATE_160k = 0,
+        public enum sp_bitrate
+        {
+            [Description("320k")]
             BITRATE_320k = 1,
+            [Description("160k")]
+            BITRATE_160k = 0,
+            [Description("96k")]
             BITRATE_96k = 2
         }
 

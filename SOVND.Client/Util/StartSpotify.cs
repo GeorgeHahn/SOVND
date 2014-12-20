@@ -7,16 +7,24 @@ namespace SOVND.Client.Util
 {
     public class StartSpotify
     {
-        public StartSpotify(IAppName _appname, ISettingsProvider settings)
+        public StartSpotify(IAppName _appname, ISettingsProvider settingsProvider)
         {
-            var _auth = settings.GetSettings();
+            var settings = settingsProvider.GetSettings();
 
             Spotify.Initialize();
-            if (!Spotify.Login(_appname.Name, _auth.SpotifyUsername, _auth.SpotifyPassword))
+            if (!Spotify.Login(_appname.Name, settings.SpotifyUsername, settings.SpotifyPassword))
                 throw new Exception("Login failure");
 
             while (!Spotify.Ready())
                 Thread.Sleep(100);
+
+            Spotify.SetBitrate(settings.Bitrate);
+
+            if (settings.Scrobbling)
+                Spotify.StartScrobbling(settings.LastfmUsername, settings.LastfmPassword);
+
+            if(settings.Normalization)
+                Spotify.Normalization = settings.Normalization;
         }
     }
 }

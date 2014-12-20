@@ -12,7 +12,7 @@ namespace SOVND.Client.Util
             {
                 LogTo.Trace("Auth settings are not set, showing window");
                 SettingsWindow w = new SettingsWindow();
-                var settingsViewModel = new SettingsViewModel(settings.GetSettings());
+                var settingsViewModel = settings.GetSettings();
                 w.DataContext = settingsViewModel;
                 w.ShowDialog();
                 LogTo.Trace("Auth window closed");

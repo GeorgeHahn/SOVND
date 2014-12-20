@@ -7,7 +7,7 @@
         xmlns:med="clr-namespace:System.Windows.Media"
         xmlns:local="clr-namespace:SOVND.Client"
         xmlns:spotify="clr-namespace:SpotifyClient;assembly=SpotifyClient"
-        xmlns:lib="clr-namespace:SOVND.Lib;assembly=SOVND.Lib"
+        xmlns:libspot="clr-namespace:libspotifydotnet;assembly=libspotifydotnet"
         xmlns:models="clr-namespace:SOVND.Lib.Models;assembly=SOVND.Lib"
         xmlns:w="clr-namespace:System.Windows.Workarounds"
         xmlns:util="clr-namespace:SOVND.Client.Util"
@@ -17,7 +17,7 @@
                       
         BorderBrush="{DynamicResource AccentColorBrush}"
         BorderThickness="1"
-        Title="SOVND" Height="550" Width="900">
+        Title="SOVND" Height="550" Width="900" DataContext="{Binding MainWindowViewModel, Source={StaticResource ViewModelLocator}}">
 
     <Controls:MetroWindow.RightWindowCommands>
       <Controls:WindowCommands>
@@ -34,12 +34,32 @@
                 Width="300"
                 x:Name="SettingsFlyout">
                 <StackPanel Margin="10">
-                    <TextBlock TextWrapping="Wrap" Margin="3">Note: this is a work in progress; the controls below are not currently functional</TextBlock>
+                    <StackPanel.Resources>
+                        <Style TargetType="{x:Type Controls:ToggleSwitch}">
+                            <Setter Property="Margin" Value="0,14,0,0"/>
+                        </Style>
+                    </StackPanel.Resources> 
                     
-                    <Controls:ToggleSwitch Header="Audio normalization" />
-                    <Controls:ToggleSwitch Header="Scrobble songs" />
-                    <Controls:ToggleSwitch Header="Song toasts" />
-                    <Controls:ToggleSwitch Header="Chat toasts" />
+                    <StackPanel>
+                        <TextBlock
+                            TextWrapping="Wrap"
+                            FontWeight="Normal"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            Margin="0,4,0,5"
+                            Opacity="0.65"
+                            FontSize="16">Bitrate</TextBlock>
+                        <ComboBox 
+                            ItemsSource="{Binding Source={util:Enumeration {util:Type2 libspot:libspotify+sp_bitrate}}}" 
+                            DisplayMemberPath="Description" 
+                            SelectedValue="{Binding SelectedBitrate}"  
+                            SelectedValuePath="Value" />
+                    </StackPanel>
+                    
+                    <Controls:ToggleSwitch Header="Audio normalization" IsChecked="{Binding Path=Normalization}"/>
+                    <Controls:ToggleSwitch Header="Scrobble songs" IsChecked="{Binding Path=Scrobbling}"/>
+                    <Controls:ToggleSwitch Header="Song toasts" IsChecked="{Binding Path=SongToasts}"/>
+                    <Controls:ToggleSwitch Header="Chat toasts" IsChecked="{Binding Path=ChatToasts}"/>
                     
                     <Button Margin="3">Setup authentication</Button>
                 </StackPanel>

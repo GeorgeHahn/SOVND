@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,6 +18,8 @@ using System.Windows.Media.Animation;
 using Anotar.NLog;
 using BugSense;
 using BugSense.Core.Model;
+using JetBrains.Annotations;
+using libspotifydotnet.libspotify;
 using MahApps.Metro.Controls;
 using ServiceStack.Text;
 using SOVND.Client.Modules;
@@ -344,6 +347,70 @@ namespace SOVND.Client
         private void SettingsButton_OnClick(object sender, RoutedEventArgs e)
         {
             SettingsFlyout.IsOpen = !SettingsFlyout.IsOpen;
+        }
+    }
+
+    public class MainWindowViewModel : INotifyPropertyChanged
+    {
+        private readonly SettingsModel _settings;
+
+        public MainWindowViewModel(ISettingsProvider settings)
+        {
+            _settings = settings.GetSettings();
+            //_settings.PropertyChanged += (sender, args) => OnPropertyChanged() // TODO Fire propertychanged when settings fires on something we care about
+        }
+
+        public bool ChatToasts
+        {
+            get { return _settings.ChatToasts; }
+            set { _settings.ChatToasts = value; }
+        }
+
+        public bool SongToasts
+        {
+            get { return _settings.SongToasts; }
+            set { _settings.SongToasts = value; }
+        }
+
+        public bool Normalization
+        {
+            get { return _settings.Normalization; }
+            set
+            {
+                _settings.Normalization = value;
+                Spotify.Normalization = value;
+            }
+        }
+
+        public bool Scrobbling
+        {
+            get { return _settings.Scrobbling; }
+            set
+            {
+                _settings.Scrobbling = value;
+                if (value)
+                    Spotify.StartScrobbling(_settings.LastfmUsername, _settings.LastfmPassword);
+                else
+                    Spotify.StopScrobbling();
+            }
+        }
+
+        public sp_bitrate SelectedBitrate
+        {
+            get { return _settings.Bitrate; }
+            set
+            {
+                _settings.Bitrate = value;
+                Spotify.SetBitrate(value);
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

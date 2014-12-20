@@ -159,6 +159,7 @@
     <Compile Include="Util\ChannelDirectory.cs" />
     <Compile Include="Util\CheckSettings.cs" />
     <Compile Include="Util\DictionaryFactoryExtension.cs" />
+    <Compile Include="Util\EnumerationExtension.cs" />
     <Compile Include="Util\ImageConverter.cs" />
     <Compile Include="Util\Logging.cs" />
     <Compile Include="Util\OppositeBoolConverter.cs" />
@@ -167,6 +168,7 @@
     <Compile Include="Util\ListboxScrollHelper.cs" />
     <Compile Include="Util\SOVNDModule.cs" />
     <Compile Include="Util\StartSpotify.cs" />
+    <Compile Include="Util\Type2Extension.cs" />
     <Compile Include="Util\WatermarkAdorner.cs" />
     <Compile Include="Util\WatermarkService.cs" />
     <Compile Include="ViewModels\NewChannelViewModel.cs" />
@@ -183,7 +185,6 @@
     <Compile Include="Settings\IListeningSettings.cs" />
     <Compile Include="Settings\SovndListeningSettings.cs" />
     <Compile Include="Settings\SovndMqttSettings.cs" />
-    <Compile Include="ViewModels\SettingsViewModel.cs" />
     <Page Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

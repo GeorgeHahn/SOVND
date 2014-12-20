@@ -32,6 +32,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Anotar.NLog;
 using libspotifydotnet;
+using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -740,6 +741,44 @@ namespace SpotifyClient
                 if (linkPtr != IntPtr.Zero)
                     libspotify.sp_link_release(linkPtr);
             }
+        }
+
+        public static bool StartScrobbling(string username, string password)
+        {
+            var error = sp_session_set_social_credentials(Session.SessionPtr, sp_social_provider.SP_SOCIAL_PROVIDER_LASTFM, username, password);
+            if (error != sp_error.OK)
+            {
+                LogTo.Error("Scrobbling error: sp_session_set_social_credentials failed with {0}", error.ToString());
+                return false;
+            }
+
+            error = sp_session_set_scrobbling(Session.SessionPtr, sp_social_provider.SP_SOCIAL_PROVIDER_LASTFM,
+                sp_scrobbling_state.SP_SCROBBLING_STATE_LOCAL_ENABLED);
+            if (error != sp_error.OK)
+            {
+                LogTo.Error("Scrobbling error: sp_session_set_scrobbling failed with {0}", error.ToString());
+                return false;
+            }
+            return true;
+        }
+
+        public static void StopScrobbling()
+        {
+            var error = sp_session_set_scrobbling(Session.SessionPtr, sp_social_provider.SP_SOCIAL_PROVIDER_LASTFM,
+                sp_scrobbling_state.SP_SCROBBLING_STATE_LOCAL_DISABLED);
+            if (error != sp_error.OK)
+                LogTo.Error("Error disabling scrobbling: sp_session_set_scrobbling failed with {0}", error.ToString());
+        }
+
+        public static bool Normalization
+        {
+            get { return sp_session_get_volume_normalization(Session.SessionPtr); }
+            set { sp_session_set_volume_normalization(Session.SessionPtr, value); }
+        }
+
+        public static void SetBitrate(sp_bitrate value)
+        {
+            sp_session_preferred_bitrate(Session.SessionPtr, value);
         }
     }
 }

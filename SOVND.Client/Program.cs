@@ -16,13 +16,15 @@ namespace SOVND.Client
 {
     internal static class Program
     {
+        public static IKernel kernel;
+
         [STAThread]
         public static void Main()
         {
             if (AlreadyRunning())
                 return;
 
-            IKernel kernel = new StandardKernel();
+            kernel = new StandardKernel();
             kernel.Bind<IMQTTSettings>().To<SovndMqttSettings>();
             kernel.Bind<IPlaylistProvider>().To<ObservablePlaylistProvider>();
             kernel.Bind<ISettingsProvider>().To<FilesystemSettingsProvider>();
@@ -70,6 +72,14 @@ namespace SOVND.Client
                 MessageBox.Show("SOVND is already running.", "SOVND is already running", MessageBoxButton.OK, MessageBoxImage.Information);
                 return true;
             }
+        }
+    }
+
+    public class ViewModelLocator
+    {
+        public MainWindowViewModel MainWindowViewModel
+        {
+            get { return Program.kernel.Get<MainWindowViewModel>(); }
         }
     }
 }
