@@ -32,7 +32,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Anotar.NLog;
 using libspotifydotnet;
-using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {

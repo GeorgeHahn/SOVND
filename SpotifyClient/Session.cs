@@ -29,7 +29,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Anotar.NLog;
 using libspotifydotnet;
-using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -356,7 +355,7 @@ namespace SpotifyClient
             Log.Debug(Plugin.LOG_MODULE, "userinfo_updated");
         }
 
-        private static void scrobble_error(IntPtr sessionptr, sp_error error)
+        private static void scrobble_error(IntPtr sessionptr, libspotify.sp_error error)
         {
             Log.Debug(Plugin.LOG_MODULE, "scrobble_error");
         }
