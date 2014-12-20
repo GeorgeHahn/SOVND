@@ -14,7 +14,16 @@
         xmlns:controls="clr-namespace:SOVND.Client.Controls"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
+                      
+        BorderBrush="{DynamicResource AccentColorBrush}"
+        BorderThickness="1"
         Title="SOVND" Height="550" Width="900">
+
+    <Controls:MetroWindow.RightWindowCommands>
+      <Controls:WindowCommands>
+            <Button Content="settings" />
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>    
     
     <Grid>
         <Grid.ColumnDefinitions>
@@ -82,11 +91,9 @@
                 Grid.Row="0"
                 x:Name="tbSearch"
                 ToolTip="Search for a track"
-                TextChanged="TextBox_TextChanged">
-                <util:WatermarkService.Watermark>
-                    <TextBlock>Search for a track to add</TextBlock>
-                </util:WatermarkService.Watermark>
-            </TextBox>
+                TextChanged="TextBox_TextChanged"
+                Controls:TextBoxHelper.ClearTextButton="True"
+                Controls:TextBoxHelper.Watermark="Search for a track to add"/>
 
             <ListBox
                 Grid.Row="1"
@@ -160,7 +167,8 @@
                     Click="SendChat">Send</Button>
                 <TextBox 
                     x:Name="chatinput" 
-                    KeyDown="Chatinput_OnKeyDown"/>
+                    KeyDown="Chatinput_OnKeyDown"
+                    Controls:TextBoxHelper.Watermark="Send a message"/>
             </DockPanel>
         </Grid>
     </Grid>
