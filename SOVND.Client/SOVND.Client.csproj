@@ -67,6 +67,9 @@
       <HintPath>..\packages\Janitor.Fody.1.1.0.0\Lib\portable-net4+sl5+wp8+win8+wpa81+MonoAndroid16+MonoTouch40\Janitor.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Lpfm.LastFmScrobbler">
+      <HintPath>..\packages\Lpfm.LastFmScrobbler.dll.1.3.0\lib\net40\Lpfm.LastFmScrobbler.dll</HintPath>
+    </Reference>
     <Reference Include="M2Mqtt">
       <HintPath>..\packages\M2Mqtt.3.6\lib\net45\M2Mqtt.dll</HintPath>
     </Reference>
@@ -166,6 +169,7 @@
     <Compile Include="Util\OppositeBoolToVisibleConverter.cs" />
     <Compile Include="Util\PasswordHelper.cs" />
     <Compile Include="Util\ListboxScrollHelper.cs" />
+    <Compile Include="Util\Scrobbler.cs" />
     <Compile Include="Util\SOVNDModule.cs" />
     <Compile Include="Util\StartSpotify.cs" />
     <Compile Include="Util\Type2Extension.cs" />

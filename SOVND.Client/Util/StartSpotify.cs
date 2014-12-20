@@ -20,9 +20,6 @@ namespace SOVND.Client.Util
 
             Spotify.SetBitrate(settings.Bitrate);
 
-            if (settings.Scrobbling)
-                Spotify.StartScrobbling(settings.LastfmUsername, settings.LastfmPassword);
-
             if(settings.Normalization)
                 Spotify.Normalization = settings.Normalization;
         }

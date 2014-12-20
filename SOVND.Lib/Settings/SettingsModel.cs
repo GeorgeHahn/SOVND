@@ -22,6 +22,7 @@ namespace SOVND.Lib.Settings
         public bool SongToasts { get; set; }
         public bool ChatToasts { get; set; }
         public libspotify.sp_bitrate Bitrate { get; set; }
+        public string LastfmSession { get; set; }
 
         private string _file;
 

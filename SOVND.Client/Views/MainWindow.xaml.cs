@@ -50,13 +50,18 @@ namespace SOVND.Client
         private SynchronizationContext synchronization;
         private Toast toast;
 
-        public MainWindow(SovndClient client, ChannelDirectory channels, IPlayerFactory playerFactory, ISettingsProvider settings)
+        private CancellationTokenSource searchToken = null;
+        private ListCollectionView playlist;
+        private Scrobbler _scrobbler;
+
+        public MainWindow(SovndClient client, ChannelDirectory channels, IPlayerFactory playerFactory, ISettingsProvider settings, Scrobbler scrobbler)
         {
             InitializeComponent();
 
             toast = new Toast();
             toast.Show();
 
+            _scrobbler = scrobbler;
             _client = client;
             _playerFactory = playerFactory;
             _settings = settings.GetSettings();
@@ -132,7 +137,7 @@ namespace SOVND.Client
             playlist = (ListCollectionView)(CollectionViewSource.GetDefaultView(observablePlaylist.Songs));
             playlist.CustomSort = new SongComparer();
 
-            _player.PlayingSongChanged = (songID, playing) =>
+            _player.PlayingSongChanged_Toast = (songID, playing) =>
             {
                 var song = observablePlaylist.Songs.FirstOrDefault(x => x.SongID == songID);
                 if (song == null)
@@ -143,6 +148,16 @@ namespace SOVND.Client
                     return;
 
                 toast.NewSong(song.track);
+            };
+
+            _player.ScrobbleSong = (songID, playing) =>
+            {
+                var song = observablePlaylist.Songs.FirstOrDefault(x => x.SongID == songID);
+                if (song == null)
+                    return;
+
+                if(_settings.Scrobbling)
+                    _scrobbler.Scrobble(song, playing);
             };
 
             // TODO: Is this bad? Seems like it's a recipe for leaking - probably holds a ref to playlist.Songs and handler.Chats
@@ -186,10 +201,6 @@ namespace SOVND.Client
         {
             OnObservablePlaylistOnPropertyChanged(null, null);
         } 
-
-
-        private CancellationTokenSource searchToken = null;
-        private ListCollectionView playlist;
 
         private void BindToPlaylist()
         {
@@ -385,14 +396,7 @@ namespace SOVND.Client
         public bool Scrobbling
         {
             get { return _settings.Scrobbling; }
-            set
-            {
-                _settings.Scrobbling = value;
-                if (value)
-                    Spotify.StartScrobbling(_settings.LastfmUsername, _settings.LastfmPassword);
-                else
-                    Spotify.StopScrobbling();
-            }
+            set { _settings.Scrobbling = value; }
         }
 
         public libspotify.sp_bitrate SelectedBitrate

@@ -29,6 +29,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Anotar.NLog;
 using libspotifydotnet;
+using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -69,6 +70,8 @@ namespace SpotifyClient
 
         private delegate void userinfo_updated_delegate(IntPtr sessionPtr);
 
+        private delegate void scrobble_error_delegate(IntPtr sessionPtr, libspotify.sp_error error);
+
         private static connection_error_delegate fn_connection_error_delegate = new connection_error_delegate(connection_error);
         private static end_of_track_delegate fn_end_of_track_delegate = new end_of_track_delegate(end_of_track);
         private static get_audio_buffer_stats_delegate fn_get_audio_buffer_stats_delegate = new get_audio_buffer_stats_delegate(get_audio_buffer_stats);
@@ -85,6 +88,8 @@ namespace SpotifyClient
         private static stop_playback_delegate fn_stop_playback = new stop_playback_delegate(stop_playback);
         private static streaming_error_delegate fn_streaming_error_delegate = new streaming_error_delegate(streaming_error);
         private static userinfo_updated_delegate fn_userinfo_updated_delegate = new userinfo_updated_delegate(userinfo_updated);
+        private static scrobble_error_delegate fn_scrobble_error_delegate = new scrobble_error_delegate(scrobble_error);
+
 
         private static byte[] appkey = null;
         private static libspotify.sp_error _loginError = libspotify.sp_error.OK;
@@ -197,6 +202,7 @@ namespace SpotifyClient
             callbacks.stop_playback = Marshal.GetFunctionPointerForDelegate(fn_stop_playback);
             callbacks.streaming_error = Marshal.GetFunctionPointerForDelegate(fn_streaming_error_delegate);
             callbacks.userinfo_updated = Marshal.GetFunctionPointerForDelegate(fn_userinfo_updated_delegate);
+            callbacks.scrobble_error = Marshal.GetFunctionPointerForDelegate(fn_scrobble_error_delegate);
 
             IntPtr callbacksPtr = Marshal.AllocHGlobal(Marshal.SizeOf(callbacks));
             Marshal.StructureToPtr(callbacks, callbacksPtr, true);
@@ -348,6 +354,11 @@ namespace SpotifyClient
         private static void userinfo_updated(IntPtr sessionPtr)
         {
             Log.Debug(Plugin.LOG_MODULE, "userinfo_updated");
+        }
+
+        private static void scrobble_error(IntPtr sessionptr, sp_error error)
+        {
+            Log.Debug(Plugin.LOG_MODULE, "scrobble_error");
         }
     }
 }

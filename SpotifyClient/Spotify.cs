@@ -32,6 +32,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Anotar.NLog;
 using libspotifydotnet;
+using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -54,7 +55,6 @@ namespace SpotifyClient
         private static Action<IntPtr> d_on_logged_in = new Action<IntPtr>(Session_OnLoggedIn);
         private static Thread _t;
         private static object _loginLock = new object();
-        private static object ALLTHETHINGS = new object();
 
         private static readonly int REQUEST_TIMEOUT = 20;
         private static readonly string LOG_MODULE = "Spotify";
@@ -744,6 +744,8 @@ namespace SpotifyClient
 
         public static bool StartScrobbling(string username, string password)
         {
+            libspotify.sp_session_set_private_session(Session.SessionPtr, false);
+
             var error = libspotify.sp_session_set_social_credentials(Session.SessionPtr, libspotify.sp_social_provider.SP_SOCIAL_PROVIDER_LASTFM, username, password);
             if (error != libspotify.sp_error.OK)
             {
