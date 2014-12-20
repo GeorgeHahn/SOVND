@@ -16,7 +16,6 @@
             </util:DictionaryFactory>
             <BitmapImage x:Key="AlbumArt" UriSource="../Resources/Icon_square.png"/>
         </util:DictionaryFactory>
-    <BitmapImage x:Key="AlbumArt" UriSource="../Resources/Icon_square.png"/>
     </UserControl.Resources>
 
     <Grid d:DataContext="{StaticResource sampledata}">
@@ -28,7 +27,7 @@
                 Margin="3"
                 Source="{ Binding Path=AlbumArt, Converter={StaticResource imageConverter} }" />
 
-                <StackPanel>
+                <StackPanel Margin="3">
                     <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding Path=Album.Name}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding Path=AllArtists}" TextTrimming="CharacterEllipsis" />

@@ -5,6 +5,7 @@
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
             xmlns:util="clr-namespace:SOVND.Client.Util"
             xmlns:system="clr-namespace:System;assembly=mscorlib"
+            xmlns:controls="clr-namespace:SOVND.Client.Controls"
             mc:Ignorable="d" d:DesignWidth="400">
     <UserControl.Resources>
         <!-- Design time data -->
@@ -43,7 +44,7 @@
                     Margin="3"
                     Source="{ Binding Path=track.AlbumArt, Converter={StaticResource imageConverter} }" />
                                 
-                <StackPanel DataContext="{Binding Path=track}" ClipToBounds="True">
+                <StackPanel DataContext="{Binding Path=track}" ClipToBounds="True" Margin="3">
                     <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding Path=Album.Name}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding Path=AllArtists}" TextTrimming="CharacterEllipsis" />
