@@ -33,7 +33,16 @@
                 Position="Right"
                 Width="300"
                 x:Name="SettingsFlyout">
-                
+                <StackPanel Margin="10">
+                    <TextBlock TextWrapping="Wrap" Margin="3">Note: this is a work in progress; the controls below are not currently functional</TextBlock>
+                    
+                    <Controls:ToggleSwitch Header="Audio normalization" />
+                    <Controls:ToggleSwitch Header="Scrobble songs" />
+                    <Controls:ToggleSwitch Header="Song toasts" />
+                    <Controls:ToggleSwitch Header="Chat toasts" />
+                    
+                    <Button Margin="3">Setup authentication</Button>
+                </StackPanel>
             </Controls:Flyout>
         </Controls:FlyoutsControl>
     </Controls:MetroWindow.Flyouts>
