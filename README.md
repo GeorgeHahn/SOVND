@@ -5,6 +5,8 @@ Open source replacement for Soundrop.fm
 [Beta signup](http://www.sovndapp.com/)
 
 # Desktop client 
+![Screenshot](https://raw.githubusercontent.com/GeorgeHahn/SOVND/gh-pages/DesktopScreenshot.png)
+
 [![Build status](https://ci.appveyor.com/api/projects/status/we8gubs49k0jm0n3/branch/master?svg=true)](https://ci.appveyor.com/project/GeorgeHahn/sovnd/branch/master)
 
 Features
