@@ -17,6 +17,7 @@ using System.Windows.Media.Animation;
 using Anotar.NLog;
 using BugSense;
 using BugSense.Core.Model;
+using MahApps.Metro.Controls;
 using ServiceStack.Text;
 using SOVND.Client.Modules;
 using SOVND.Client.Util;
@@ -37,7 +38,7 @@ namespace SOVND.Client
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow
     {
         private readonly SovndClient _client;
         private readonly IPlayerFactory _playerFactory;

@@ -4,6 +4,15 @@
              xmlns:local="clr-namespace:SOVND.Client"
              xmlns:media="clr-namespace:System.Windows.Media">
     <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Blue.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            
         <media:ImageConverter x:Key="imageConverter" />
         
         <Style TargetType="Button" x:Key="VectorButtonStyle">
@@ -111,5 +120,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

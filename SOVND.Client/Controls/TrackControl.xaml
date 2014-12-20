@@ -32,12 +32,13 @@
                     <TextBlock Text="{Binding Path=Album.Name}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Text="{Binding Path=AllArtists}" TextTrimming="CharacterEllipsis" />
                 </StackPanel>
+                
                 <Button
-                HorizontalAlignment="Right"
-                HorizontalContentAlignment="Right"
-                DockPanel.Dock="Right"
-                Click="AddSong_Click"
-                Margin="3">
+                    HorizontalAlignment="Right"
+                    HorizontalContentAlignment="Right"
+                    DockPanel.Dock="Right"
+                    Click="AddSong_Click"
+                    Margin="3">
                     ADD
                 </Button>
             </DockPanel>
