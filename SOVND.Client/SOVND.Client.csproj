@@ -152,6 +152,7 @@
     <Compile Include="Util\BoolToVisibleConverter.cs" />
     <Compile Include="Util\ChannelDirectory.cs" />
     <Compile Include="Util\CheckSettings.cs" />
+    <Compile Include="Util\DictionaryFactoryExtension.cs" />
     <Compile Include="Util\ImageConverter.cs" />
     <Compile Include="Util\Logging.cs" />
     <Compile Include="Util\OppositeBoolConverter.cs" />

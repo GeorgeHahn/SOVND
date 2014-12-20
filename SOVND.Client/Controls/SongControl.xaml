@@ -3,17 +3,26 @@
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-            xmlns:med="clr-namespace:System.Windows.Media"
-            xmlns:client="clr-namespace:SOVND.Client"
-            xmlns:spotify="clr-namespace:SpotifyClient;assembly=SpotifyClient"
-            xmlns:lib="clr-namespace:SOVND.Lib;assembly=SOVND.Lib"
-            xmlns:models="clr-namespace:SOVND.Lib.Models;assembly=SOVND.Lib"
-            xmlns:w="clr-namespace:System.Windows.Workarounds"
             xmlns:util="clr-namespace:SOVND.Client.Util"
-            xmlns:local="clr-namespace:SOVND.Client.Controls"
-             mc:Ignorable="d" 
-             d:DesignHeight="100" d:DesignWidth="500">
-    <Grid>
+            xmlns:system="clr-namespace:System;assembly=mscorlib"
+            mc:Ignorable="d" d:DesignWidth="400">
+    <UserControl.Resources>
+        <!-- Design time data -->
+        <util:DictionaryFactory x:Key="sampledata" KeyType="system:String" ValueType="system:Object">
+            <system:Int32 x:Key="Votes">3</system:Int32>
+            <system:Boolean x:Key="Playing">True</system:Boolean>
+            <util:DictionaryFactory x:Key="track" KeyType="system:String" ValueType="system:Object">
+                <system:String x:Key="Name">Name</system:String>
+                <system:String x:Key="AllArtists">Artists</system:String>
+                <util:DictionaryFactory x:Key="Album" KeyType="system:String" ValueType="system:Object">
+                    <system:String x:Key="Name">Album</system:String>
+                </util:DictionaryFactory>
+                <BitmapImage x:Key="AlbumArt" UriSource="../Resources/Icon_square.png"/>
+            </util:DictionaryFactory>
+        </util:DictionaryFactory>
+    </UserControl.Resources>
+    
+    <Grid d:DataContext="{StaticResource sampledata}">
         <Border Name="border" BorderThickness="1" Padding="3" Margin="3" CornerRadius="8">
             <Border.Style>
                 <Style TargetType="{x:Type Border}">

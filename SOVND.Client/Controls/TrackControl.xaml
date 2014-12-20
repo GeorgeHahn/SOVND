@@ -3,29 +3,45 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" 
-    d:DesignHeight="100" d:DesignWidth="500">
-    <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
-        <DockPanel>
-            <Image 
+    xmlns:util="clr-namespace:SOVND.Client.Util"
+    xmlns:system="clr-namespace:System;assembly=mscorlib"
+    mc:Ignorable="d" d:DesignWidth="400">
+    <UserControl.Resources>
+        <!-- Design time data -->
+        <util:DictionaryFactory x:Key="sampledata" KeyType="system:String" ValueType="system:Object">
+            <system:String x:Key="Name">Name</system:String>
+            <system:String x:Key="AllArtists">Artists</system:String>
+            <util:DictionaryFactory x:Key="Album" KeyType="system:String" ValueType="system:Object">
+                <system:String x:Key="Name">Album</system:String>
+            </util:DictionaryFactory>
+            <BitmapImage x:Key="AlbumArt" UriSource="../Resources/Icon_square.png"/>
+        </util:DictionaryFactory>
+    <BitmapImage x:Key="AlbumArt" UriSource="../Resources/Icon_square.png"/>
+    </UserControl.Resources>
+
+    <Grid d:DataContext="{StaticResource sampledata}">
+        <Border Name="border" BorderBrush="Gray" BorderThickness="1" Padding="3" Margin="3">
+            <DockPanel>
+                <Image 
                 DockPanel.Dock="Left"
                 Height="60"
                 Margin="3"
                 Source="{ Binding Path=AlbumArt, Converter={StaticResource imageConverter} }" />
-                                
-            <StackPanel>
-                <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Text="{Binding Path=Album.Name}" TextTrimming="CharacterEllipsis" />
-                <TextBlock Text="{Binding Path=AllArtists}" TextTrimming="CharacterEllipsis" />
-            </StackPanel>
-            <Button
+
+                <StackPanel>
+                    <TextBlock Text="{Binding Path=Name}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Path=Album.Name}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Text="{Binding Path=AllArtists}" TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+                <Button
                 HorizontalAlignment="Right"
                 HorizontalContentAlignment="Right"
                 DockPanel.Dock="Right"
                 Click="AddSong_Click"
                 Margin="3">
-                ADD
-            </Button>
-        </DockPanel>
-    </Border>
+                    ADD
+                </Button>
+            </DockPanel>
+        </Border>
+    </Grid>
 </UserControl>

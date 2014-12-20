@@ -29,6 +29,11 @@ namespace SOVND.Lib.Models
             };
         }
 
+        public Song()
+        {
+            
+        }
+
         public string SongID { get; private set; }
         public long Votetime { get; set; }
         public int Votes { get; set; }

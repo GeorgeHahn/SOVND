@@ -19,6 +19,9 @@ namespace System.Windows.Media
             // empty images are empty...
             if (value == null) { return null; }
 
+            if (value is BitmapImage)
+                return value;
+
             var image = (Image)value;
             // Winforms Image we want to get the WPF Image from...
             var bitmap = new BitmapImage();
