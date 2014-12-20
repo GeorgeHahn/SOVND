@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using JetBrains.Annotations;
-using libspotifydotnet.libspotify;
+using libspotifydotnet;
 using Newtonsoft.Json;
 
 namespace SOVND.Lib.Settings
@@ -21,7 +21,7 @@ namespace SOVND.Lib.Settings
         public bool Scrobbling { get; set; }
         public bool SongToasts { get; set; }
         public bool ChatToasts { get; set; }
-        public sp_bitrate Bitrate { get; set; }
+        public libspotify.sp_bitrate Bitrate { get; set; }
 
         private string _file;
 

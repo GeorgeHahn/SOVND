@@ -19,7 +19,7 @@ using Anotar.NLog;
 using BugSense;
 using BugSense.Core.Model;
 using JetBrains.Annotations;
-using libspotifydotnet.libspotify;
+using libspotifydotnet;
 using MahApps.Metro.Controls;
 using ServiceStack.Text;
 using SOVND.Client.Modules;
@@ -395,7 +395,7 @@ namespace SOVND.Client
             }
         }
 
-        public sp_bitrate SelectedBitrate
+        public libspotify.sp_bitrate SelectedBitrate
         {
             get { return _settings.Bitrate; }
             set

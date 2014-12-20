@@ -32,7 +32,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Anotar.NLog;
 using libspotifydotnet;
-using libspotifydotnet.libspotify;
 
 namespace SpotifyClient
 {
@@ -745,16 +744,15 @@ namespace SpotifyClient
 
         public static bool StartScrobbling(string username, string password)
         {
-            var error = sp_session_set_social_credentials(Session.SessionPtr, sp_social_provider.SP_SOCIAL_PROVIDER_LASTFM, username, password);
-            if (error != sp_error.OK)
+            var error = libspotify.sp_session_set_social_credentials(Session.SessionPtr, libspotify.sp_social_provider.SP_SOCIAL_PROVIDER_LASTFM, username, password);
+            if (error != libspotify.sp_error.OK)
             {
                 LogTo.Error("Scrobbling error: sp_session_set_social_credentials failed with {0}", error.ToString());
                 return false;
             }
 
-            error = sp_session_set_scrobbling(Session.SessionPtr, sp_social_provider.SP_SOCIAL_PROVIDER_LASTFM,
-                sp_scrobbling_state.SP_SCROBBLING_STATE_LOCAL_ENABLED);
-            if (error != sp_error.OK)
+            error = libspotify.sp_session_set_scrobbling(Session.SessionPtr, libspotify.sp_social_provider.SP_SOCIAL_PROVIDER_LASTFM, libspotify.sp_scrobbling_state.SP_SCROBBLING_STATE_LOCAL_ENABLED);
+            if (error != libspotify.sp_error.OK)
             {
                 LogTo.Error("Scrobbling error: sp_session_set_scrobbling failed with {0}", error.ToString());
                 return false;
@@ -764,21 +762,20 @@ namespace SpotifyClient
 
         public static void StopScrobbling()
         {
-            var error = sp_session_set_scrobbling(Session.SessionPtr, sp_social_provider.SP_SOCIAL_PROVIDER_LASTFM,
-                sp_scrobbling_state.SP_SCROBBLING_STATE_LOCAL_DISABLED);
-            if (error != sp_error.OK)
+            var error = libspotify.sp_session_set_scrobbling(Session.SessionPtr, libspotify.sp_social_provider.SP_SOCIAL_PROVIDER_LASTFM, libspotify.sp_scrobbling_state.SP_SCROBBLING_STATE_LOCAL_DISABLED);
+            if (error != libspotify.sp_error.OK)
                 LogTo.Error("Error disabling scrobbling: sp_session_set_scrobbling failed with {0}", error.ToString());
         }
 
         public static bool Normalization
         {
-            get { return sp_session_get_volume_normalization(Session.SessionPtr); }
-            set { sp_session_set_volume_normalization(Session.SessionPtr, value); }
+            get { return libspotify.sp_session_get_volume_normalization(Session.SessionPtr); }
+            set { libspotify.sp_session_set_volume_normalization(Session.SessionPtr, value); }
         }
 
-        public static void SetBitrate(sp_bitrate value)
+        public static void SetBitrate(libspotify.sp_bitrate value)
         {
-            sp_session_preferred_bitrate(Session.SessionPtr, value);
+            libspotify.sp_session_preferred_bitrate(Session.SessionPtr, value);
         }
     }
 }
