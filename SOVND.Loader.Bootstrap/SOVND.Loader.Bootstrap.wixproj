@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+	<SignOutput>true</SignOutput>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.10</ProductVersion>
@@ -52,4 +53,27 @@
 	<Target Name="AfterBuild">
 	</Target>
 	-->
+  <Target Name="UsesFrameworkSdk">
+    <GetFrameworkSdkPath>
+      <Output TaskParameter="Path" PropertyName="FrameworkSdkPath" />
+    </GetFrameworkSdkPath>
+    <PropertyGroup>
+      <Win8SDK>$(registry:HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\Windows\v7.1A@InstallationFolder)</Win8SDK>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="UsesSignTool" DependsOnTargets="UsesFrameworkSdk">
+    <PropertyGroup>
+      <SignToolPath Condition="('@(SignToolPath)'=='') and Exists('$(FrameworkSdkPath)bin\signtool.exe')">$(FrameworkSdkPath)bin\signtool.exe</SignToolPath>
+      <SignToolPath Condition="('@(SignToolPath)'=='') and Exists('$(Win8SDK)\bin\signtool.exe')">$(Win8SDK)\bin\signtool.exe</SignToolPath>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="SignBundleEngine" DependsOnTargets="UsesSignTool">
+    <Exec Command="&quot;$(SignToolPath)&quot; sign /t http://timestamp.digicert.com /a &quot;@(SignBundleEngine)&quot;" />
+  </Target>
+
+  <Target Name="SignBundle" DependsOnTargets="UsesSignTool">
+    <Exec Command="&quot;$(SignToolPath)&quot; sign /t http://timestamp.digicert.com /a &quot;@(SignBundle)&quot;" />
+  </Target>
 </Project>

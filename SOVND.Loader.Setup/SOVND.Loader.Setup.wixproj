@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <SignOutput>true</SignOutput>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.10</ProductVersion>
@@ -34,11 +35,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
-  <!--
-	To modify your build process, add your task inside one of the targets below and uncomment it.
-	Other similar extension points exist, see Wix.targets.
-	<Target Name="BeforeBuild">
-	</Target> -->
+
   <Target Name="UsesFrameworkSdk">
     <GetFrameworkSdkPath>
       <Output TaskParameter="Path" PropertyName="FrameworkSdkPath" />
@@ -55,7 +52,7 @@
     </PropertyGroup>
   </Target>
   
-	<Target Name="AfterBuild" DependsOnTargets="UsesSignTool">
-		<Exec Command="&quot;$(SignToolPath)&quot; sign /t http://timestamp.digicert.com /a &quot;bin\$(Configuration)\$(MSBuildProjectName).msi&quot;" />
-	</Target>
+  <Target Name="SignMsi" DependsOnTargets="UsesSignTool">
+	<Exec Command="&quot;$(SignToolPath)&quot; sign /t http://timestamp.digicert.com /a &quot;%(SignMsi.FullPath)&quot;" />
+  </Target>
 </Project>
