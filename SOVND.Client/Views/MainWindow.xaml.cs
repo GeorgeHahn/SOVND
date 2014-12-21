@@ -147,7 +147,8 @@ namespace SOVND.Client
                 if (!playing)
                     return;
 
-                toast.NewSong(song.track);
+                if(_settings.SongToasts)
+                    toast.NewSong(song.track);
             };
 
             _player.ScrobbleSong = (songID, playing) =>
