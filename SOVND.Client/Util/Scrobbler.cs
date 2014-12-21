@@ -16,21 +16,12 @@ namespace SOVND.Client.Util
         private readonly SettingsModel _settings;
         private Lpfm.LastFmScrobbler.Scrobbler _scrobbler;
         private Track thisTrack;
+        private object trackLock = new object();
 
         public void Scrobble(Song song, bool playing)
         {
             if (song.track == null || !song.track.Loaded)
                 return;
-
-            if (playing)
-                thisTrack = new Track
-                {
-                    TrackName = song.track.Name,
-                    AlbumName = song.track.Album.Name,
-                    ArtistName = song.track.Artists[0],
-                    Duration = TimeSpan.FromSeconds(decimal.ToInt32(song.track.Seconds)),
-                    WhenStartedPlaying = DateTime.Now
-                };
 
             if (!_scrobbler.HasSession)
             {
@@ -47,15 +38,26 @@ namespace SOVND.Client.Util
 
             try
             {
+                lock(trackLock)
+                    if (thisTrack != null && thisTrack.TrackName != song.track.Name &&
+                        thisTrack.ArtistName != song.track.Artists[0] &&
+                        DateTime.Now - thisTrack.WhenStartedPlaying > TimeSpan.FromSeconds(30))
+                    {
+                        _scrobbler.Scrobble(thisTrack);
+                        thisTrack = null;
+                    }
+
                 if (playing)
                 {
+                    thisTrack = new Track
+                    {
+                        TrackName = song.track.Name,
+                        AlbumName = song.track.Album.Name,
+                        ArtistName = song.track.Artists[0],
+                        Duration = TimeSpan.FromSeconds(decimal.ToInt32(song.track.Seconds)),
+                        WhenStartedPlaying = DateTime.Now
+                    };
                     _scrobbler.NowPlaying(thisTrack);
-                }
-                else
-                {
-                    if (thisTrack != null)
-                        _scrobbler.Scrobble(thisTrack);
-                    thisTrack = null;
                 }
             }
             catch (Exception e)

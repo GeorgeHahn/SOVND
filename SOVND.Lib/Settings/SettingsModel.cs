@@ -22,20 +22,9 @@ namespace SOVND.Lib.Settings
         public bool ChatToasts { get; set; }
         public libspotify.sp_bitrate Bitrate { get; set; }
 
-        public string LastfmSession
-        {
-            get
-            {
-                return _lastfmSession;
-            }
-            set
-            {
-                _lastfmSession = value;
-            }
-        }
+        public string LastfmSession { get; set; }
 
         private string _file;
-        private string _lastfmSession;
 
         // TODO refactor to FilesystemSettingsProvider
         public void Save()
