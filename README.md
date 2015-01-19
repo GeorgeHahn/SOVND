@@ -22,7 +22,7 @@ Features
 On the way!
 
 # Third party clients
-Third party clients are welcome on the SOVND platform! See [SPEC.md](SPEC.md) for implementation details. Our MQTT Server is live at `sovndapp.com:8883`.
+Third party clients are welcome on the SOVND platform! See [SPEC.md](SPEC.md) for implementation details.
 
 # Contributing
 
