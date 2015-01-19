@@ -2,8 +2,6 @@
 
 Open source replacement for Soundrop.fm
 
-[Beta signup](http://www.sovndapp.com/)
-
 # Desktop client 
 ![Screenshot](https://raw.githubusercontent.com/GeorgeHahn/SOVND/gh-pages/DesktopScreenshot.png)
 
